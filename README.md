@@ -4,7 +4,7 @@ This is an open-sourced Secure Socket Tunneling Protocol (MS-SSTP) client for An
 
 ## Installation
 * You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/raw/master/releases/0.0.1/release/app-release.apk) and install it
+* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/raw/master/releases/0.0.1.1/release/app-release.apk) and install it
 
 ## Usage
 Fill `Host`, `Username` and `Password` fields and push `CONNECT` button. If a key icon gets to show on the right side of the status bar, 

@@ -106,7 +106,7 @@ internal class SstpControlPacket {
         val hmac = Mac.getInstance(hmacProtocol)
         hmac.init(SecretKeySpec(ByteArray(keySize), hmacProtocol))
         cmkInput.put(cmacKeySeed)
-        cmkInput.putShort(keySize.shl(2).toShort())
+        cmkInput.putShort(keySize.shl(8).toShort())
         cmkInput.put(1)
         val cmk = hmac.doFinal(cmkInput.array())
         hmac.init(SecretKeySpec(cmk, hmacProtocol))

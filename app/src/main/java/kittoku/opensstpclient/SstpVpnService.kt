@@ -62,7 +62,6 @@ internal class SstpVpnService : VpnService(), CoroutineScope {
         val pendingIntent = PendingIntent.getService(this, 0, intent, 0)
         //val action = NotificationCompat.Action(ic_media_pause, "DISCONNECT", pendingIntent)
         val builder = NotificationCompat.Builder(this, CHANNEL_ID).apply {
-            setSmallIcon(ic_secure)
             setContentText("Open SSTP Client connecting")
             priority = NotificationCompat.PRIORITY_DEFAULT
             addAction(ic_media_pause, "DISCONNECT", pendingIntent)

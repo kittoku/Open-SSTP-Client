@@ -4,6 +4,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
+import javax.net.ssl.SSLSocket
 import kotlin.math.min
 
 
@@ -12,7 +13,9 @@ internal class IncomingBuffer(capacity: Int) {
         it.limit(0)
         it.mark()
     }
+    private var waitInterval = 0
     internal var pppLimit = 0
+    internal lateinit var socket: SSLSocket
     internal lateinit var sslInput: InputStream
     internal lateinit var ipOutput: FileOutputStream
 
@@ -37,6 +40,9 @@ internal class IncomingBuffer(capacity: Int) {
     }
 
     private fun supply() {
+        waitInterval = min(waitInterval + 10, 100)
+        //socket.soTimeout = waitInterval
+
         try {
             buffer.limit(
                 buffer.limit() + sslInput.read(
@@ -45,6 +51,8 @@ internal class IncomingBuffer(capacity: Int) {
                     buffer.capacity() - buffer.limit()
                 )
             )
+
+            waitInterval = 0
         } catch (e: SocketTimeoutException) {
         }
     }

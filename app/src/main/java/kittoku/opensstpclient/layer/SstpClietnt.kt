@@ -8,13 +8,14 @@ import kittoku.opensstpclient.unit.PPP_HEADER
 import kittoku.opensstpclient.unit.PacketType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.withLock
+import kotlin.math.min
 
 
 internal class SstpClient(parent: ControlClient) : Client(parent) {
+    private var waitInterval = 0L
 
     internal val negotiationTimer = Timer(60_000L)
     internal val negotiationCounter = Counter(3)
-
     internal val echoTimer = Timer(10_000L)
     internal val echoCounter = Counter(1)
 
@@ -173,6 +174,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
                         throw SuicideException()
                     }
 
+                    incomingBuffer.socket = it.socket
                     incomingBuffer.sslInput = it.sslInput
                 }
 
@@ -221,8 +223,11 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
     override suspend fun sendDataUnit() {
         if (outgoingBuffer.position() == 4) {
-            delay(100L)
+            waitInterval = min(waitInterval + 10, 100)
+            delay(waitInterval)
             return
+        } else {
+            waitInterval = 0
         }
 
         val length = outgoingBuffer.limit()

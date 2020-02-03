@@ -1,6 +1,7 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
+import kittoku.opensstpclient.MAX_MRU_SIZE
 import kittoku.opensstpclient.misc.inform
 import kittoku.opensstpclient.misc.informInvalidUnit
 import kittoku.opensstpclient.negotiator.*
@@ -262,7 +263,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (status.ppp == PppStatus.NETWORK) {
             parent.ipTerminal.ipInput.also {
-                val readLength = it.read(outgoingBuffer.array(), 8, 4096)
+                val readLength = it.read(outgoingBuffer.array(), 8, MAX_MRU_SIZE)
                 if (readLength != 0) {
                     outgoingBuffer.putShort(PPP_HEADER)
                     outgoingBuffer.putShort(PppProtocol.IP.value)

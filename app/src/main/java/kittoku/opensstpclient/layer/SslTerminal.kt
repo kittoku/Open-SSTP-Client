@@ -12,7 +12,7 @@ import javax.net.ssl.*
 
 
 internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
-    private lateinit var socket: SSLSocket
+    internal lateinit var socket: SSLSocket
 
     internal lateinit var sslInput: InputStream
 

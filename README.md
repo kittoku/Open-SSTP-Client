@@ -5,7 +5,7 @@ So no test with other servers is done. Its behavior may be still unstable.
 
 ## Installation
 * You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/raw/master/releases/0.0.2/release/app-release.apk) and install it
+* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v0.0.2/osc-0.0.2.apk) and install it
 
 ## Usage
 Fill `Host`, `Username` and `Password` fields and push `CONNECT` button. If a key icon gets to show on the right side of the status bar, 
@@ -26,7 +26,3 @@ Licensed under MIT. Be sure you use this software at your own risk.
 ## (Wish) To do
 * support MS-CHAPv2
 * get able to produce a pcap file to debug
-
-## Release
-0.0.2 - decreased coroutines, added log window  
-0.0.1 - first release

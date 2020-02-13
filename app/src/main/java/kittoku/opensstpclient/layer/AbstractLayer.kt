@@ -1,9 +1,14 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
+import kittoku.opensstpclient.INTERVAL_STEP
+import kittoku.opensstpclient.MAX_INTERVAL
 import kittoku.opensstpclient.unit.DataUnit
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.min
 
 
 internal enum class PppStatus {
@@ -49,6 +54,28 @@ internal class Timer(private val maxLength: Long) {
 
     internal fun reset() {
         startedTime = System.currentTimeMillis()
+    }
+}
+
+internal class Waiter() {
+    private val incoming = AtomicInteger(0)
+    private val outgoing = AtomicLong(0)
+    private val maxLong = MAX_INTERVAL.toLong()
+    private val stepLong = INTERVAL_STEP.toLong()
+
+    internal fun getIncomingInterval(): Int {
+        incoming.set(min(incoming.get() + INTERVAL_STEP, MAX_INTERVAL))
+        return incoming.get()
+    }
+
+    internal fun getOutgoingInterval(): Long {
+        outgoing.set(min(outgoing.get() + stepLong, maxLong))
+        return outgoing.get()
+    }
+
+    internal fun reset() {
+        incoming.set(0)
+        outgoing.set(0)
     }
 }
 

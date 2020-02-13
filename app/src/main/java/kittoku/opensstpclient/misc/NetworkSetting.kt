@@ -8,44 +8,71 @@ import java.util.*
 internal class NetworkSetting(
     internal val host: String,
     internal val username: String,
-    internal val password: String
+    internal val password: String,
+    internal val port: Int?,
+    customMru: Int?,
+    internal val customMtu: Int?,
+    isPapAcceptable: Boolean,
+    isMschapv2Acceptable: Boolean,
+    internal val isHvIgnored: Boolean,
+    internal val isDecryptable: Boolean
 ) {
     internal lateinit var serverCertificate: Certificate
     internal lateinit var hashProtocol: HashProtocol
     internal lateinit var nonce: ByteArray
     internal val guid = UUID.randomUUID().toString()
 
-    internal var mru = LcpMruOption()
-    internal var auth = LcpAuthOption()
-    internal var ipAddress = IpcpIpAddressOption()
-    internal var dnsAddress = IpcpDnsAddressOption()
+    internal val mgMru = when {
+        customMru == 1500 -> {
+            OptionManager(LcpMruOption(), arrayOf(LcpMruOption()), true)
+        }
 
-    internal var isMruRejected = false
-    internal var isAuthRejected = false
-    internal var isIpAddressRejected = false
-    internal var isDnsAddressRejected = false
+        customMru != null -> {
+            LcpMruOption().let {
+                it.unitSize = customMru.toShort()
+                OptionManager(it, arrayOf(it.copy()), false)
+            }
+        }
 
-    internal val acceptableMru = AcceptableOptions<LcpMruOption>()
-    internal val acceptableAuth = AcceptableOptions<LcpAuthOption>()
-    internal val acceptableIpAddress = AcceptableOptions<IpcpIpAddressOption>()
-    internal val acceptableDnsAddress = AcceptableOptions<IpcpDnsAddressOption>()
+        else -> OptionManager(LcpMruOption(), arrayOf(), true)
+    }
+
+    internal val mgAuth = when {
+        isMschapv2Acceptable && isPapAcceptable -> {
+            LcpAuthOption().let {
+                it.protocol = AuthProtocol.CHAP.value
+                it.holder.add(ChapAlgorithm.MS_CHAPv2.value)
+                OptionManager(it, arrayOf(it.copy(), LcpAuthOption()), true)
+            }
+        }
+
+        isMschapv2Acceptable -> {
+            LcpAuthOption().let {
+                it.protocol = AuthProtocol.CHAP.value
+                it.holder.add(ChapAlgorithm.MS_CHAPv2.value)
+                OptionManager(it, arrayOf(it.copy()), false)
+            }
+        }
+
+        else -> OptionManager(LcpAuthOption(), arrayOf(), true)
+    }
+
+    internal val mgIpAddress = OptionManager(IpcpIpAddressOption(), arrayOf(), false)
+    internal val mgDnsAddress = OptionManager(IpcpDnsAddressOption(), arrayOf(), true)
 }
 
-internal class AcceptableOptions<T : Option<T>> {
-    private val candidates = mutableListOf<T>()
-
+internal class OptionManager<T : Option<T>>(
+    internal var current: T,
+    internal val candidates: Array<T>,
     internal val isRejectable: Boolean
-        get() = candidates.isEmpty()
+) {
+    internal var isRejected = false
 
     internal fun isAcceptable(suggestion: T): Boolean {
-        if (isRejectable) return true
+        if (candidates.isEmpty()) return true
 
         candidates.forEach { if (it.isMatchedTo(suggestion)) return true }
 
         return false
-    }
-
-    internal fun add(option: T) {
-        candidates.add(option)
     }
 }

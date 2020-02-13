@@ -24,11 +24,11 @@ internal fun PppClient.tryReadingIpcp(frame: IpcpFrame): Boolean {
 
 internal fun PppClient.isCompromisableIpcp(received: IpcpConfigureFrame): Boolean {
     received.optionIpAddress?.also {
-        if (!networkSetting.acceptableIpAddress.isAcceptable(it)) return false
+        if (!networkSetting.mgIpAddress.isAcceptable(it)) return false
     }
 
     received.optionDnsAddress?.also {
-        if (!networkSetting.acceptableDnsAddress.isAcceptable(it)) return false
+        if (!networkSetting.mgDnsAddress.isAcceptable(it)) return false
     }
 
     return true
@@ -36,20 +36,20 @@ internal fun PppClient.isCompromisableIpcp(received: IpcpConfigureFrame): Boolea
 
 internal fun PppClient.extractUncompromisableIpcp(received: IpcpConfigureFrame): Option<*>? {
     received.optionIpAddress?.also {
-        if (!networkSetting.acceptableIpAddress.isAcceptable(it)) return it
+        if (!networkSetting.mgIpAddress.isAcceptable(it)) return it
     }
 
     received.optionDnsAddress?.also {
-        if (!networkSetting.acceptableDnsAddress.isAcceptable(it)) return it
+        if (!networkSetting.mgDnsAddress.isAcceptable(it)) return it
     }
 
     return null
 }
 
 internal fun PppClient.compromiseIpcp(received: IpcpConfigureFrame) {
-    received.optionIpAddress?.also { networkSetting.ipAddress = it.copy() }
+    received.optionIpAddress?.also { networkSetting.mgIpAddress.current = it.copy() }
 
-    received.optionDnsAddress?.also { networkSetting.dnsAddress = it.copy() }
+    received.optionDnsAddress?.also { networkSetting.mgDnsAddress.current = it.copy() }
 }
 
 internal suspend fun PppClient.sendIpcpConfigureRequest() {
@@ -65,10 +65,10 @@ internal suspend fun PppClient.sendIpcpConfigureRequest() {
     currentIpcpRequestId = globalIdentifier
     val sending = IpcpConfigureRequest()
     sending.id = currentIpcpRequestId
-    if (!networkSetting.isIpAddressRejected) sending.optionIpAddress =
-        parent.networkSetting.ipAddress.copy()
-    if (!networkSetting.isDnsAddressRejected) sending.optionDnsAddress =
-        parent.networkSetting.dnsAddress.copy()
+    if (!networkSetting.mgIpAddress.isRejected) sending.optionIpAddress =
+        parent.networkSetting.mgIpAddress.current.copy()
+    if (!networkSetting.mgDnsAddress.isRejected) sending.optionDnsAddress =
+        parent.networkSetting.mgDnsAddress.current.copy()
     sending.update()
     addControlUnit(sending)
 
@@ -85,11 +85,11 @@ internal suspend fun PppClient.sendIpcpConfigureAck(received: IpcpConfigureReque
 
 internal suspend fun PppClient.sendIpcpConfigureNak(received: IpcpConfigureRequest) {
     if (received.optionIpAddress != null) {
-        received.optionIpAddress = networkSetting.ipAddress.copy()
+        received.optionIpAddress = networkSetting.mgIpAddress.current.copy()
     }
 
     if (received.optionDnsAddress != null) {
-        received.optionDnsAddress = networkSetting.dnsAddress.copy()
+        received.optionDnsAddress = networkSetting.mgDnsAddress.current.copy()
     }
 
     val sending = IpcpConfigureNak()
@@ -217,22 +217,22 @@ internal suspend fun PppClient.receiveIpcpConfigureReject() {
     if (!tryReadingIpcp(received)) return
 
     if (received.optionIpAddress != null) {
-        if (networkSetting.acceptableIpAddress.isRejectable) {
-            networkSetting.isIpAddressRejected = true
-            networkSetting.ipAddress = IpcpIpAddressOption()
+        if (networkSetting.mgIpAddress.isRejectable) {
+            networkSetting.mgIpAddress.isRejected = true
+            networkSetting.mgIpAddress.current = IpcpIpAddressOption()
         } else {
-            parent.informOptionRejected(networkSetting.ipAddress)
+            parent.informOptionRejected(networkSetting.mgIpAddress.current)
             kill()
             return
         }
     }
 
     if (received.optionDnsAddress != null) {
-        if (networkSetting.acceptableDnsAddress.isRejectable) {
-            networkSetting.isDnsAddressRejected = true
-            networkSetting.dnsAddress = IpcpDnsAddressOption()
+        if (networkSetting.mgDnsAddress.isRejectable) {
+            networkSetting.mgDnsAddress.isRejected = true
+            networkSetting.mgDnsAddress.current = IpcpDnsAddressOption()
         } else {
-            parent.informOptionRejected(networkSetting.dnsAddress)
+            parent.informOptionRejected(networkSetting.mgDnsAddress.current)
             kill()
             return
         }

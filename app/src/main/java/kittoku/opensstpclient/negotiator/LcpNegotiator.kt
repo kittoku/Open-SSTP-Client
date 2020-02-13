@@ -26,11 +26,11 @@ internal fun PppClient.tryReadingLcp(frame: LcpFrame): Boolean {
 
 internal fun PppClient.isCompromisableLcp(received: LcpConfigureFrame): Boolean {
     received.optionMru?.also {
-        if (!networkSetting.acceptableMru.isAcceptable(it)) return false
+        if (!networkSetting.mgMru.isAcceptable(it)) return false
     }
 
     received.optionAuth?.also {
-        if (!networkSetting.acceptableAuth.isAcceptable(it)) return false
+        if (!networkSetting.mgAuth.isAcceptable(it)) return false
     }
 
     return true
@@ -38,20 +38,20 @@ internal fun PppClient.isCompromisableLcp(received: LcpConfigureFrame): Boolean 
 
 internal fun PppClient.extractUncompromisableLcp(received: LcpConfigureFrame): Option<*>? {
     received.optionMru?.also {
-        if (!networkSetting.acceptableMru.isAcceptable(it)) return it
+        if (!networkSetting.mgMru.isAcceptable(it)) return it
     }
 
     received.optionAuth?.also {
-        if (!networkSetting.acceptableAuth.isAcceptable(it)) return it
+        if (!networkSetting.mgAuth.isAcceptable(it)) return it
     }
 
     return null
 }
 
 internal fun PppClient.compromiseLcp(received: LcpConfigureFrame) {
-    received.optionMru?.also { networkSetting.mru = it.copy() }
+    received.optionMru?.also { networkSetting.mgMru.current = it.copy() }
 
-    received.optionAuth?.also { networkSetting.auth = it.copy() }
+    received.optionAuth?.also { networkSetting.mgAuth.current = it.copy() }
 }
 
 internal suspend fun PppClient.sendLcpConfigureRequest() {
@@ -67,8 +67,8 @@ internal suspend fun PppClient.sendLcpConfigureRequest() {
     currentLcpRequestId = globalIdentifier
     val sending = LcpConfigureRequest()
     sending.id = currentLcpRequestId
-    if (!networkSetting.isMruRejected) sending.optionMru = parent.networkSetting.mru.copy()
-    if (!networkSetting.isAuthRejected) sending.optionAuth = parent.networkSetting.auth.copy()
+    if (!networkSetting.mgMru.isRejected) sending.optionMru = parent.networkSetting.mgMru.current.copy()
+    if (!networkSetting.mgAuth.isRejected) sending.optionAuth = parent.networkSetting.mgAuth.current.copy()
     sending.update()
     addControlUnit(sending)
 
@@ -85,11 +85,11 @@ internal suspend fun PppClient.sendLcpConfigureAck(received: LcpConfigureRequest
 
 internal suspend fun PppClient.sendLcpConfigureNak(received: LcpConfigureRequest) {
     if (received.optionMru != null) {
-        received.optionMru = networkSetting.mru.copy()
+        received.optionMru = networkSetting.mgMru.current.copy()
     }
 
     if (received.optionAuth != null) {
-        received.optionAuth = networkSetting.auth.copy()
+        received.optionAuth = networkSetting.mgAuth.current.copy()
     }
 
     val sending = LcpConfigureNak()
@@ -241,22 +241,22 @@ internal suspend fun PppClient.receiveLcpConfigureReject() {
     if (!tryReadingLcp(received)) return
 
     if (received.optionMru != null) {
-        if (networkSetting.acceptableMru.isRejectable) {
-            networkSetting.isMruRejected = true
-            networkSetting.mru = LcpMruOption()
+        if (networkSetting.mgMru.isRejectable) {
+            networkSetting.mgMru.isRejected = true
+            networkSetting.mgMru.current = LcpMruOption()
         } else {
-            parent.informOptionRejected(networkSetting.mru)
+            parent.informOptionRejected(networkSetting.mgMru.current)
             kill()
             return
         }
     }
 
     if (received.optionAuth != null) {
-        if (networkSetting.acceptableAuth.isRejectable) {
-            networkSetting.isAuthRejected = true
-            networkSetting.auth = LcpAuthOption()
+        if (networkSetting.mgAuth.isRejectable) {
+            networkSetting.mgAuth.isRejected = true
+            networkSetting.mgAuth.current = LcpAuthOption()
         } else {
-            parent.informOptionRejected(networkSetting.auth)
+            parent.informOptionRejected(networkSetting.mgAuth.current)
             kill()
             return
         }

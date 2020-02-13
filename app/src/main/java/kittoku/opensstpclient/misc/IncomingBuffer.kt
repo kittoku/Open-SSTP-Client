@@ -1,23 +1,17 @@
 package kittoku.opensstpclient.misc
 
-import java.io.FileOutputStream
-import java.io.InputStream
+import kittoku.opensstpclient.ControlClient
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
-import javax.net.ssl.SSLSocket
 import kotlin.math.min
 
 
-internal class IncomingBuffer(capacity: Int) {
+internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) {
     private val buffer = ByteBuffer.allocate(capacity).also {
         it.limit(0)
         it.mark()
     }
-    private var waitInterval = 0
     internal var pppLimit = 0
-    internal lateinit var socket: SSLSocket
-    internal lateinit var sslInput: InputStream
-    internal lateinit var ipOutput: FileOutputStream
 
     internal fun position(): Int = buffer.position()
     internal fun position(value: Int) = buffer.position(value)
@@ -40,26 +34,25 @@ internal class IncomingBuffer(capacity: Int) {
     }
 
     private fun supply() {
-        waitInterval = min(waitInterval + 10, 100)
-        //socket.soTimeout = waitInterval
+        parent.sslTerminal.socket.soTimeout =  parent.waiter.getIncomingInterval()
 
         try {
             buffer.limit(
-                buffer.limit() + sslInput.read(
+                buffer.limit() + parent.sslTerminal.socket.inputStream.read(
                     buffer.array(),
                     buffer.limit(),
                     buffer.capacity() - buffer.limit()
                 )
             )
 
-            waitInterval = 0
+            parent.waiter.reset()
         } catch (e: SocketTimeoutException) {
         }
     }
 
     internal fun convey() {
         val length = pppLimit - buffer.position()
-        ipOutput.write(buffer.array(), buffer.position(), length)
+        parent.ipTerminal.ipOutput.write(buffer.array(), buffer.position(), length)
         buffer.position(buffer.position() + length)
     }
 

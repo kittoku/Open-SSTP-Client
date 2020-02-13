@@ -1,7 +1,7 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
-import kittoku.opensstpclient.MAX_MRU_SIZE
+import kittoku.opensstpclient.MAX_MRU
 import kittoku.opensstpclient.misc.inform
 import kittoku.opensstpclient.misc.informInvalidUnit
 import kittoku.opensstpclient.negotiator.*
@@ -196,7 +196,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
             }
 
             PppStatus.AUTHENTICATE -> {
-                when(AuthProtocol.resolve(networkSetting.auth.protocol)) {
+                when(AuthProtocol.resolve(networkSetting.mgAuth.current.protocol)) {
                     AuthProtocol.PAP -> {
                         if (isInitialAuth) {
                             sendPapRequest()
@@ -232,8 +232,6 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                                 kill()
                                 return
                             }
-
-                            incomingBuffer.ipOutput = it.ipOutput
                         }
 
                         status.ppp = PppStatus.NETWORK
@@ -263,7 +261,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (status.ppp == PppStatus.NETWORK) {
             parent.ipTerminal.ipInput.also {
-                val readLength = it.read(outgoingBuffer.array(), 8, MAX_MRU_SIZE)
+                val readLength = it.read(outgoingBuffer.array(), 8, MAX_MRU)
                 if (readLength != 0) {
                     outgoingBuffer.putShort(PPP_HEADER)
                     outgoingBuffer.putShort(PppProtocol.IP.value)

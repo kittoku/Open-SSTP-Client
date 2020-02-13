@@ -8,7 +8,6 @@ import kittoku.opensstpclient.unit.PPP_HEADER
 import kittoku.opensstpclient.unit.PacketType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.withLock
-import kotlin.math.min
 
 
 internal class SstpClient(parent: ControlClient) : Client(parent) {
@@ -173,9 +172,6 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
                         parent.inform("Failed to establish SSL connection", e)
                         throw SuicideException()
                     }
-
-                    incomingBuffer.socket = it.socket
-                    incomingBuffer.sslInput = it.sslInput
                 }
 
                 sendCallConnectRequest()
@@ -203,7 +199,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
     private fun sendPacket(length: Int) {
         try {
-            parent.sslTerminal.sslOutput.write(outgoingBuffer.array(), 0, length)
+            parent.sslTerminal.socket.outputStream.write(outgoingBuffer.array(), 0, length)
         } catch (e: Exception) {
             parent.inform("SSL layer turned down", e)
             throw SuicideException()
@@ -223,11 +219,10 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
     override suspend fun sendDataUnit() {
         if (outgoingBuffer.position() == 4) {
-            waitInterval = min(waitInterval + 10, 100)
-            delay(waitInterval)
+            delay(parent.waiter.getOutgoingInterval())
             return
         } else {
-            waitInterval = 0
+            parent.waiter.reset()
         }
 
         val length = outgoingBuffer.limit()

@@ -1,5 +1,6 @@
 package kittoku.opensstpclient.unit
 
+import kittoku.opensstpclient.DEFAULT_MRU
 import kittoku.opensstpclient.misc.DataUnitParsingError
 import kittoku.opensstpclient.misc.IncomingBuffer
 import kittoku.opensstpclient.misc.generateResolver
@@ -36,10 +37,19 @@ internal enum class LcpOptionType(val value: Byte) {
 }
 
 internal enum class AuthProtocol(val value: Short) {
-    PAP(0xC023.toShort());
+    PAP(0xC023.toShort()),
+    CHAP(0xC223.toShort());
 
     companion object {
         internal val resolve = generateResolver(values(), AuthProtocol::value)
+    }
+}
+
+internal enum class ChapAlgorithm(val value: Byte) {
+    MS_CHAPv2(0x81.toByte());
+
+    companion object {
+        internal val resolve = generateResolver(values(), ChapAlgorithm::value)
     }
 }
 
@@ -59,7 +69,7 @@ internal class LcpMruOption : LcpOption<LcpMruOption>() {
 
     override val validLengthRange = 4..4
 
-    internal var unitSize by Delegates.observable<Short>(1500) { _, _, new ->
+    internal var unitSize by Delegates.observable(DEFAULT_MRU.toShort()) { _, _, new ->
         if (new !in 1..4096) throw DataUnitParsingError()
     }
 

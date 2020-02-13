@@ -3,6 +3,7 @@ package kittoku.opensstpclient.misc
 import android.content.Intent
 import android.support.v4.content.LocalBroadcastManager
 import kittoku.opensstpclient.ControlClient
+import kittoku.opensstpclient.VpnAction
 import kittoku.opensstpclient.unit.DataUnit
 import kittoku.opensstpclient.unit.Option
 import java.text.SimpleDateFormat
@@ -13,8 +14,6 @@ import kotlin.reflect.KFunction
 internal class DataUnitParsingError : Error("Failed to parse data unit")
 
 internal class SuicideException : Exception("Kill this client as intended")
-
-const val ACTION_CONVEY = "kittoku.opensstpclient.CONVEY"
 
 const val EXTENDED_LOG = "kittoku.opensstpclient.LOG"
 
@@ -28,7 +27,7 @@ internal fun ControlClient.inform(message: String, cause: Throwable?) {
     }
     printing += "\n"
 
-    val conveyIntent = Intent(ACTION_CONVEY).also {
+    val conveyIntent = Intent(VpnAction.ACTION_CONVEY.value).also {
         it.putExtra(EXTENDED_LOG, printing)
     }
 

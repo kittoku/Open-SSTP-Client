@@ -2,10 +2,12 @@ package kittoku.opensstpclient.layer
 
 import android.os.ParcelFileDescriptor
 import kittoku.opensstpclient.ControlClient
+import kittoku.opensstpclient.DEFAULT_MRU
 import kittoku.opensstpclient.misc.SuicideException
 import kittoku.opensstpclient.misc.isSame
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.Exception
 import java.net.InetAddress
 
 
@@ -25,19 +27,32 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
     }
 
     internal fun initializeTun() {
-        parent.networkSetting.ipAddress.address.also {
+        val setting = parent.networkSetting
+        val builder = parent.builder
+
+        setting.mgIpAddress.current.address.also {
             if (it.isSame(ByteArray(4))) throw SuicideException()
 
-            parent.builder.addAddress(InetAddress.getByAddress(it), getPrefixLength(it))
+            builder.addAddress(InetAddress.getByAddress(it), getPrefixLength(it))
         }
 
-        parent.networkSetting.dnsAddress.also {
-            if (it.address.isSame(ByteArray(4))) return
+        if (!setting.mgDnsAddress.isRejected){
+            setting.mgDnsAddress.current.address.also {
+                if (it.isSame(ByteArray(4))) return
 
-            parent.builder.addDnsServer(InetAddress.getByAddress(it.address))
+                builder.addDnsServer(InetAddress.getByAddress(it))
+            }
         }
 
-        parent.builder.setMtu(parent.networkSetting.mru.unitSize.toInt())
+        val mru = if (setting.mgMru.isRejected) DEFAULT_MRU else {
+            setting.mgMru.current.unitSize.toInt()
+        }
+
+        val mtu = setting.customMtu ?: DEFAULT_MRU
+
+        if (mtu > mru) throw Exception("MTU is bigger than MRU")
+
+        parent.builder.setMtu(mtu)
 
         parent.builder.addRoute("0.0.0.0", 0)
 

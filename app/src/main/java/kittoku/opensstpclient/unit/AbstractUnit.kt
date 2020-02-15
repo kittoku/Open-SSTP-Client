@@ -7,7 +7,7 @@ import kotlin.properties.Delegates
 
 
 internal abstract class DataUnit<T : Number> {
-    internal var _length by Delegates.observable<Int>(0) { _, _, new ->
+    internal var _length by Delegates.observable(0) { _, _, new ->
         if (new !in validLengthRange) throw DataUnitParsingError()
     }
 
@@ -38,10 +38,4 @@ internal abstract class ShortLengthDataUnit : DataUnit<Short>() {
     override fun setTypedLength(value: Short) {
         _length = value.toInt()
     }
-}
-
-internal interface Option<self> {
-    fun isMatchedTo(other: self): Boolean
-
-    fun copy(): self
 }

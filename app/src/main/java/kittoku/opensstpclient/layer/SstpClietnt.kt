@@ -11,8 +11,6 @@ import kotlinx.coroutines.sync.withLock
 
 
 internal class SstpClient(parent: ControlClient) : Client(parent) {
-    private var waitInterval = 0L
-
     internal val negotiationTimer = Timer(60_000L)
     internal val negotiationCounter = Counter(3)
     internal val echoTimer = Timer(10_000L)

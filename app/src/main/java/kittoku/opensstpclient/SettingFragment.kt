@@ -43,7 +43,7 @@ class SettingFragment : Fragment() {
         view.findViewById<CheckBox>(R.id.pap).isChecked =
             prefs.getBoolean(PreferenceKey.PAP.value, true)
         view.findViewById<CheckBox>(R.id.mschapv2).isChecked =
-            prefs.getBoolean(PreferenceKey.MS_CHAPv2.value, true)
+            prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
         view.findViewById<CheckBox>(R.id.hvIgnored).isChecked =
             prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
         view.findViewById<CheckBox>(R.id.decryptable).isChecked =
@@ -66,7 +66,7 @@ class SettingFragment : Fragment() {
         )
         editor.putBoolean(PreferenceKey.PAP.value, view.findViewById<CheckBox>(R.id.pap).isChecked)
         editor.putBoolean(
-            PreferenceKey.MS_CHAPv2.value,
+            PreferenceKey.MSCHAPv2.value,
             view.findViewById<CheckBox>(R.id.mschapv2).isChecked
         )
         editor.putBoolean(

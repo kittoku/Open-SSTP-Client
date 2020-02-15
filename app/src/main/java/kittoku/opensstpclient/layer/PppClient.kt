@@ -2,6 +2,7 @@ package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.MAX_MRU
+import kittoku.opensstpclient.misc.AuthSuite
 import kittoku.opensstpclient.misc.inform
 import kittoku.opensstpclient.misc.informInvalidUnit
 import kittoku.opensstpclient.negotiator.*
@@ -196,8 +197,8 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
             }
 
             PppStatus.AUTHENTICATE -> {
-                when(AuthProtocol.resolve(networkSetting.mgAuth.current.protocol)) {
-                    AuthProtocol.PAP -> {
+                when (networkSetting.currentAuth) {
+                    AuthSuite.PAP -> {
                         if (isInitialAuth) {
                             sendPapRequest()
                             isInitialAuth = false

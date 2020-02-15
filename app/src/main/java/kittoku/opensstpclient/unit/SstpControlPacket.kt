@@ -109,44 +109,6 @@ internal class SstpCallConnectAck : ControlPacket() {
 
 }
 
-internal class SstpCallConnectNak : ControlPacket() {
-    override val type = MessageType.CALL_CONNECT_NAK.value
-
-    override val validLengthRange = 8..Short.MAX_VALUE
-
-    internal val statusInfos = mutableListOf<StatusInfo>()
-
-    override fun read(bytes: IncomingBuffer) {
-        readHeader(bytes)
-        val numAttributes = bytes.getShort().toInt()
-        if (numAttributes < 1) throw DataUnitParsingError()
-        repeat(numAttributes) {
-            bytes.move(1)
-            if (AttributeId.resolve(bytes.getByte()) != AttributeId.STATUS_INFO) throw DataUnitParsingError()
-            StatusInfo().also {
-                it.read(bytes)
-                statusInfos.add(it)
-            }
-        }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        bytes.putShort(statusInfos.size.toShort())
-        statusInfos.forEach {
-            it.write(bytes)
-        }
-    }
-
-    override fun update() {
-        _length = validLengthRange.first
-        statusInfos.forEach {
-            it.update()
-            _length += it._length
-        }
-    }
-}
-
 internal class SstpCallConnected : ControlPacket() {
     override val type = MessageType.CALL_CONNECTED.value
 

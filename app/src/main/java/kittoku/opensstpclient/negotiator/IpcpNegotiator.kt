@@ -22,36 +22,6 @@ internal fun PppClient.tryReadingIpcp(frame: IpcpFrame): Boolean {
     return true
 }
 
-internal fun PppClient.isCompromisableIpcp(received: IpcpConfigureFrame): Boolean {
-    received.optionIpAddress?.also {
-        if (!networkSetting.mgIpAddress.isAcceptable(it)) return false
-    }
-
-    received.optionDnsAddress?.also {
-        if (!networkSetting.mgDnsAddress.isAcceptable(it)) return false
-    }
-
-    return true
-}
-
-internal fun PppClient.extractUncompromisableIpcp(received: IpcpConfigureFrame): Option<*>? {
-    received.optionIpAddress?.also {
-        if (!networkSetting.mgIpAddress.isAcceptable(it)) return it
-    }
-
-    received.optionDnsAddress?.also {
-        if (!networkSetting.mgDnsAddress.isAcceptable(it)) return it
-    }
-
-    return null
-}
-
-internal fun PppClient.compromiseIpcp(received: IpcpConfigureFrame) {
-    received.optionIpAddress?.also { networkSetting.mgIpAddress.current = it.copy() }
-
-    received.optionDnsAddress?.also { networkSetting.mgDnsAddress.current = it.copy() }
-}
-
 internal suspend fun PppClient.sendIpcpConfigureRequest() {
     if (ipcpCounter.isExhausted) {
         parent.informCounterExhausted(::sendIpcpConfigureRequest)
@@ -65,10 +35,10 @@ internal suspend fun PppClient.sendIpcpConfigureRequest() {
     currentIpcpRequestId = globalIdentifier
     val sending = IpcpConfigureRequest()
     sending.id = currentIpcpRequestId
-    if (!networkSetting.mgIpAddress.isRejected) sending.optionIpAddress =
-        parent.networkSetting.mgIpAddress.current.copy()
-    if (!networkSetting.mgDnsAddress.isRejected) sending.optionDnsAddress =
-        parent.networkSetting.mgDnsAddress.current.copy()
+    if (!networkSetting.mgIp.isRejected) sending.optionIp =
+        parent.networkSetting.mgIp.create()
+    if (!networkSetting.mgDns.isRejected) sending.optionDns =
+        parent.networkSetting.mgDns.create()
     sending.update()
     addControlUnit(sending)
 
@@ -84,12 +54,12 @@ internal suspend fun PppClient.sendIpcpConfigureAck(received: IpcpConfigureReque
 }
 
 internal suspend fun PppClient.sendIpcpConfigureNak(received: IpcpConfigureRequest) {
-    if (received.optionIpAddress != null) {
-        received.optionIpAddress = networkSetting.mgIpAddress.current.copy()
+    if (received.optionIp != null) {
+        received.optionIp = networkSetting.mgIp.create()
     }
 
-    if (received.optionDnsAddress != null) {
-        received.optionDnsAddress = networkSetting.mgDnsAddress.current.copy()
+    if (received.optionDns != null) {
+        received.optionDns = networkSetting.mgDns.create()
     }
 
     val sending = IpcpConfigureNak()
@@ -111,45 +81,39 @@ internal suspend fun PppClient.receiveIpcpConfigureRequest() {
     val received = IpcpConfigureRequest()
     if (!tryReadingIpcp(received)) return
 
-    when {
-        received.hasUnknownOption -> {
-            when (ipcpState) {
-                IpcpState.REQ_SENT, IpcpState.ACK_RCVD -> sendIpcpConfigureReject(received)
-                IpcpState.ACK_SENT -> {
-                    sendIpcpConfigureReject(received)
-                    ipcpState = IpcpState.REQ_SENT
-                }
-                IpcpState.OPENED -> {
-                    parent.informInvalidUnit(::receiveIpcpConfigureRequest)
-                    kill()
-                    return
-                }
-            }
-        }
+    if (ipcpState == IpcpState.OPENED) {
+        parent.informInvalidUnit(::receiveIpcpConfigureRequest)
+        kill()
+        return
+    }
 
-        isCompromisableIpcp(received) -> {
-            compromiseIpcp(received)
-            when (ipcpState) {
-                IpcpState.REQ_SENT -> {
-                    sendIpcpConfigureAck(received)
-                    ipcpState = IpcpState.ACK_SENT
-                }
-                IpcpState.ACK_RCVD -> {
-                    sendIpcpConfigureAck(received)
-                    ipcpState = IpcpState.OPENED
-                }
-                IpcpState.ACK_SENT -> sendIpcpConfigureAck(received)
-                IpcpState.OPENED -> {
-                    parent.informInvalidUnit(::receiveIpcpConfigureRequest)
-                    kill()
-                    return
-                }
-            }
-        }
+    if (received.hasUnknownOption) {
+        sendIpcpConfigureReject(received)
 
-        ipcpState == IpcpState.ACK_RCVD -> sendIpcpConfigureNak(received)
+        if (ipcpState == IpcpState.ACK_SENT) ipcpState = IpcpState.REQ_SENT
+
+        return
+    }
+
+    val isIpOk = received.optionIp?.let { networkSetting.mgIp.compromiseReq(it) } ?: true
+    val isDnsOk = received.optionDns?.let { networkSetting.mgDns.compromiseReq(it) } ?: true
+
+    if (isIpOk && isDnsOk) {
+        sendIpcpConfigureAck(received)
+
+        when (ipcpState) {
+            IpcpState.REQ_SENT -> ipcpState = IpcpState.ACK_SENT
+            IpcpState.ACK_RCVD -> ipcpState = IpcpState.OPENED
+        }
+    } else {
+        if (isIpOk) received.optionIp = null
+        if (isDnsOk) received.optionDns = null
+        sendIpcpConfigureNak(received)
+
+        if (ipcpState == IpcpState.ACK_SENT) ipcpState = IpcpState.REQ_SENT
     }
 }
+
 
 internal suspend fun PppClient.receiveIpcpConfigureAck() {
     val received = IpcpConfigureAck()
@@ -181,61 +145,31 @@ internal suspend fun PppClient.receiveIpcpConfigureNak() {
     val received = IpcpConfigureNak()
     if (!tryReadingIpcp(received)) return
 
-    when (ipcpState) {
-        IpcpState.REQ_SENT, IpcpState.ACK_SENT -> {
-            ipcpCounter.reset()
-            if (isCompromisableIpcp(received)){
-                compromiseIpcp(received)
-                sendIpcpConfigureRequest()
-            } else {
-                parent.informUnableToCompromise(extractUncompromisableIpcp(received)!!, ::receiveIpcpConfigureNak)
-                kill()
-                return
-            }
-        }
-        IpcpState.ACK_RCVD -> {
-            if (isCompromisableIpcp(received)){
-                compromiseIpcp(received)
-                sendIpcpConfigureRequest()
-            } else {
-                parent.informUnableToCompromise(extractUncompromisableIpcp(received)!!, ::receiveIpcpConfigureNak)
-                kill()
-                return
-            }
-            ipcpState = IpcpState.REQ_SENT
-        }
-        IpcpState.OPENED -> {
-            parent.informInvalidUnit(::receiveIpcpConfigureNak)
-            kill()
-            return
-        }
+    if (ipcpState == IpcpState.OPENED) {
+        parent.informInvalidUnit(::receiveIpcpConfigureNak)
+        kill()
+        return
     }
+
+    received.optionIp?.also { networkSetting.mgIp.compromiseNak(it) }
+    received.optionDns?.also { networkSetting.mgDns.compromiseNak(it) }
+    sendIpcpConfigureRequest()
+
+    if (ipcpState == IpcpState.ACK_RCVD) ipcpState = IpcpState.REQ_SENT
 }
 
 internal suspend fun PppClient.receiveIpcpConfigureReject() {
     val received = IpcpConfigureReject()
     if (!tryReadingIpcp(received)) return
 
-    if (received.optionIpAddress != null) {
-        if (networkSetting.mgIpAddress.isRejectable) {
-            networkSetting.mgIpAddress.isRejected = true
-            networkSetting.mgIpAddress.current = IpcpIpAddressOption()
-        } else {
-            parent.informOptionRejected(networkSetting.mgIpAddress.current)
-            kill()
-            return
-        }
+    if (received.optionIp != null) {
+        parent.informOptionRejected(networkSetting.mgIp.create())
+        kill()
+        return
     }
 
-    if (received.optionDnsAddress != null) {
-        if (networkSetting.mgDnsAddress.isRejectable) {
-            networkSetting.mgDnsAddress.isRejected = true
-            networkSetting.mgDnsAddress.current = IpcpDnsAddressOption()
-        } else {
-            parent.informOptionRejected(networkSetting.mgDnsAddress.current)
-            kill()
-            return
-        }
+    if (received.optionDns != null) {
+        networkSetting.mgDns.isRejected = true
     }
 
     when (ipcpState) {

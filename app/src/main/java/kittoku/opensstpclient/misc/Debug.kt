@@ -5,7 +5,6 @@ import android.support.v4.content.LocalBroadcastManager
 import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.VpnAction
 import kittoku.opensstpclient.unit.DataUnit
-import kittoku.opensstpclient.unit.Option
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KFunction
@@ -47,11 +46,7 @@ internal fun ControlClient.informCounterExhausted(where: KFunction<*>) {
     inform("The counter was exhausted: ${where.name}", null)
 }
 
-internal fun ControlClient.informUnableToCompromise(option: Option<*>, where: KFunction<*>) {
-    inform("Failed to compromise with ${option::class.simpleName}: ${where.name}", null)
-}
-
-internal fun ControlClient.informOptionRejected(option: Option<*>) {
+internal fun ControlClient.informOptionRejected(option: DataUnit<*>) {
     inform("${option::class.simpleName} was rejected", null)
 }
 

@@ -1,5 +1,6 @@
 package kittoku.opensstpclient.negotiator
 
+import kittoku.opensstpclient.DEFAULT_MRU
 import kittoku.opensstpclient.layer.LcpState
 import kittoku.opensstpclient.layer.PppClient
 import kittoku.opensstpclient.misc.*
@@ -24,36 +25,6 @@ internal fun PppClient.tryReadingLcp(frame: LcpFrame): Boolean {
     return true
 }
 
-internal fun PppClient.isCompromisableLcp(received: LcpConfigureFrame): Boolean {
-    received.optionMru?.also {
-        if (!networkSetting.mgMru.isAcceptable(it)) return false
-    }
-
-    received.optionAuth?.also {
-        if (!networkSetting.mgAuth.isAcceptable(it)) return false
-    }
-
-    return true
-}
-
-internal fun PppClient.extractUncompromisableLcp(received: LcpConfigureFrame): Option<*>? {
-    received.optionMru?.also {
-        if (!networkSetting.mgMru.isAcceptable(it)) return it
-    }
-
-    received.optionAuth?.also {
-        if (!networkSetting.mgAuth.isAcceptable(it)) return it
-    }
-
-    return null
-}
-
-internal fun PppClient.compromiseLcp(received: LcpConfigureFrame) {
-    received.optionMru?.also { networkSetting.mgMru.current = it.copy() }
-
-    received.optionAuth?.also { networkSetting.mgAuth.current = it.copy() }
-}
-
 internal suspend fun PppClient.sendLcpConfigureRequest() {
     if (lcpCounter.isExhausted) {
         parent.informCounterExhausted(::sendLcpConfigureRequest)
@@ -67,8 +38,9 @@ internal suspend fun PppClient.sendLcpConfigureRequest() {
     currentLcpRequestId = globalIdentifier
     val sending = LcpConfigureRequest()
     sending.id = currentLcpRequestId
-    if (!networkSetting.mgMru.isRejected) sending.optionMru = parent.networkSetting.mgMru.current.copy()
-    if (!networkSetting.mgAuth.isRejected) sending.optionAuth = parent.networkSetting.mgAuth.current.copy()
+    if (!networkSetting.mgMru.isRejected) sending.optionMru = parent.networkSetting.mgMru.create()
+    if (!networkSetting.mgAuth.isRejected) sending.optionAuth =
+        parent.networkSetting.mgAuth.create()
     sending.update()
     addControlUnit(sending)
 
@@ -85,11 +57,11 @@ internal suspend fun PppClient.sendLcpConfigureAck(received: LcpConfigureRequest
 
 internal suspend fun PppClient.sendLcpConfigureNak(received: LcpConfigureRequest) {
     if (received.optionMru != null) {
-        received.optionMru = networkSetting.mgMru.current.copy()
+        received.optionMru = networkSetting.mgMru.create()
     }
 
     if (received.optionAuth != null) {
-        received.optionAuth = networkSetting.mgAuth.current.copy()
+        received.optionAuth = networkSetting.mgAuth.create()
     }
 
     val sending = LcpConfigureNak()
@@ -134,44 +106,36 @@ internal suspend fun PppClient.receiveLcpConfigureRequest() {
     val received = LcpConfigureRequest()
     if (!tryReadingLcp(received)) return
 
-    when {
-        received.hasUnknownOption -> {
-            when (lcpState) {
-                LcpState.REQ_SENT, LcpState.ACK_RCVD -> sendLcpConfigureReject(received)
-                LcpState.ACK_SENT -> {
-                    sendLcpConfigureReject(received)
-                    lcpState = LcpState.REQ_SENT
-                }
-                LcpState.OPENED -> {
-                    parent.informInvalidUnit(::receiveLcpConfigureRequest)
-                    kill()
-                    return
-                }
+    if (lcpState == LcpState.OPENED) {
+        parent.informInvalidUnit(::receiveLcpConfigureRequest)
+        kill()
+        return
+    }
 
-            }
+    if (received.hasUnknownOption) {
+        sendLcpConfigureReject(received)
+
+        if (lcpState == LcpState.ACK_SENT) lcpState = LcpState.REQ_SENT
+
+        return
+    }
+
+    val isMruOk = received.optionMru?.let { networkSetting.mgMru.compromiseReq(it) } ?: true
+    val isAuthOk = received.optionAuth?.let { networkSetting.mgAuth.compromiseReq(it) } ?: true
+
+    if (isMruOk && isAuthOk) {
+        sendLcpConfigureAck(received)
+
+        when (lcpState) {
+            LcpState.REQ_SENT -> lcpState = LcpState.ACK_SENT
+            LcpState.ACK_RCVD -> lcpState = LcpState.OPENED
         }
+    } else {
+        if (isMruOk) received.optionMru = null
+        if (isAuthOk) received.optionAuth = null
+        sendLcpConfigureNak(received)
 
-        isCompromisableLcp(received) -> {
-            compromiseLcp(received)
-            when (lcpState) {
-                LcpState.REQ_SENT -> {
-                    sendLcpConfigureAck(received)
-                    lcpState = LcpState.ACK_SENT
-                }
-                LcpState.ACK_RCVD -> {
-                    sendLcpConfigureAck(received)
-                    lcpState = LcpState.OPENED
-                }
-                LcpState.ACK_SENT -> sendLcpConfigureAck(received)
-                LcpState.OPENED -> {
-                    parent.informInvalidUnit(::receiveLcpConfigureRequest)
-                    kill()
-                    return
-                }
-            }
-        }
-
-        lcpState == LcpState.ACK_RCVD -> sendLcpConfigureNak(received)
+        if (lcpState == LcpState.ACK_SENT) lcpState = LcpState.REQ_SENT
     }
 }
 
@@ -197,7 +161,6 @@ internal suspend fun PppClient.receiveLcpConfigureAck() {
             kill()
             return
         }
-
     }
 }
 
@@ -205,35 +168,17 @@ internal suspend fun PppClient.receiveLcpConfigureNak() {
     val received = LcpConfigureNak()
     if (!tryReadingLcp(received)) return
 
-    when (lcpState) {
-        LcpState.REQ_SENT, LcpState.ACK_SENT -> {
-            lcpCounter.reset()
-            if (isCompromisableLcp(received)){
-                compromiseLcp(received)
-                sendLcpConfigureRequest()
-            } else {
-                parent.informUnableToCompromise(extractUncompromisableLcp(received)!!, ::receiveLcpConfigureNak)
-                kill()
-                return
-            }
-        }
-        LcpState.ACK_RCVD -> {
-            if (isCompromisableLcp(received)){
-                compromiseLcp(received)
-                sendLcpConfigureRequest()
-            } else {
-                parent.informUnableToCompromise(extractUncompromisableLcp(received)!!, ::receiveLcpConfigureNak)
-                kill()
-                return
-            }
-            lcpState = LcpState.REQ_SENT
-        }
-        LcpState.OPENED -> {
-            parent.informInvalidUnit(::receiveLcpConfigureNak)
-            kill()
-            return
-        }
+    if (lcpState == LcpState.OPENED) {
+        parent.informInvalidUnit(::receiveLcpConfigureNak)
+        kill()
+        return
     }
+
+    received.optionMru?.also { networkSetting.mgMru.compromiseNak(it) }
+    received.optionAuth?.also { networkSetting.mgAuth.compromiseNak(it) }
+    sendLcpConfigureRequest()
+
+    if (lcpState == LcpState.ACK_RCVD) lcpState = LcpState.REQ_SENT
 }
 
 internal suspend fun PppClient.receiveLcpConfigureReject() {
@@ -241,22 +186,11 @@ internal suspend fun PppClient.receiveLcpConfigureReject() {
     if (!tryReadingLcp(received)) return
 
     if (received.optionMru != null) {
-        if (networkSetting.mgMru.isRejectable) {
+        if (networkSetting.customMru == null || networkSetting.customMru >= DEFAULT_MRU) {
             networkSetting.mgMru.isRejected = true
-            networkSetting.mgMru.current = LcpMruOption()
+            networkSetting.currentMru = DEFAULT_MRU
         } else {
-            parent.informOptionRejected(networkSetting.mgMru.current)
-            kill()
-            return
-        }
-    }
-
-    if (received.optionAuth != null) {
-        if (networkSetting.mgAuth.isRejectable) {
-            networkSetting.mgAuth.isRejected = true
-            networkSetting.mgAuth.current = LcpAuthOption()
-        } else {
-            parent.informOptionRejected(networkSetting.mgAuth.current)
+            parent.informOptionRejected(networkSetting.mgMru.create())
             kill()
             return
         }

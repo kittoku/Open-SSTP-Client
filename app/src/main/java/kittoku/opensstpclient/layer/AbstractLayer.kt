@@ -57,7 +57,7 @@ internal class Timer(private val maxLength: Long) {
     }
 }
 
-internal class Waiter() {
+internal class Waiter {
     private val incoming = AtomicInteger(0)
     private val outgoing = AtomicLong(0)
     private val maxLong = MAX_INTERVAL.toLong()

@@ -27,25 +27,6 @@ internal enum class HashProtocol(val value: Byte) {
     }
 }
 
-internal enum class AttributeStatus(val value: Int) {
-    NO_ERROR(0),
-    DUPLICATE_ATTRIBUTE(1),
-    UNRECOGNIZED_ATTRIBUTE(2),
-    INVALID_ATTRIB_VALUE_LENGTH(3),
-    VALUE_NOT_SUPPORTED(4),
-    UNACCEPTED_FRAME_RECEIVED(5),
-    RETRY_COUNT_EXCEEDED(6),
-    INVALID_FRAME_RECEIVED(7),
-    NEGOTIATION_TIMEOUT(8),
-    ATTRIB_NOT_SUPPORTED_IN_MSG(9),
-    REQUIRED_ATTRIBUTE_MISSING(10),
-    STATUS_INFO_NOT_SUPPORTED_IN_MSG(11);
-
-    companion object {
-        internal val resolve = generateResolver(values(), AttributeStatus::value)
-    }
-}
-
 internal abstract class Attribute : ShortLengthDataUnit() {
     internal abstract val id: Byte
 

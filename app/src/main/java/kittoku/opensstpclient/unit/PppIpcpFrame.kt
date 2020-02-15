@@ -3,9 +3,7 @@ package kittoku.opensstpclient.unit
 import kittoku.opensstpclient.misc.DataUnitParsingError
 import kittoku.opensstpclient.misc.IncomingBuffer
 import kittoku.opensstpclient.misc.generateResolver
-import kittoku.opensstpclient.misc.isSame
 import java.nio.ByteBuffer
-import kotlin.math.min
 import kotlin.properties.Delegates
 
 
@@ -24,15 +22,15 @@ internal enum class IpcpCode(val value: Byte) {
 }
 
 internal enum class IpcpOptionType(val value: Byte) {
-    IP_ADDRESS(0x03),
-    DNS_ADDRESS(0x81.toByte());
+    IP(0x03),
+    DNS(0x81.toByte());
 
     companion object {
         internal val resolve = generateResolver(values(), IpcpOptionType::value)
     }
 }
 
-internal abstract class IpcpOption<self : IpcpOption<self>> : ByteLengthDataUnit(), Option<self> {
+internal abstract class IpcpOption : ByteLengthDataUnit() {
     internal abstract val type: Byte
 
     override val validLengthRange = 2..Byte.MAX_VALUE
@@ -43,8 +41,8 @@ internal abstract class IpcpOption<self : IpcpOption<self>> : ByteLengthDataUnit
     }
 }
 
-internal class IpcpIpAddressOption : IpcpOption<IpcpIpAddressOption>() {
-    override val type = IpcpOptionType.IP_ADDRESS.value
+internal class IpcpIpOption : IpcpOption() {
+    override val type = IpcpOptionType.IP.value
 
     override val validLengthRange = 6..6
 
@@ -63,19 +61,10 @@ internal class IpcpIpAddressOption : IpcpOption<IpcpIpAddressOption>() {
     override fun update() {
         _length = validLengthRange.first
     }
-
-    override fun isMatchedTo(other: IpcpIpAddressOption): Boolean =
-        this.address.isSame(other.address)
-
-    override fun copy(): IpcpIpAddressOption {
-        val copied = IpcpIpAddressOption()
-        repeat(address.size) { copied.address[it] = this.address[it] }
-        return copied
-    }
 }
 
-internal class IpcpDnsAddressOption : IpcpOption<IpcpDnsAddressOption>() {
-    override val type = IpcpOptionType.DNS_ADDRESS.value
+internal class IpcpDnsOption : IpcpOption() {
+    override val type = IpcpOptionType.DNS.value
 
     override val validLengthRange = 6..6
 
@@ -94,17 +83,9 @@ internal class IpcpDnsAddressOption : IpcpOption<IpcpDnsAddressOption>() {
     override fun update() {
         _length = validLengthRange.first
     }
-
-    override fun isMatchedTo(other: IpcpDnsAddressOption): Boolean = this.address.isSame(other.address)
-
-    override fun copy(): IpcpDnsAddressOption {
-        val copied = IpcpDnsAddressOption()
-        repeat(address.size) { copied.address[it] = this.address[it] }
-        return copied
-    }
 }
 
-internal class IpcpUnknownOption(unknownType: Byte) : IpcpOption<IpcpUnknownOption>() {
+internal class IpcpUnknownOption(unknownType: Byte) : IpcpOption() {
     override val type = unknownType
 
     internal val holder = mutableListOf<Byte>()
@@ -123,17 +104,6 @@ internal class IpcpUnknownOption(unknownType: Byte) : IpcpOption<IpcpUnknownOpti
     override fun update() {
         _length = holder.size + validLengthRange.first
     }
-
-    override fun isMatchedTo(other: IpcpUnknownOption): Boolean {
-        // not meant to be used
-        return this.holder == other.holder && this.type == other.type
-    }
-
-    override fun copy(): IpcpUnknownOption {
-        val copied = IpcpUnknownOption(this.type)
-        this.holder.forEach { copied.holder.add(it) }
-        return copied
-    }
 }
 
 internal abstract class IpcpFrame : PppFrame() {
@@ -141,10 +111,10 @@ internal abstract class IpcpFrame : PppFrame() {
 }
 
 internal abstract class IpcpConfigureFrame : IpcpFrame() {
-    internal var options = mutableListOf<IpcpOption<*>>()
+    internal var options = mutableListOf<IpcpOption>()
     // contains all options to be sent or received
 
-    private inline fun <reified T : IpcpOption<*>> delegateOption() =
+    private inline fun <reified T : IpcpOption> delegateOption() =
         Delegates.observable<T?>(null) { _, old, new ->
             if (old != null) {
                 if (new == null) { // erase option
@@ -167,8 +137,8 @@ internal abstract class IpcpConfigureFrame : IpcpFrame() {
             }
         }
 
-    internal var optionIpAddress by delegateOption<IpcpIpAddressOption>()
-    internal var optionDnsAddress by delegateOption<IpcpDnsAddressOption>()
+    internal var optionIp by delegateOption<IpcpIpOption>()
+    internal var optionDns by delegateOption<IpcpDnsOption>()
 
     internal val hasUnknownOption: Boolean
         get() {
@@ -177,9 +147,9 @@ internal abstract class IpcpConfigureFrame : IpcpFrame() {
             return false
         }
 
-    internal fun extractUnknownOption(): MutableList<IpcpOption<*>> {
-        val onlyUnknowns = mutableListOf<IpcpOption<*>>()
-        this.options.forEach { if (it is IpcpUnknownOption) onlyUnknowns.add(it.copy()) }
+    internal fun extractUnknownOption(): MutableList<IpcpOption> {
+        val onlyUnknowns = mutableListOf<IpcpOption>()
+        this.options.forEach { if (it is IpcpUnknownOption) onlyUnknowns.add(it) }
         return onlyUnknowns
     }
 
@@ -195,9 +165,9 @@ internal abstract class IpcpConfigureFrame : IpcpFrame() {
             }
 
             val type = bytes.getByte()
-            val option: IpcpOption<*> = when (IpcpOptionType.resolve(type)) {
-                IpcpOptionType.IP_ADDRESS -> IpcpIpAddressOption().also { optionIpAddress = it }
-                IpcpOptionType.DNS_ADDRESS -> IpcpDnsAddressOption().also { optionDnsAddress = it }
+            val option: IpcpOption = when (IpcpOptionType.resolve(type)) {
+                IpcpOptionType.IP -> IpcpIpOption().also { optionIp = it }
+                IpcpOptionType.DNS -> IpcpDnsOption().also { optionDns = it }
                 else -> IpcpUnknownOption(type).also { options.add(it) }
             }
 
@@ -234,56 +204,4 @@ internal class IpcpConfigureNak : IpcpConfigureFrame() {
 
 internal class IpcpConfigureReject : IpcpConfigureFrame() {
     override val code = IpcpCode.CONFIGURE_REJECT.value
-}
-
-internal abstract class IpcpTerminateFrame : IpcpFrame() {
-    internal val holder = mutableListOf<Byte>()
-
-    override fun read(bytes: IncomingBuffer) {
-        holder.clear()
-        readHeader(bytes)
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        holder.forEach { bytes.put(it) }
-    }
-
-    override fun update() {
-        _length = validLengthRange.first + holder.size
-    }
-}
-
-internal class IpcpTerminateRequest : IpcpTerminateFrame() {
-    override val code = IpcpCode.TERMINATE_REQUEST.value
-}
-
-internal class IpcpTerminateAck : IpcpTerminateFrame() {
-    override val code = IpcpCode.TERMINATE_ACK.value
-}
-
-internal class IpcpCodeReject : IpcpFrame() {
-    override val code = IpcpCode.CODE_REJECT.value
-
-    internal var mru by Delegates.observable<Int>(validLengthRange.last - validLengthRange.first) { _, _, new ->
-        if (new < validLengthRange.first) throw DataUnitParsingError()
-    }
-
-    internal val rejectedPacket = mutableListOf<Byte>()
-
-    override fun read(bytes: IncomingBuffer) {
-        rejectedPacket.clear()
-        readHeader(bytes)
-        repeat(_length - validLengthRange.first) { rejectedPacket.add(bytes.getByte()) }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        rejectedPacket.slice(0..min(rejectedPacket.lastIndex, mru - 1)).forEach { bytes.put(it) }
-    }
-
-    override fun update() {
-        _length = validLengthRange.first + min(rejectedPacket.size, mru)
-    }
 }

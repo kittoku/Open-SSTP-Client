@@ -102,19 +102,19 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
 
         val mru = prefs.getString(PreferenceKey.MRU.value, null)?.toIntOrNull()
-        if (mru != null && mru !in 1..MAX_MRU) {
-            makeToast("The given MRU is out of 1-$MAX_MRU")
+        if (mru != null && mru !in MIN_MRU..MAX_MRU) {
+            makeToast("The given MRU is out of $MIN_MRU-$MAX_MRU")
             return false
         }
 
         val mtu = prefs.getString(PreferenceKey.MTU.value, null)?.toIntOrNull()
-        if (mtu != null && mtu !in 1..MAX_MRU) {
-            makeToast("The given MTU is out of 1-$MAX_MRU")
+        if (mtu != null && mtu !in MIN_MTU..MAX_MTU) {
+            makeToast("The given MTU is out of $MIN_MTU-$MAX_MTU")
             return false
         }
 
-        val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, false)
-        val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MS_CHAPv2.value, false)
+        val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, true)
+        val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
         if (!(isPapAcceptable || isMschapv2Acceptable)) {
             makeToast("No authentication protocol was accepted")
         }

@@ -5,7 +5,6 @@ import kittoku.opensstpclient.misc.DataUnitParsingError
 import kittoku.opensstpclient.misc.IncomingBuffer
 import kittoku.opensstpclient.misc.generateResolver
 import java.nio.ByteBuffer
-import kotlin.math.min
 import kotlin.properties.Delegates
 
 
@@ -46,14 +45,14 @@ internal enum class AuthProtocol(val value: Short) {
 }
 
 internal enum class ChapAlgorithm(val value: Byte) {
-    MS_CHAPv2(0x81.toByte());
+    MSCHAPv2(0x81.toByte());
 
     companion object {
         internal val resolve = generateResolver(values(), ChapAlgorithm::value)
     }
 }
 
-internal abstract class LcpOption<self : LcpOption<self>> : ByteLengthDataUnit(), Option<self> {
+internal abstract class LcpOption : ByteLengthDataUnit() {
     internal abstract val type: Byte
 
     override val validLengthRange = 2..Byte.MAX_VALUE
@@ -64,41 +63,31 @@ internal abstract class LcpOption<self : LcpOption<self>> : ByteLengthDataUnit()
     }
 }
 
-internal class LcpMruOption : LcpOption<LcpMruOption>() {
+internal class LcpMruOption : LcpOption() {
     override val type = LcpOptionType.MRU.value
 
     override val validLengthRange = 4..4
 
-    internal var unitSize by Delegates.observable(DEFAULT_MRU.toShort()) { _, _, new ->
-        if (new !in 1..4096) throw DataUnitParsingError()
+    internal var unitSize by Delegates.observable(DEFAULT_MRU) { _, _, new ->
+        if (new < 0) throw DataUnitParsingError()
     }
 
     override fun read(bytes: IncomingBuffer) {
         setTypedLength(bytes.getByte())
-        unitSize = bytes.getShort()
+        unitSize = bytes.getShort().toInt()
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        bytes.putShort(unitSize)
+        bytes.putShort(unitSize.toShort())
     }
 
     override fun update() {
         _length = validLengthRange.first
     }
-
-    override fun isMatchedTo(other: LcpMruOption): Boolean {
-        return this.unitSize == other.unitSize
-    }
-
-    override fun copy(): LcpMruOption {
-        val copied = LcpMruOption()
-        copied.unitSize = this.unitSize
-        return copied
-    }
 }
 
-internal class LcpAuthOption : LcpOption<LcpAuthOption>() {
+internal class LcpAuthOption : LcpOption() {
     override val type = LcpOptionType.AUTH.value
 
     override val validLengthRange = 4..Byte.MAX_VALUE
@@ -123,20 +112,9 @@ internal class LcpAuthOption : LcpOption<LcpAuthOption>() {
     override fun update() {
         _length = holder.size + validLengthRange.first
     }
-
-    override fun isMatchedTo(other: LcpAuthOption): Boolean {
-        return this.protocol == other.protocol && this.holder == other.holder
-    }
-
-    override fun copy(): LcpAuthOption {
-        val copied = LcpAuthOption()
-        copied.protocol = this.protocol
-        this.holder.forEach { copied.holder.add(it) }
-        return copied
-    }
 }
 
-internal class LcpUnknownOption(unknownType: Byte) : LcpOption<LcpUnknownOption>() {
+internal class LcpUnknownOption(unknownType: Byte) : LcpOption() {
     override val type = unknownType
 
     internal val holder = mutableListOf<Byte>()
@@ -155,17 +133,6 @@ internal class LcpUnknownOption(unknownType: Byte) : LcpOption<LcpUnknownOption>
     override fun update() {
         _length = holder.size + validLengthRange.first
     }
-
-    override fun isMatchedTo(other: LcpUnknownOption): Boolean {
-        // not meant to be used
-        return this.holder == other.holder && this.type == other.type
-    }
-
-    override fun copy(): LcpUnknownOption {
-        val copied = LcpUnknownOption(this.type)
-        this.holder.forEach { copied.holder.add(it) }
-        return copied
-    }
 }
 
 internal abstract class LcpFrame : PppFrame() {
@@ -173,10 +140,10 @@ internal abstract class LcpFrame : PppFrame() {
 }
 
 internal abstract class LcpConfigureFrame : LcpFrame() {
-    internal var options = mutableListOf<LcpOption<*>>()
+    internal var options = mutableListOf<LcpOption>()
     // contains all options to be sent or received
 
-    private inline fun <reified T : LcpOption<*>> delegateOption() =
+    private inline fun <reified T : LcpOption> delegateOption() =
         Delegates.observable<T?>(null) { _, old, new ->
             if (old != null) {
                 if (new == null) { // erase option
@@ -209,9 +176,9 @@ internal abstract class LcpConfigureFrame : LcpFrame() {
             return false
         }
 
-    internal fun extractUnknownOption(): MutableList<LcpOption<*>> {
-        val onlyUnknowns = mutableListOf<LcpOption<*>>()
-        this.options.forEach { if (it is LcpUnknownOption) onlyUnknowns.add(it.copy()) }
+    internal fun extractUnknownOption(): MutableList<LcpOption> {
+        val onlyUnknowns = mutableListOf<LcpOption>()
+        this.options.forEach { if (it is LcpUnknownOption) onlyUnknowns.add(it) }
         return onlyUnknowns
     }
 
@@ -227,7 +194,7 @@ internal abstract class LcpConfigureFrame : LcpFrame() {
             }
 
             val type = bytes.getByte()
-            val option: LcpOption<*> = when (LcpOptionType.resolve(type)) {
+            val option: LcpOption = when (LcpOptionType.resolve(type)) {
                 LcpOptionType.MRU -> LcpMruOption().also { optionMru = it }
                 LcpOptionType.AUTH -> LcpAuthOption().also { optionAuth = it }
                 else -> LcpUnknownOption(type).also { options.add(it) }
@@ -268,88 +235,6 @@ internal class LcpConfigureReject : LcpConfigureFrame() {
     override val code = LcpCode.CONFIGURE_REJECT.value
 }
 
-internal abstract class LcpTerminateFrame : LcpFrame() {
-    internal val holder = mutableListOf<Byte>()
-
-    override fun read(bytes: IncomingBuffer) {
-        holder.clear()
-        readHeader(bytes)
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        holder.forEach { bytes.put(it) }
-    }
-
-    override fun update() {
-        _length = validLengthRange.first + holder.size
-    }
-}
-
-internal class LcpTerminateRequest : LcpTerminateFrame() {
-    override val code = LcpCode.TERMINATE_REQUEST.value
-}
-
-internal class LcpTerminateAck : LcpTerminateFrame() {
-    override val code = LcpCode.TERMINATE_ACK.value
-}
-
-internal class LcpCodeReject : LcpFrame() {
-    override val code = LcpCode.CODE_REJECT.value
-
-    internal var mru by Delegates.observable<Int>(validLengthRange.last - validLengthRange.first) { _, _, new ->
-        if (new < validLengthRange.first) throw DataUnitParsingError()
-    }
-
-    internal val rejectedPacket = mutableListOf<Byte>()
-
-    override fun read(bytes: IncomingBuffer) {
-        rejectedPacket.clear()
-        readHeader(bytes)
-        repeat(_length - validLengthRange.first) { rejectedPacket.add(bytes.getByte()) }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        rejectedPacket.slice(0..min(rejectedPacket.lastIndex, mru - 1)).forEach { bytes.put(it) }
-    }
-
-    override fun update() {
-        _length = validLengthRange.first + min(rejectedPacket.size, mru)
-    }
-}
-
-internal class LcpProtocolReject : LcpFrame() {
-    override val code = LcpCode.PROTOCOL_REJECT.value
-
-    override val validLengthRange = 6..Short.MAX_VALUE
-
-    internal var mru by Delegates.observable<Int>(validLengthRange.last - validLengthRange.first) { _, _, new ->
-        if (new < validLengthRange.first) throw DataUnitParsingError()
-    }
-
-    internal var rejectedProtocol: Short = 0
-
-    internal val rejectedInformation = mutableListOf<Byte>()
-
-    override fun read(bytes: IncomingBuffer) {
-        rejectedInformation.clear()
-        readHeader(bytes)
-        repeat(_length - validLengthRange.first) { rejectedInformation.add(bytes.getByte()) }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        bytes.putShort(rejectedProtocol)
-        rejectedInformation.slice(0..min(rejectedInformation.lastIndex, mru - 1)).forEach { bytes.put(it) }
-    }
-
-    override fun update() {
-        _length = validLengthRange.first + min(rejectedInformation.size, mru)
-    }
-}
-
 internal abstract class LcpMagicNumberFrame : LcpFrame() {
     internal val holder = mutableListOf<Byte>()
 
@@ -381,29 +266,4 @@ internal class LcpEchoRequest : LcpMagicNumberFrame() {
 
 internal class LcpEchoReply : LcpMagicNumberFrame() {
     override val code = LcpCode.ECHO_REPLY.value
-}
-
-internal class LcpDiscardRequest : LcpMagicNumberFrame() {
-    override val code = LcpCode.DISCARD_REQUEST.value
-}
-
-internal class LcpUnknownFrame(unknownCode: Byte) : LcpFrame() {
-    override val code = unknownCode
-
-    internal val holder = mutableListOf<Byte>()
-
-    override fun read(bytes: IncomingBuffer) {
-        holder.clear()
-        setTypedLength(bytes.getShort())
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
-    }
-
-    override fun write(bytes: ByteBuffer) {
-        writeHeader(bytes)
-        holder.forEach { bytes.put(it) }
-    }
-
-    override fun update() {
-        _length = holder.size + validLengthRange.first
-    }
 }

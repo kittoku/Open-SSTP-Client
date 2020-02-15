@@ -77,8 +77,8 @@ internal suspend fun SstpClient.sendCallConnected() {
 
     sending.write(cmacInputBuffer)
 
-    val HLAK = when(AuthProtocol.resolve(networkSetting.mgAuth.current.protocol)) {
-        AuthProtocol.PAP -> ByteArray(32)
+    val HLAK = when (networkSetting.currentAuth) {
+        AuthSuite.PAP -> ByteArray(32)
         else -> {
             parent.inform("An unacceptable authentication protocol chosen", null)
             status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1

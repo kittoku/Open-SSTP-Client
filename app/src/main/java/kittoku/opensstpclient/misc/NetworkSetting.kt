@@ -1,19 +1,26 @@
 package kittoku.opensstpclient.misc
 
+import kittoku.opensstpclient.*
 import kittoku.opensstpclient.unit.*
 import java.security.cert.Certificate
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
+
+internal enum class AuthSuite {
+    PAP, MSCHAPv2
+}
 
 internal class NetworkSetting(
     internal val host: String,
     internal val username: String,
     internal val password: String,
     internal val port: Int?,
-    customMru: Int?,
+    internal val customMru: Int?,
     internal val customMtu: Int?,
-    isPapAcceptable: Boolean,
-    isMschapv2Acceptable: Boolean,
+    internal val isPapAcceptable: Boolean,
+    internal val isMschapv2Acceptable: Boolean,
     internal val isHvIgnored: Boolean,
     internal val isDecryptable: Boolean
 ) {
@@ -21,58 +28,118 @@ internal class NetworkSetting(
     internal lateinit var hashProtocol: HashProtocol
     internal lateinit var nonce: ByteArray
     internal val guid = UUID.randomUUID().toString()
+    internal var currentMru = customMru ?: DEFAULT_MRU
+    internal var currentMtu = customMtu ?: DEFAULT_MTU
+    internal var currentAuth = if (isMschapv2Acceptable) AuthSuite.MSCHAPv2 else AuthSuite.PAP
+    internal val currentIp = ByteArray(4)
+    internal val currentDns = ByteArray(4)
 
-    internal val mgMru = when {
-        customMru == 1500 -> {
-            OptionManager(LcpMruOption(), arrayOf(LcpMruOption()), true)
+    internal val mgMru = object : OptionManager<LcpMruOption>() {
+        override fun create() = LcpMruOption().also {
+            it.unitSize = currentMru
         }
 
-        customMru != null -> {
-            LcpMruOption().let {
-                it.unitSize = customMru.toShort()
-                OptionManager(it, arrayOf(it.copy()), false)
+        override fun compromiseReq(option: LcpMruOption): Boolean {
+            if (customMtu != null) {
+                currentMtu = min(max(customMtu, option.unitSize), MAX_MTU)
+                return option.unitSize >= currentMtu
+            }
+
+            return if (option.unitSize >= MIN_MTU) {
+                currentMtu = min(option.unitSize, MAX_MTU)
+                true
+            } else {
+                currentMtu = MIN_MTU
+                false
             }
         }
 
-        else -> OptionManager(LcpMruOption(), arrayOf(), true)
+        override fun compromiseNak(option: LcpMruOption) {
+            currentMru = when {
+                customMru != null -> max(min(customMru, option.unitSize), MIN_MRU)
+
+                option.unitSize > MAX_MRU -> MAX_MRU
+
+                option.unitSize < MIN_MRU -> MIN_MRU
+
+                else -> option.unitSize
+            }
+        }
     }
 
-    internal val mgAuth = when {
-        isMschapv2Acceptable && isPapAcceptable -> {
-            LcpAuthOption().let {
+    internal val mgAuth = object : OptionManager<LcpAuthOption>() {
+        override fun create() = LcpAuthOption().also {
+            if (currentAuth == AuthSuite.MSCHAPv2) {
                 it.protocol = AuthProtocol.CHAP.value
-                it.holder.add(ChapAlgorithm.MS_CHAPv2.value)
-                OptionManager(it, arrayOf(it.copy(), LcpAuthOption()), true)
+                it.holder.add(ChapAlgorithm.MSCHAPv2.value)
             }
         }
 
-        isMschapv2Acceptable -> {
-            LcpAuthOption().let {
-                it.protocol = AuthProtocol.CHAP.value
-                it.holder.add(ChapAlgorithm.MS_CHAPv2.value)
-                OptionManager(it, arrayOf(it.copy()), false)
+        override fun compromiseReq(option: LcpAuthOption): Boolean {
+            when (AuthProtocol.resolve(option.protocol)) {
+                AuthProtocol.PAP -> {
+                    return if (isPapAcceptable) {
+                        currentAuth = AuthSuite.PAP
+                        true
+                    } else {
+                        currentAuth = AuthSuite.MSCHAPv2
+                        false
+                    }
+                }
+
+                AuthProtocol.CHAP -> {
+                    if (option._length == 5 && option.holder[0] == ChapAlgorithm.MSCHAPv2.value) {
+                        return if (isMschapv2Acceptable) {
+                            currentAuth = AuthSuite.MSCHAPv2
+                            true
+                        } else {
+                            currentAuth = AuthSuite.PAP
+                            false
+                        }
+                    }
+                }
             }
+
+            currentAuth = if (isMschapv2Acceptable) AuthSuite.MSCHAPv2 else AuthSuite.PAP
+            return false
         }
 
-        else -> OptionManager(LcpAuthOption(), arrayOf(), true)
+        override fun compromiseNak(option: LcpAuthOption) {}
+    }.also {
+        it.isRejected = true
     }
 
-    internal val mgIpAddress = OptionManager(IpcpIpAddressOption(), arrayOf(), false)
-    internal val mgDnsAddress = OptionManager(IpcpDnsAddressOption(), arrayOf(), true)
+    internal val mgIp = object : OptionManager<IpcpIpOption>() {
+        override fun create() = IpcpIpOption().also {
+            currentIp.writeTo(it.address)
+        }
+
+        override fun compromiseReq(option: IpcpIpOption) = true
+
+        override fun compromiseNak(option: IpcpIpOption) {
+            option.address.writeTo(currentIp)
+        }
+    }
+
+    internal val mgDns = object : OptionManager<IpcpDnsOption>() {
+        override fun create() = IpcpDnsOption().also {
+            currentDns.writeTo(it.address)
+        }
+
+        override fun compromiseReq(option: IpcpDnsOption) = true
+
+        override fun compromiseNak(option: IpcpDnsOption) {
+            option.address.writeTo(currentDns)
+        }
+    }
 }
 
-internal class OptionManager<T : Option<T>>(
-    internal var current: T,
-    internal val candidates: Array<T>,
-    internal val isRejectable: Boolean
-) {
+internal abstract class OptionManager<T> {
     internal var isRejected = false
 
-    internal fun isAcceptable(suggestion: T): Boolean {
-        if (candidates.isEmpty()) return true
+    internal abstract fun create(): T
 
-        candidates.forEach { if (it.isMatchedTo(suggestion)) return true }
+    internal abstract fun compromiseReq(option: T): Boolean
 
-        return false
-    }
+    internal abstract fun compromiseNak(option: T)
 }

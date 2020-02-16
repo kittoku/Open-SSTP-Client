@@ -1,187 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <ScrollView
+    <TextView
+        android:id="@+id/titlePort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Port"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/port"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="DEFAULT"
+        android:inputType="number" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+    <TextView
+        android:id="@+id/titleMru"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="MRU"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/titlePort"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp"
-                android:text="Port"
-                android:textColor="@android:color/black"
-                tools:textSize="18sp" />
+    <EditText
+        android:id="@+id/mru"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="DEFAULT"
+        android:inputType="number" />
 
-            <EditText
-                android:id="@+id/port"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:autofillHints=""
-                android:ems="10"
-                android:hint="DEFAULT"
-                android:inputType="number" />
+    <TextView
+        android:id="@+id/titleMtu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="MTU"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/titleMru"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="MRU"
-                android:textColor="@android:color/black"
-                tools:textSize="18sp" />
+    <EditText
+        android:id="@+id/mtu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="DEFAULT"
+        android:inputType="number" />
 
-            <EditText
-                android:id="@+id/mru"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:autofillHints=""
-                android:ems="10"
-                android:hint="DEFAULT"
-                android:inputType="number" />
+    <TextView
+        android:id="@+id/titleAddressPrefix"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Address Prefix"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/titleMtu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="MTU"
-                android:textColor="@android:color/black"
-                tools:textSize="18sp" />
+    <EditText
+        android:id="@+id/prefix"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="DEFAULT"
+        android:inputType="number" />
 
-            <EditText
-                android:id="@+id/mtu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:autofillHints=""
-                android:ems="10"
-                android:hint="DEFAULT"
-                android:inputType="number" />
+    <TextView
+        android:id="@+id/titleAuth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Acceptable Authentication Protocol"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/titleAddressPrefix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Address Prefix"
-                android:textColor="@android:color/black"
-                tools:textSize="18sp" />
+    <CheckBox
+        android:id="@+id/pap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="PAP" />
 
-            <EditText
-                android:id="@+id/prefix"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:autofillHints=""
-                android:ems="10"
-                android:hint="DEFAULT"
-                android:inputType="number" />
+    <CheckBox
+        android:id="@+id/mschapv2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="MS-CHAPv2" />
 
-            <TextView
-                android:id="@+id/titleAuth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="32dp"
-                android:text="Acceptable Authentication Protocol"
-                android:textColor="@android:color/black"
-                tools:textSize="18sp" />
+    <TextView
+        android:id="@+id/titleInsecure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Insecure Options"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
 
-            <CheckBox
-                android:id="@+id/pap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="PAP" />
+    <CheckBox
+        android:id="@+id/hvIgnored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Disable Hostname Verifier" />
 
-            <CheckBox
-                android:id="@+id/mschapv2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="MS-CHAPv2" />
+    <CheckBox
+        android:id="@+id/decryptable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Decryptable Mode" />
 
-            <TextView
-                android:id="@+id/titleInsecure"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="32dp"
-                android:text="Insecure Options"
-                android:textColor="@android:color/black"
-                tools:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/hvIgnored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Disable Hostname Verifier" />
-
-            <CheckBox
-                android:id="@+id/decryptable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Decryptable Mode" />
-
-            <Button
-                android:id="@+id/button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="32dp"
-                android:text="SAVE" />
-        </LinearLayout>
-    </ScrollView>
-
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="32dp"
+        android:text="SAVE" />
+</LinearLayout>

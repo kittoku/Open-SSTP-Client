@@ -53,7 +53,10 @@ class HomeFragment : Fragment() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     when (intent?.action) {
                         VpnAction.ACTION_CONVEY.value -> {
-                            intent.getStringExtra(EXTENDED_LOG)?.also { log.append(it) }
+                            intent.getStringExtra(EXTENDED_LOG)?.also {
+                                log.append(it)
+                                savePreferences(view)
+                            }
                         }
 
                         VpnAction.ACTION_SWITCHOFF.value -> {

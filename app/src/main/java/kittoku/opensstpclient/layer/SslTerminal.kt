@@ -4,8 +4,9 @@ import kittoku.opensstpclient.ControlClient
 import kotlinx.coroutines.withTimeout
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
-import java.security.cert.X509Certificate
-import javax.net.ssl.*
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLSocket
+import javax.net.ssl.SSLSocketFactory
 
 
 internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
@@ -16,6 +17,15 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
             parent.networkSetting.host,
             parent.networkSetting.port ?: 443
         ) as SSLSocket
+
+        if (parent.networkSetting.isDecryptable) {
+            socket.enabledCipherSuites = arrayOf(
+                "TLS_RSA_WITH_AES_128_CBC_SHA",
+                "TLS_RSA_WITH_AES_256_CBC_SHA"
+            )
+        }
+
+
         HttpsURLConnection.getDefaultHostnameVerifier().also {
             if (!it.verify(
                     parent.networkSetting.host,
@@ -25,44 +35,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
                 throw Exception("Failed to verify the hostname")
             }
         }
-        parent.networkSetting.serverCertificate = socket.session.peerCertificates[0]
-        socket.startHandshake()
-    }
 
-    private fun getSpoiledTrustManager(): Array<TrustManager> {
-        class Manager : X509TrustManager {
-            override fun checkClientTrusted(
-                chain: Array<out X509Certificate>?,
-                authType: String?
-            ) {
-            }
-
-            override fun checkServerTrusted(
-                chain: Array<out X509Certificate>?,
-                authType: String?
-            ) {
-            }
-
-            override fun getAcceptedIssuers(): Array<X509Certificate> {
-                return emptyArray()
-            }
-        }
-
-        return arrayOf(Manager())
-    }
-
-    private fun createNullSocket() {
-        SSLContext.getInstance("TLSv1.2").also {
-            it.init(null, getSpoiledTrustManager(), null)
-            socket = it.socketFactory.createSocket(
-                parent.networkSetting.host,
-                parent.networkSetting.port ?: 443
-            ) as SSLSocket
-        }
-
-        socket.enabledCipherSuites = arrayOf(
-            "TLS_RSA_WITH_AES_128_CBC_SHA",
-            "TLS_RSA_WITH_AES_256_CBC_SHA")
         parent.networkSetting.serverCertificate = socket.session.peerCertificates[0]
         socket.startHandshake()
     }
@@ -97,7 +70,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
     }
 
     internal suspend fun initializeSocket() {
-        if (parent.networkSetting.isDecryptable) createNullSocket() else createSocket()
+        createSocket()
         establishHttpLayer()
     }
 

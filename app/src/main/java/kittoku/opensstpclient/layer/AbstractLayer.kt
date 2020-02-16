@@ -6,8 +6,6 @@ import kittoku.opensstpclient.MAX_INTERVAL
 import kittoku.opensstpclient.unit.DataUnit
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
 
 
@@ -56,28 +54,31 @@ internal class Timer(private val maxLength: Long) {
         startedTime = System.currentTimeMillis()
     }
 }
-
 internal class Waiter {
-    private val incoming = AtomicInteger(0)
-    private val outgoing = AtomicLong(0)
+    private var incoming = 0
+    private var outgoing = 0L
     private val maxLong = MAX_INTERVAL.toLong()
     private val stepLong = INTERVAL_STEP.toLong()
 
     internal fun getIncomingInterval(): Int {
-        incoming.set(min(incoming.get() + INTERVAL_STEP, MAX_INTERVAL))
-        return incoming.get()
+        incoming = min(incoming + INTERVAL_STEP, MAX_INTERVAL)
+        return incoming
     }
 
     internal fun getOutgoingInterval(): Long {
-        outgoing.set(min(outgoing.get() + stepLong, maxLong))
-        return outgoing.get()
+        outgoing = min(outgoing + stepLong, maxLong)
+        return outgoing
     }
 
-    internal fun reset() {
-        incoming.set(0)
-        outgoing.set(0)
+    internal fun resetIncoming() {
+        incoming = 0
+    }
+
+    internal fun resetOutgoing() {
+        outgoing = 0
     }
 }
+
 
 internal abstract class Client(internal val parent: ControlClient) {
     internal val waitingControlUnits = mutableListOf<DataUnit<*>>()

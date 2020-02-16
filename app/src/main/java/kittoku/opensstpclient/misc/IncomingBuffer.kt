@@ -45,7 +45,7 @@ internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) 
                 )
             )
 
-            parent.waiter.reset()
+            parent.waiter.resetIncoming()
         } catch (e: SocketTimeoutException) {
         }
     }

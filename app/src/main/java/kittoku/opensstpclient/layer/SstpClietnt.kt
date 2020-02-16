@@ -220,7 +220,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
             delay(parent.waiter.getOutgoingInterval())
             return
         } else {
-            parent.waiter.reset()
+            parent.waiter.resetOutgoing()
         }
 
         val length = outgoingBuffer.limit()

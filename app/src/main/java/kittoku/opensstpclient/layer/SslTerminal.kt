@@ -19,12 +19,12 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         ) as SSLSocket
 
         if (parent.networkSetting.isDecryptable) {
+            socket.enabledProtocols = arrayOf("TLSv1.2")
             socket.enabledCipherSuites = arrayOf(
                 "TLS_RSA_WITH_AES_128_CBC_SHA",
                 "TLS_RSA_WITH_AES_256_CBC_SHA"
             )
         }
-
 
         HttpsURLConnection.getDefaultHostnameVerifier().also {
             if (!it.verify(

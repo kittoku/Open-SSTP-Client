@@ -40,6 +40,8 @@ class SettingFragment : Fragment() {
             .setText(prefs.getString(PreferenceKey.MRU.value, null))
         view.findViewById<EditText>(R.id.mtu)
             .setText(prefs.getString(PreferenceKey.MTU.value, null))
+        view.findViewById<EditText>(R.id.prefix)
+            .setText(prefs.getString(PreferenceKey.PREFIX.value, null))
         view.findViewById<CheckBox>(R.id.pap).isChecked =
             prefs.getBoolean(PreferenceKey.PAP.value, true)
         view.findViewById<CheckBox>(R.id.mschapv2).isChecked =
@@ -63,6 +65,10 @@ class SettingFragment : Fragment() {
         editor.putString(
             PreferenceKey.MTU.value,
             view.findViewById<EditText>(R.id.mtu).text.toString()
+        )
+        editor.putString(
+            PreferenceKey.PREFIX.value,
+            view.findViewById<EditText>(R.id.prefix).text.toString()
         )
         editor.putBoolean(PreferenceKey.PAP.value, view.findViewById<CheckBox>(R.id.pap).isChecked)
         editor.putBoolean(

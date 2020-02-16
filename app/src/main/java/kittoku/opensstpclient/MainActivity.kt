@@ -12,6 +12,7 @@ internal enum class PreferenceKey(val value: String) {
     PORT("PORT"),
     MRU("MRU"),
     MTU("MTU"),
+    PREFIX("PREFIX"),
     PAP("PAP"),
     MSCHAPv2("MSCHAPv2"),
     HV_IGNORED("HV_IGNORED"),

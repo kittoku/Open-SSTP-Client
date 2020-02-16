@@ -113,6 +113,12 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             return false
         }
 
+        val prefix = prefs.getString(PreferenceKey.PREFIX.value, null)?.toIntOrNull()
+        if (prefix != null && prefix !in 0..32) {
+            makeToast("The given address prefix is out of 0-32")
+            return false
+        }
+
         val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, true)
         val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
         if (!(isPapAcceptable || isMschapv2Acceptable)) {
@@ -124,7 +130,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
 
         networkSetting = NetworkSetting(
-            host, username, password, port, mru, mtu,
+            host, username, password, port, mru, mtu, prefix,
             isPapAcceptable, isMschapv2Acceptable, isHvIgnored, isDecryptable
         )
 

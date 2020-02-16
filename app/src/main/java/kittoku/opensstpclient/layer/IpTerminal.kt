@@ -31,7 +31,10 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
         setting.currentIp.also {
             if (it.isSame(ByteArray(4))) throw SuicideException()
 
-            builder.addAddress(InetAddress.getByAddress(it), getPrefixLength(it))
+            builder.addAddress(
+                InetAddress.getByAddress(it),
+                setting.customPrefix ?: getPrefixLength(it)
+            )
         }
 
         if (!setting.mgDns.isRejected) {

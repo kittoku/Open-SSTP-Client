@@ -17,7 +17,8 @@ internal enum class PreferenceKey(val value: String) {
     MSCHAPv2("MSCHAPv2"),
     HV_IGNORED("HV_IGNORED"),
     DECRYPTABLE("DECRYPTABLE"),
-    LOG("LOG")
+    LOG("LOG"),
+    SWITCH("SWITCH")
 }
 
 class MainActivity : AppCompatActivity() {

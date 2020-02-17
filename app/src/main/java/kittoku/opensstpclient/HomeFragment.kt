@@ -37,7 +37,6 @@ class HomeFragment : Fragment() {
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 wipeLog(log)
-                savePreferences(view)
 
                 val intent = VpnService.prepare(context)
                 if (intent == null) {
@@ -46,6 +45,8 @@ class HomeFragment : Fragment() {
             } else {
                 startVpnService(VpnAction.ACTION_DISCONNECT)
             }
+
+            savePreferences(view)
         }
 
         LocalBroadcastManager.getInstance(context!!).registerReceiver(
@@ -55,7 +56,6 @@ class HomeFragment : Fragment() {
                         VpnAction.ACTION_CONVEY.value -> {
                             intent.getStringExtra(EXTENDED_LOG)?.also {
                                 log.append(it)
-                                savePreferences(view)
                             }
                         }
 
@@ -63,6 +63,8 @@ class HomeFragment : Fragment() {
                             switch.isChecked = false
                         }
                     }
+
+                    savePreferences(view)
                 }
             },
             IntentFilter().also {
@@ -85,6 +87,8 @@ class HomeFragment : Fragment() {
         view.findViewById<EditText>(R.id.host).setText(prefs.getString(PreferenceKey.HOST.value, null))
         view.findViewById<EditText>(R.id.username).setText(prefs.getString(PreferenceKey.USERNAME.value, null))
         view.findViewById<EditText>(R.id.password).setText(prefs.getString(PreferenceKey.PASSWORD.value, null))
+        view.findViewById<Switch>(R.id.connector).isChecked =
+            prefs.getBoolean(PreferenceKey.SWITCH.value, false)
         view.findViewById<TextView>(R.id.log).text = prefs.getString(PreferenceKey.LOG.value, null)
     }
 
@@ -93,6 +97,10 @@ class HomeFragment : Fragment() {
         editor.putString(PreferenceKey.HOST.value, view.findViewById<EditText>(R.id.host).text.toString())
         editor.putString(PreferenceKey.USERNAME.value, view.findViewById<EditText>(R.id.username).text.toString())
         editor.putString(PreferenceKey.PASSWORD.value, view.findViewById<EditText>(R.id.password).text.toString())
+        editor.putBoolean(
+            PreferenceKey.SWITCH.value,
+            view.findViewById<Switch>(R.id.connector).isChecked
+        )
         editor.putString(PreferenceKey.LOG.value, view.findViewById<TextView>(R.id.log).text.toString())
 
         editor.apply()

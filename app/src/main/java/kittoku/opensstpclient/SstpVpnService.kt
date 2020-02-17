@@ -29,6 +29,7 @@ internal class SstpVpnService : VpnService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return if (VpnAction.ACTION_DISCONNECT.value == intent?.action ?: false) {
             controlClient?.killIntendedly()
+            controlClient = null
             Service.START_NOT_STICKY
         } else {
             controlClient?.killIntendedly()

@@ -1,12 +1,9 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
-import kittoku.opensstpclient.INTERVAL_STEP
-import kittoku.opensstpclient.MAX_INTERVAL
 import kittoku.opensstpclient.unit.DataUnit
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.math.min
 
 
 internal enum class PppStatus {
@@ -54,31 +51,6 @@ internal class Timer(private val maxLength: Long) {
         startedTime = System.currentTimeMillis()
     }
 }
-internal class Waiter {
-    private var incoming = 0
-    private var outgoing = 0L
-    private val maxLong = MAX_INTERVAL.toLong()
-    private val stepLong = INTERVAL_STEP.toLong()
-
-    internal fun getIncomingInterval(): Int {
-        incoming = min(incoming + INTERVAL_STEP, MAX_INTERVAL)
-        return incoming
-    }
-
-    internal fun getOutgoingInterval(): Long {
-        outgoing = min(outgoing + stepLong, maxLong)
-        return outgoing
-    }
-
-    internal fun resetIncoming() {
-        incoming = 0
-    }
-
-    internal fun resetOutgoing() {
-        outgoing = 0
-    }
-}
-
 
 internal abstract class Client(internal val parent: ControlClient) {
     internal val waitingControlUnits = mutableListOf<DataUnit<*>>()

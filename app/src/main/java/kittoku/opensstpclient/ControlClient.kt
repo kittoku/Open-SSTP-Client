@@ -16,11 +16,10 @@ import java.nio.ByteBuffer
 
 
 internal class ControlClient(internal val vpnService: SstpVpnService) :
-    CoroutineScope by CoroutineScope(Dispatchers.Default + SupervisorJob()) {
+    CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()) {
     internal lateinit var networkSetting: NetworkSetting
     internal val status = DualClientStatus()
     internal val builder = vpnService.Builder()
-    internal val waiter = Waiter()
     internal val incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
     internal val outgoingBuffer = ByteBuffer.allocate(OUTGOING_BUFFER_SIZE)
 
@@ -49,17 +48,17 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                         inform("An unexpected event occurred", exception)
                     }
 
-                    vpnService.stopForeground(true)
-                    LocalBroadcastManager.getInstance(vpnService)
-                        .sendBroadcast(Intent(VpnAction.ACTION_SWITCHOFF.value))
-
-                    inform("Terminate VPN connection", null)
-
                     jobIncoming?.join()
                     jobOutgoing?.join()
 
                     sslTerminal.release()
                     ipTerminal.release()
+
+                    vpnService.stopForeground(true)
+                    LocalBroadcastManager.getInstance(vpnService)
+                        .sendBroadcast(Intent(VpnAction.ACTION_SWITCHOFF.value))
+
+                    inform("Terminate VPN connection", null)
 
                 }
             }
@@ -161,7 +160,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 if (isClosing) {
                     withTimeoutOrNull(10_000) {
                         while (isActive) {
-                            if (jobOutgoing?.isCompleted == false) {
+                            if (jobIncoming?.isCompleted == false) {
                                 delay(100)
                                 continue
                             }

@@ -206,10 +206,8 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
     override suspend fun sendDataUnit() {
         if (outgoingBuffer.position() == 4) {
-            delay(parent.waiter.getOutgoingInterval())
+            delay(100)
             return
-        } else {
-            parent.waiter.resetOutgoing()
         }
 
         val length = outgoingBuffer.limit()

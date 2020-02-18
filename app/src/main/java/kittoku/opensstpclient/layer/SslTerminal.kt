@@ -65,8 +65,8 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
             }
         }
 
+        socket.soTimeout = 100
         parent.vpnService.protect(socket)
-
     }
 
     internal suspend fun initializeSocket() {

@@ -23,7 +23,7 @@ internal fun SstpClient.tryReadingPacket(packet: ControlPacket): Boolean {
     return true
 }
 
-internal fun SstpClient.challengeWholePacket(): Boolean {
+internal suspend fun SstpClient.challengeWholePacket(): Boolean {
     if (!incomingBuffer.challenge(4)) {
         return false
     }

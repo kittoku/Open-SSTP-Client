@@ -34,8 +34,6 @@ internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) 
     }
 
     private fun supply() {
-        parent.sslTerminal.socket.soTimeout =  parent.waiter.getIncomingInterval()
-
         try {
             buffer.limit(
                 buffer.limit() + parent.sslTerminal.socket.inputStream.read(
@@ -45,7 +43,6 @@ internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) 
                 )
             )
 
-            parent.waiter.resetIncoming()
         } catch (e: SocketTimeoutException) {
         }
     }

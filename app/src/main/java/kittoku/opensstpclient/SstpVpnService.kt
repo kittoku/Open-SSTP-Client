@@ -28,11 +28,11 @@ internal class SstpVpnService : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return if (VpnAction.ACTION_DISCONNECT.value == intent?.action ?: false) {
-            controlClient?.killIntendedly()
+            controlClient?.kill(null)
             controlClient = null
             Service.START_NOT_STICKY
         } else {
-            controlClient?.killIntendedly()
+            controlClient?.kill(null)
             controlClient = ControlClient(this).also {
                 if (!it.prepareSetting()) {
                     LocalBroadcastManager.getInstance(this)
@@ -66,5 +66,7 @@ internal class SstpVpnService : VpnService() {
         startForeground(1, builder.build())
     }
 
-    override fun onDestroy() { controlClient?.killIntendedly() }
+    override fun onDestroy() {
+        controlClient?.kill(null)
+    }
 }

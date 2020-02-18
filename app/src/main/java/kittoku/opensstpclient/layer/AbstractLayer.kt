@@ -10,7 +10,7 @@ import kotlin.math.min
 
 
 internal enum class PppStatus {
-    NEGOTIATE_LCP, AUTHENTICATE, NEGOTIATE_IPCP, NETWORK, KILLED
+    NEGOTIATE_LCP, AUTHENTICATE, NEGOTIATE_IPCP, NETWORK
 }
 
 internal enum class SstpStatus {

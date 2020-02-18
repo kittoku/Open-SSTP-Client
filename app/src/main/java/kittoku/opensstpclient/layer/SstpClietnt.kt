@@ -79,36 +79,37 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
         when (PacketType.resolve(incomingBuffer.getShort())) {
             PacketType.DATA ->{
                 readAsData()
-                return
             }
+
+            PacketType.CONTROL -> {
+                incomingBuffer.move(2)
+
+                when (MessageType.resolve(incomingBuffer.getShort())) {
+                    MessageType.CALL_DISCONNECT -> {
+                        parent.informReceivedCallDisconnect(::proceedAckReceived)
+                        status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
+                    }
+
+                    MessageType.CALL_ABORT -> {
+                        parent.informReceivedCallAbort(::proceedAckReceived)
+                        status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
+                    }
+
+                    else -> {
+                        parent.informInvalidUnit(::proceedAckReceived)
+                        status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
+                        return
+                    }
+                }
+
+                incomingBuffer.forget()
+            }
+
             null -> {
                 parent.informInvalidUnit(::proceedAckReceived)
                 status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
-                return
             }
         }
-
-        incomingBuffer.move(2)
-
-        when (MessageType.resolve(incomingBuffer.getShort())) {
-            MessageType.CALL_DISCONNECT -> {
-                parent.informReceivedCallDisconnect(::proceedAckReceived)
-                status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
-            }
-
-            MessageType.CALL_ABORT -> {
-                parent.informReceivedCallAbort(::proceedAckReceived)
-                status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
-            }
-
-            else -> {
-                parent.informInvalidUnit(::proceedAckReceived)
-                status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
-                return
-            }
-        }
-
-        incomingBuffer.forget()
     }
 
     private suspend fun proceedConnected() {
@@ -124,54 +125,47 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
         when (PacketType.resolve(incomingBuffer.getShort())) {
             PacketType.DATA ->{
                 readAsData()
-                return
             }
+
+            PacketType.CONTROL -> {
+                incomingBuffer.move(2)
+
+                when (MessageType.resolve(incomingBuffer.getShort())) {
+                    MessageType.CALL_DISCONNECT -> {
+                        parent.informReceivedCallDisconnect(::proceedConnected)
+                        status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
+                    }
+
+                    MessageType.CALL_ABORT -> {
+                        parent.informReceivedCallAbort(::proceedConnected)
+                        status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
+                    }
+
+                    MessageType.ECHO_REQUEST -> receiveEchoRequest()
+
+                    MessageType.ECHO_RESPONSE -> receiveEchoResponse()
+
+                    else -> {
+                        parent.informInvalidUnit(::proceedConnected)
+                        status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
+                        return
+                    }
+                }
+
+                incomingBuffer.forget()
+            }
+
             null -> {
                 parent.informInvalidUnit(::proceedConnected)
                 status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
-                return
             }
         }
-
-        incomingBuffer.move(2)
-
-        when (MessageType.resolve(incomingBuffer.getShort())) {
-            MessageType.CALL_DISCONNECT -> {
-                parent.informReceivedCallDisconnect(::proceedConnected)
-                status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
-            }
-
-            MessageType.CALL_ABORT -> {
-                parent.informReceivedCallAbort(::proceedConnected)
-                status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
-            }
-
-            MessageType.ECHO_REQUEST -> receiveEchoRequest()
-
-            MessageType.ECHO_RESPONSE -> receiveEchoResponse()
-
-            else -> {
-                parent.informInvalidUnit(::proceedConnected)
-                status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
-                return
-            }
-        }
-
-        incomingBuffer.forget()
     }
 
     override suspend fun proceed() {
         when (status.sstp) {
             SstpStatus.CLIENT_CALL_DISCONNECTED -> {
-                parent.sslTerminal.also {
-                    try {
-                        it.initializeSocket()
-                    } catch (e: Exception) {
-                        parent.inform("Failed to establish SSL connection", e)
-                        throw SuicideException()
-                    }
-                }
-
+                parent.sslTerminal.initializeSocket()
                 sendCallConnectRequest()
                 status.sstp = SstpStatus.CLIENT_CONNECT_REQUEST_SENT
             }
@@ -196,12 +190,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
     }
 
     private fun sendPacket(length: Int) {
-        try {
-            parent.sslTerminal.socket.outputStream.write(outgoingBuffer.array(), 0, length)
-        } catch (e: Exception) {
-            parent.inform("SSL layer turned down", e)
-            throw SuicideException()
-        }
+        parent.sslTerminal.socket.outputStream.write(outgoingBuffer.array(), 0, length)
     }
 
     override suspend fun sendControlUnit() {

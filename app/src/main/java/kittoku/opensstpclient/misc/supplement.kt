@@ -9,16 +9,6 @@ internal fun <K, V> generateResolver(array: Array<K>, map: (K) -> V): (V) -> K? 
     }
 }
 
-fun ByteArray.isSame(other: ByteArray): Boolean {
-    if (this.size != other.size) return false
-
-    this.zip(other).forEach {
-        if (it.first != it.second) return false
-    }
-
-    return true
-}
-
 fun ByteArray.writeTo(other: ByteArray) {
     repeat(min(this.size, other.size)) {
         other[it] = this[it]

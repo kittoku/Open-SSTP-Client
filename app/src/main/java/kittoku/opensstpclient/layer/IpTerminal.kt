@@ -2,8 +2,6 @@ package kittoku.opensstpclient.layer
 
 import android.os.ParcelFileDescriptor
 import kittoku.opensstpclient.ControlClient
-import kittoku.opensstpclient.misc.SuicideException
-import kittoku.opensstpclient.misc.isSame
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
@@ -28,21 +26,13 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
         val setting = parent.networkSetting
         val builder = parent.builder
 
-        setting.currentIp.also {
-            if (it.isSame(ByteArray(4))) throw SuicideException()
-
-            builder.addAddress(
-                InetAddress.getByAddress(it),
-                setting.customPrefix ?: getPrefixLength(it)
-            )
-        }
+        builder.addAddress(
+            InetAddress.getByAddress(setting.currentIp),
+            setting.customPrefix ?: getPrefixLength(setting.currentIp)
+        )
 
         if (!setting.mgDns.isRejected) {
-            setting.currentDns.also {
-                if (it.isSame(ByteArray(4))) return
-
-                builder.addDnsServer(InetAddress.getByAddress(it))
-            }
+            builder.addDnsServer(InetAddress.getByAddress(setting.currentDns))
         }
 
         builder.setMtu(setting.currentMtu)

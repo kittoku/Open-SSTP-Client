@@ -274,8 +274,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
     }
 
     internal fun kill() {
-        status.ppp = PppStatus.KILLED
+        status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_1
         parent.inform("PPP layer turned down", null)
-        parent.killIntendedly()
     }
 }

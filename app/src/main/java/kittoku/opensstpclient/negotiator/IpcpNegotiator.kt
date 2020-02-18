@@ -101,10 +101,12 @@ internal suspend fun PppClient.receiveIpcpConfigureRequest() {
     if (isIpOk && isDnsOk) {
         sendIpcpConfigureAck(received)
 
-        when (ipcpState) {
-            IpcpState.REQ_SENT -> ipcpState = IpcpState.ACK_SENT
-            IpcpState.ACK_RCVD -> ipcpState = IpcpState.OPENED
+        ipcpState = when (ipcpState) {
+            IpcpState.REQ_SENT -> IpcpState.ACK_SENT
+            IpcpState.ACK_RCVD -> IpcpState.OPENED
+            else -> ipcpState
         }
+
     } else {
         if (isIpOk) received.optionIp = null
         if (isDnsOk) received.optionDns = null

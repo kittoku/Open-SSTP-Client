@@ -17,8 +17,6 @@ import java.nio.ByteBuffer
 
 internal class ControlClient(internal val vpnService: SstpVpnService) :
     CoroutineScope by CoroutineScope(Dispatchers.Default + SupervisorJob()) {
-    internal val prefs =
-        PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
     internal lateinit var networkSetting: NetworkSetting
     internal val status = DualClientStatus()
     internal val builder = vpnService.Builder()
@@ -36,37 +34,34 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
     private val mutex = Mutex()
     private var isClosing = false
-    private var isIntendedToClose = false
 
     private val handler = CoroutineExceptionHandler { _, exception ->
+        if (!isClosing) kill(exception)
+    }
+
+    internal fun kill(exception: Throwable?) {
         launch {
             mutex.withLock {
                 if (!isClosing) {
-                    if (exception is SuicideException) {
-                        if (isIntendedToClose) {
-                            inform("Terminate VPN connection", null)
-                        } else {
-                            inform("Terminate VPN connection", exception)
-                        }
-                    } else {
+                    isClosing = true
+
+                    if (exception != null) {
                         inform("An unexpected event occurred", exception)
                     }
-
-                    jobIncoming?.cancel()
-                    jobOutgoing?.cancel()
-
-                    sslTerminal.release()
-                    ipTerminal.release()
-
-                    jobIncoming?.join()
-                    jobOutgoing?.join()
 
                     vpnService.stopForeground(true)
                     LocalBroadcastManager.getInstance(vpnService)
                         .sendBroadcast(Intent(VpnAction.ACTION_SWITCHOFF.value))
-                }
 
-                isClosing = true
+                    inform("Terminate VPN connection", null)
+
+                    jobIncoming?.join()
+                    jobOutgoing?.join()
+
+                    sslTerminal.release()
+                    ipTerminal.release()
+
+                }
             }
         }
     }
@@ -77,6 +72,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     }
 
     internal fun prepareSetting(): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
+
         val host = prefs.getString(PreferenceKey.HOST.value, null)
         if (host == null) {
             makeToast("Host is missing")
@@ -153,7 +150,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 sstpClient.proceed()
                 pppClient.proceed()
 
-                if (isIntendedToClose) {
+                if (isClosing) {
                     status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_1
                 }
             }
@@ -161,6 +158,23 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
         jobOutgoing = launch(handler) {
             while (isActive) {
+                if (isClosing) {
+                    withTimeoutOrNull(10_000) {
+                        while (isActive) {
+                            if (jobOutgoing?.isCompleted == false) {
+                                delay(100)
+                                continue
+                            }
+
+                            if (sstpClient.waitingControlUnits.any()) {
+                                sstpClient.sendControlUnit()
+                            } else break
+                        }
+                    }
+
+                    throw SuicideException()
+                }
+
                 if (sstpClient.waitingControlUnits.any()) {
                     sstpClient.sendControlUnit()
                     continue
@@ -172,9 +186,5 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 sstpClient.sendDataUnit()
             }
         }
-    }
-
-    internal fun killIntendedly() {
-        isIntendedToClose = true
     }
 }

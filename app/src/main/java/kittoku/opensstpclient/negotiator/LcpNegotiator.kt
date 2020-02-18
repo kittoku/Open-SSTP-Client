@@ -126,10 +126,12 @@ internal suspend fun PppClient.receiveLcpConfigureRequest() {
     if (isMruOk && isAuthOk) {
         sendLcpConfigureAck(received)
 
-        when (lcpState) {
-            LcpState.REQ_SENT -> lcpState = LcpState.ACK_SENT
-            LcpState.ACK_RCVD -> lcpState = LcpState.OPENED
+        lcpState = when (lcpState) {
+            LcpState.REQ_SENT -> LcpState.ACK_SENT
+            LcpState.ACK_RCVD -> LcpState.OPENED
+            else -> lcpState
         }
+
     } else {
         if (isMruOk) received.optionMru = null
         if (isAuthOk) received.optionAuth = null

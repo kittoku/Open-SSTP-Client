@@ -4,8 +4,6 @@ import kittoku.opensstpclient.layer.SstpClient
 import kittoku.opensstpclient.layer.SstpStatus
 import kittoku.opensstpclient.misc.*
 import kittoku.opensstpclient.unit.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.security.MessageDigest
@@ -128,21 +126,12 @@ internal suspend fun SstpClient.sendLastGreeting() {
     val sending = when (status.sstp) {
         SstpStatus.CALL_DISCONNECT_IN_PROGRESS_1 -> SstpCallDisconnect()
         SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2 -> SstpCallDisconnectAck()
-        SstpStatus.CALL_ABORT_IN_PROGRESS_1, SstpStatus.CALL_ABORT_IN_PROGRESS_2 -> SstpCallAbort()
-        else -> throw SuicideException()
+        else -> SstpCallAbort()
     }
 
     sending.update()
     addControlUnit(sending)
 
-    withTimeoutOrNull(10_000) {
-        while (true) {
-            if (waitingControlUnits.any()) delay(100)
-            else break
-        }
-    }
-
-    parent.killIntendedly()
     throw SuicideException()
 }
 

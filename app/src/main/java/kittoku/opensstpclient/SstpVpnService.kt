@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Build
+import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
 
@@ -17,8 +18,7 @@ import android.support.v4.content.LocalBroadcastManager
 internal enum class VpnAction(val value: String) {
     ACTION_CONNECT("kittoku.opensstpclient.START"),
     ACTION_DISCONNECT("kittoku.opensstpclient.STOP"),
-    ACTION_CONVEY("kittoku.opensstpclient.CONVEY"),
-    ACTION_SWITCHOFF("kittoku.opensstpclient.STOP")
+    ACTION_UPDATE("kittoku.opensstpclient.UPDATE")
 }
 
 internal class SstpVpnService : VpnService() {
@@ -35,8 +35,7 @@ internal class SstpVpnService : VpnService() {
             controlClient?.kill(null)
             controlClient = ControlClient(this).also {
                 if (!it.prepareSetting()) {
-                    LocalBroadcastManager.getInstance(this)
-                        .sendBroadcast(Intent(VpnAction.ACTION_SWITCHOFF.value))
+                    notifySwitchOff()
                     return Service.START_NOT_STICKY
                 }
                 beForegrounded()
@@ -54,9 +53,12 @@ internal class SstpVpnService : VpnService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val intent = Intent(this, SstpVpnService::class.java).setAction(VpnAction.ACTION_DISCONNECT.value)
-        val pendingIntent = PendingIntent.getService(this, 0, intent, 0)
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID).also {
+        val intent = Intent(
+            applicationContext,
+            SstpVpnService::class.java
+        ).setAction(VpnAction.ACTION_DISCONNECT.value)
+        val pendingIntent = PendingIntent.getService(applicationContext, 0, intent, 0)
+        val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID).also {
             it.setSmallIcon(ic_notification_overlay)
             it.setContentText("Open SSTP Client connecting")
             it.priority = NotificationCompat.PRIORITY_DEFAULT
@@ -68,5 +70,13 @@ internal class SstpVpnService : VpnService() {
 
     override fun onDestroy() {
         controlClient?.kill(null)
+    }
+
+    internal fun notifySwitchOff() {
+        PreferenceManager.getDefaultSharedPreferences(applicationContext).also {
+            it.edit().putBoolean(PreferenceKey.SWITCH.value, false).apply()
+        }
+        LocalBroadcastManager.getInstance(applicationContext)
+            .sendBroadcast(Intent(VpnAction.ACTION_UPDATE.value))
     }
 }

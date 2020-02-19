@@ -1,8 +1,6 @@
 package kittoku.opensstpclient
 
-import android.content.Intent
 import android.preference.PreferenceManager
-import android.support.v4.content.LocalBroadcastManager
 import android.widget.Toast
 import kittoku.opensstpclient.layer.*
 import kittoku.opensstpclient.misc.IncomingBuffer
@@ -54,90 +52,13 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     sslTerminal.release()
                     ipTerminal.release()
 
-                    vpnService.stopForeground(true)
-                    LocalBroadcastManager.getInstance(vpnService)
-                        .sendBroadcast(Intent(VpnAction.ACTION_SWITCHOFF.value))
-
                     inform("Terminate VPN connection", null)
+                    vpnService.notifySwitchOff()
+                    vpnService.stopForeground(true)
 
                 }
             }
         }
-    }
-
-    private fun makeToast(cause: String) {
-        Toast.makeText(vpnService.applicationContext, "INVALID SETTING: $cause", Toast.LENGTH_LONG)
-            .show()
-    }
-
-    internal fun prepareSetting(): Boolean {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
-
-        val host = prefs.getString(PreferenceKey.HOST.value, null)
-        if (host == null) {
-            makeToast("Host is missing")
-            return false
-        }
-
-        val username = prefs.getString(PreferenceKey.USERNAME.value, null)
-        if (username == null) {
-            makeToast("Username is missing")
-            return false
-        }
-
-        val password = prefs.getString(PreferenceKey.PASSWORD.value, null)
-        if (password == null) {
-            makeToast("Password is missing")
-            return false
-        }
-
-        val port = prefs.getString(PreferenceKey.PORT.value, null)?.toIntOrNull()
-        if (port != null && port !in 0..65535) {
-            makeToast("The given port is out of 0-65535")
-            return false
-        }
-
-        val mru = prefs.getString(PreferenceKey.MRU.value, null)?.toIntOrNull()
-        if (mru != null && mru !in MIN_MRU..MAX_MRU) {
-            makeToast("The given MRU is out of $MIN_MRU-$MAX_MRU")
-            return false
-        }
-
-        val mtu = prefs.getString(PreferenceKey.MTU.value, null)?.toIntOrNull()
-        if (mtu != null && mtu !in MIN_MTU..MAX_MTU) {
-            makeToast("The given MTU is out of $MIN_MTU-$MAX_MTU")
-            return false
-        }
-
-        val prefix = prefs.getString(PreferenceKey.PREFIX.value, null)?.toIntOrNull()
-        if (prefix != null && prefix !in 0..32) {
-            makeToast("The given address prefix is out of 0-32")
-            return false
-        }
-
-        val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, true)
-        val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
-        if (!(isPapAcceptable || isMschapv2Acceptable)) {
-            makeToast("No authentication protocol was accepted")
-        }
-
-        val isHvIgnored = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
-        val isDecryptable = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
-
-
-        networkSetting = NetworkSetting(
-            host, username, password, port, mru, mtu, prefix,
-            isPapAcceptable, isMschapv2Acceptable, isHvIgnored, isDecryptable
-        )
-
-        return true
-    }
-
-    private fun prepareLayers() {
-        sslTerminal = SslTerminal(this)
-        sstpClient = SstpClient(this)
-        pppClient = PppClient(this)
-        ipTerminal = IpTerminal(this)
     }
 
     internal fun run() {
@@ -185,5 +106,80 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 sstpClient.sendDataUnit()
             }
         }
+    }
+
+    private fun makeToast(cause: String) {
+        Toast.makeText(vpnService.applicationContext, "INVALID SETTING: $cause", Toast.LENGTH_LONG)
+            .show()
+    }
+
+    internal fun prepareSetting(): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
+
+        val host = prefs.getString(PreferenceKey.HOST.value, "") as String
+        if (host == "") {
+            makeToast("Host is missing")
+            return false
+        }
+
+        val username = prefs.getString(PreferenceKey.USERNAME.value, "") as String
+        if (username == "") {
+            makeToast("Username is missing")
+            return false
+        }
+
+        val password = prefs.getString(PreferenceKey.PASSWORD.value, "") as String
+        if (password == "") {
+            makeToast("Password is missing")
+            return false
+        }
+
+        val port = prefs.getString(PreferenceKey.PORT.value, "")?.toIntOrNull()
+        if (port != null && port !in 0..65535) {
+            makeToast("The given port is out of 0-65535")
+            return false
+        }
+
+        val mru = prefs.getString(PreferenceKey.MRU.value, "")?.toIntOrNull()
+        if (mru != null && mru !in MIN_MRU..MAX_MRU) {
+            makeToast("The given MRU is out of $MIN_MRU-$MAX_MRU")
+            return false
+        }
+
+        val mtu = prefs.getString(PreferenceKey.MTU.value, "")?.toIntOrNull()
+        if (mtu != null && mtu !in MIN_MTU..MAX_MTU) {
+            makeToast("The given MTU is out of $MIN_MTU-$MAX_MTU")
+            return false
+        }
+
+        val prefix = prefs.getString(PreferenceKey.PREFIX.value, "")?.toIntOrNull()
+        if (prefix != null && prefix !in 0..32) {
+            makeToast("The given address prefix is out of 0-32")
+            return false
+        }
+
+        val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, true)
+        val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
+        if (!(isPapAcceptable || isMschapv2Acceptable)) {
+            makeToast("No authentication protocol was accepted")
+        }
+
+        val isHvIgnored = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
+        val isDecryptable = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
+
+
+        networkSetting = NetworkSetting(
+            host, username, password, port, mru, mtu, prefix,
+            isPapAcceptable, isMschapv2Acceptable, isHvIgnored, isDecryptable
+        )
+
+        return true
+    }
+
+    private fun prepareLayers() {
+        sslTerminal = SslTerminal(this)
+        sstpClient = SstpClient(this)
+        pppClient = PppClient(this)
+        ipTerminal = IpTerminal(this)
     }
 }

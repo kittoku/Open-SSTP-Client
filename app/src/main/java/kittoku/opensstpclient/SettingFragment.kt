@@ -35,13 +35,13 @@ class SettingFragment : Fragment() {
     private fun loadPreferences(view: View) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         view.findViewById<EditText>(R.id.port)
-            .setText(prefs.getString(PreferenceKey.PORT.value, null))
+            .setText(prefs.getString(PreferenceKey.PORT.value, ""))
         view.findViewById<EditText>(R.id.mru)
-            .setText(prefs.getString(PreferenceKey.MRU.value, null))
+            .setText(prefs.getString(PreferenceKey.MRU.value, ""))
         view.findViewById<EditText>(R.id.mtu)
-            .setText(prefs.getString(PreferenceKey.MTU.value, null))
+            .setText(prefs.getString(PreferenceKey.MTU.value, ""))
         view.findViewById<EditText>(R.id.prefix)
-            .setText(prefs.getString(PreferenceKey.PREFIX.value, null))
+            .setText(prefs.getString(PreferenceKey.PREFIX.value, ""))
         view.findViewById<CheckBox>(R.id.pap).isChecked =
             prefs.getBoolean(PreferenceKey.PAP.value, true)
         view.findViewById<CheckBox>(R.id.mschapv2).isChecked =

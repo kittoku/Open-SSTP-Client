@@ -13,10 +13,10 @@ import android.support.v4.content.LocalBroadcastManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
-import kittoku.opensstpclient.misc.EXTENDED_LOG
 
 
 class HomeFragment : Fragment() {
@@ -31,46 +31,40 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val switch = view.findViewById<Switch>(R.id.connector)
         val log = view.findViewById<TextView>(R.id.log)
-
-        loadPreferences(view)
-
-        switch.setOnCheckedChangeListener { _, isChecked ->
+        val listener = { _: CompoundButton, isChecked: Boolean ->
             if (isChecked) {
                 wipeLog(log)
+                savePreferences(view)
 
                 val intent = VpnService.prepare(context)
-                if (intent == null) {
+                if (intent != null) {
+                    startActivityForResult(intent, 0)
+                } else {
                     onActivityResult(0, Activity.RESULT_OK, null)
-                } else startActivityForResult(intent, 0)
+                }
+
             } else {
                 startVpnService(VpnAction.ACTION_DISCONNECT)
             }
-
-            savePreferences(view)
         }
+
+        loadPreferences(view)
+
+        switch.setOnCheckedChangeListener(listener)
 
         LocalBroadcastManager.getInstance(context!!).registerReceiver(
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    when (intent?.action) {
-                        VpnAction.ACTION_CONVEY.value -> {
-                            intent.getStringExtra(EXTENDED_LOG)?.also {
-                                log.append(it)
-                            }
-                        }
-
-                        VpnAction.ACTION_SWITCHOFF.value -> {
-                            switch.isChecked = false
+                    if (intent?.action == VpnAction.ACTION_UPDATE.value) {
+                        if (activity != null) {
+                            switch.setOnCheckedChangeListener(null)
+                            loadPreferences(view)
+                            switch.setOnCheckedChangeListener(listener)
                         }
                     }
-
-                    savePreferences(view)
                 }
             },
-            IntentFilter().also {
-                it.addAction(VpnAction.ACTION_CONVEY.value)
-                it.addAction(VpnAction.ACTION_SWITCHOFF.value)
-            }
+            IntentFilter().also { it.addAction(VpnAction.ACTION_UPDATE.value) }
         )
     }
 
@@ -84,12 +78,15 @@ class HomeFragment : Fragment() {
 
     private fun loadPreferences(view: View) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        view.findViewById<EditText>(R.id.host).setText(prefs.getString(PreferenceKey.HOST.value, null))
-        view.findViewById<EditText>(R.id.username).setText(prefs.getString(PreferenceKey.USERNAME.value, null))
-        view.findViewById<EditText>(R.id.password).setText(prefs.getString(PreferenceKey.PASSWORD.value, null))
+        view.findViewById<EditText>(R.id.host)
+            .setText(prefs.getString(PreferenceKey.HOST.value, ""))
+        view.findViewById<EditText>(R.id.username)
+            .setText(prefs.getString(PreferenceKey.USERNAME.value, ""))
+        view.findViewById<EditText>(R.id.password)
+            .setText(prefs.getString(PreferenceKey.PASSWORD.value, ""))
         view.findViewById<Switch>(R.id.connector).isChecked =
             prefs.getBoolean(PreferenceKey.SWITCH.value, false)
-        view.findViewById<TextView>(R.id.log).text = prefs.getString(PreferenceKey.LOG.value, null)
+        view.findViewById<TextView>(R.id.log).text = prefs.getString(PreferenceKey.LOG.value, "")
     }
 
     private fun savePreferences(view: View) {

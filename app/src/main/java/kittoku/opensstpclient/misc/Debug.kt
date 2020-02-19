@@ -1,8 +1,10 @@
 package kittoku.opensstpclient.misc
 
 import android.content.Intent
+import android.preference.PreferenceManager
 import android.support.v4.content.LocalBroadcastManager
 import kittoku.opensstpclient.ControlClient
+import kittoku.opensstpclient.PreferenceKey
 import kittoku.opensstpclient.VpnAction
 import kittoku.opensstpclient.unit.DataUnit
 import java.text.SimpleDateFormat
@@ -14,8 +16,6 @@ internal class DataUnitParsingError : Error("Failed to parse data unit")
 
 internal class SuicideException : Exception("Kill this client as intended")
 
-const val EXTENDED_LOG = "kittoku.opensstpclient.LOG"
-
 internal fun ControlClient.inform(message: String, cause: Throwable?) {
     val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
     var printing = "[$currentTime] $message"
@@ -26,11 +26,13 @@ internal fun ControlClient.inform(message: String, cause: Throwable?) {
     }
     printing += "\n"
 
-    val conveyIntent = Intent(VpnAction.ACTION_CONVEY.value).also {
-        it.putExtra(EXTENDED_LOG, printing)
+    PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext).also {
+        val new = it.getString(PreferenceKey.LOG.value, "") as String + printing
+        it.edit().putString(PreferenceKey.LOG.value, new).apply()
     }
 
-    LocalBroadcastManager.getInstance(vpnService).sendBroadcast(conveyIntent)
+    LocalBroadcastManager.getInstance(vpnService.applicationContext)
+        .sendBroadcast(Intent(VpnAction.ACTION_UPDATE.value))
 }
 
 

@@ -20,6 +20,7 @@ internal class NetworkSetting(
     internal val customMru: Int?,
     internal val customMtu: Int?,
     internal val customPrefix: Int?,
+    internal val sslProtocol: String,
     internal val isPapAcceptable: Boolean,
     internal val isMschapv2Acceptable: Boolean,
     internal val isHvIgnored: Boolean,

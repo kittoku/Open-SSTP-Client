@@ -6,10 +6,16 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
+
+
+internal val sslMap = mapOf(
+    0 to "DEFAULT",
+    1 to "SSLv3",
+    2 to "TLSv1",
+    3 to "TLSv1.1",
+    4 to "TLSv1.2"
+)
 
 
 class SettingFragment : Fragment() {
@@ -22,6 +28,15 @@ class SettingFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_setting, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val spinner = view.findViewById<Spinner>(R.id.spinner)
+        spinner.adapter = ArrayAdapter<String>(
+            context!!,
+            android.R.layout.simple_spinner_item,
+            sslMap.values.toTypedArray()
+        ).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
         val button = view.findViewById<Button>(R.id.button)
 
         loadPreferences(view)
@@ -42,6 +57,9 @@ class SettingFragment : Fragment() {
             .setText(prefs.getString(PreferenceKey.MTU.value, ""))
         view.findViewById<EditText>(R.id.prefix)
             .setText(prefs.getString(PreferenceKey.PREFIX.value, ""))
+        view.findViewById<Spinner>(R.id.spinner).setSelection(
+            prefs.getInt(PreferenceKey.SSL.value, 0)
+        )
         view.findViewById<CheckBox>(R.id.pap).isChecked =
             prefs.getBoolean(PreferenceKey.PAP.value, true)
         view.findViewById<CheckBox>(R.id.mschapv2).isChecked =
@@ -69,6 +87,10 @@ class SettingFragment : Fragment() {
         editor.putString(
             PreferenceKey.PREFIX.value,
             view.findViewById<EditText>(R.id.prefix).text.toString()
+        )
+        editor.putInt(
+            PreferenceKey.SSL.value,
+            view.findViewById<Spinner>(R.id.spinner).selectedItemPosition
         )
         editor.putBoolean(PreferenceKey.PAP.value, view.findViewById<CheckBox>(R.id.pap).isChecked)
         editor.putBoolean(

@@ -104,6 +104,25 @@
         android:inputType="number" />
 
     <TextView
+        android:id="@+id/titleSslProtocol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:text="SSL protocol"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp" />
+
+    <TextView
         android:id="@+id/titleAuth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -169,4 +188,5 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="32dp"
         android:text="SAVE" />
+
 </LinearLayout>

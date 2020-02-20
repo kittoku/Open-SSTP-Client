@@ -158,6 +158,12 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             return false
         }
 
+        val ssl = sslMap[prefs.getInt(PreferenceKey.SSL.value, 0)]
+        if (ssl == null) {
+            makeToast("No valid SSL protocol was chosen")
+            return false
+        }
+
         val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, true)
         val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
         if (!(isPapAcceptable || isMschapv2Acceptable)) {
@@ -169,7 +175,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
 
         networkSetting = NetworkSetting(
-            host, username, password, port, mru, mtu, prefix,
+            host, username, password, port, mru, mtu, prefix, ssl,
             isPapAcceptable, isMschapv2Acceptable, isHvIgnored, isDecryptable
         )
 

@@ -18,8 +18,13 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
             parent.networkSetting.port ?: 443
         ) as SSLSocket
 
+        parent.networkSetting.sslProtocol.also {
+            if (it != "DEFAULT") {
+                socket.enabledProtocols = arrayOf(it)
+            }
+        }
+
         if (parent.networkSetting.isDecryptable) {
-            socket.enabledProtocols = arrayOf("TLSv1.2")
             socket.enabledCipherSuites = arrayOf(
                 "TLS_RSA_WITH_AES_128_CBC_SHA",
                 "TLS_RSA_WITH_AES_256_CBC_SHA"

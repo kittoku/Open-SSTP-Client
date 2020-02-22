@@ -73,6 +73,8 @@ internal suspend fun SstpClient.sendCallConnected() {
         it.digest(networkSetting.serverCertificate.encoded).writeTo(sending.binding.certHash)
     }
 
+    sending.binding.hashProtocol = networkSetting.hashProtocol.value
+    sending.update()
     sending.write(cmacInputBuffer)
 
     val HLAK = when (networkSetting.currentAuth) {

@@ -9,7 +9,7 @@ internal fun <K, V> generateResolver(array: Array<K>, map: (K) -> V): (V) -> K? 
     }
 }
 
-fun ByteArray.writeTo(other: ByteArray) {
+internal fun ByteArray.writeTo(other: ByteArray) {
     repeat(min(this.size, other.size)) {
         other[it] = this[it]
     }

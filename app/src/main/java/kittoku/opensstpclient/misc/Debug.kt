@@ -21,7 +21,8 @@ internal fun ControlClient.inform(message: String, cause: Throwable?) {
     var printing = "[$currentTime] $message"
     cause?.also {
         printing += ":\n"
-        val trace = it::class.simpleName + "\n" + it.stackTrace.joinToString("\n")
+        val trace =
+            it::class.simpleName + "\n" + it.message + "\n" + it.stackTrace.joinToString("\n")
         printing += trace
     }
     printing += "\n"

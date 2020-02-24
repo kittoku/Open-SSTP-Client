@@ -68,9 +68,9 @@ internal suspend fun SstpClient.sendCallConnected() {
     val cmacInputBuffer = ByteBuffer.allocate(sending.validLengthRange.first)
     val hashSetting = HashSetting(networkSetting.hashProtocol)
 
-    networkSetting.nonce.writeTo(sending.binding.nonce)
+    networkSetting.nonce.copyInto(sending.binding.nonce)
     MessageDigest.getInstance(hashSetting.digestProtocol).also {
-        it.digest(networkSetting.serverCertificate.encoded).writeTo(sending.binding.certHash)
+        it.digest(networkSetting.serverCertificate.encoded).copyInto(sending.binding.certHash)
     }
 
     sending.binding.hashProtocol = networkSetting.hashProtocol.value
@@ -96,7 +96,7 @@ internal suspend fun SstpClient.sendCallConnected() {
         val cmk = it.doFinal(cmkInputBuffer.array())
         it.init(SecretKeySpec(cmk, hashSetting.macProtocol))
         val cmac = it.doFinal(cmacInputBuffer.array())
-        cmac.writeTo(sending.binding.compoundMac)
+        cmac.copyInto(sending.binding.compoundMac)
     }
 
     sending.update()

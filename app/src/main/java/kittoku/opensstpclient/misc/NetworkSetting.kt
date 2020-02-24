@@ -113,25 +113,25 @@ internal class NetworkSetting(
 
     internal val mgIp = object : OptionManager<IpcpIpOption>() {
         override fun create() = IpcpIpOption().also {
-            currentIp.writeTo(it.address)
+            currentIp.copyInto(it.address)
         }
 
         override fun compromiseReq(option: IpcpIpOption) = true
 
         override fun compromiseNak(option: IpcpIpOption) {
-            option.address.writeTo(currentIp)
+            option.address.copyInto(currentIp)
         }
     }
 
     internal val mgDns = object : OptionManager<IpcpDnsOption>() {
         override fun create() = IpcpDnsOption().also {
-            currentDns.writeTo(it.address)
+            currentDns.copyInto(it.address)
         }
 
         override fun compromiseReq(option: IpcpDnsOption) = true
 
         override fun compromiseNak(option: IpcpDnsOption) {
-            option.address.writeTo(currentDns)
+            option.address.copyInto(currentDns)
         }
     }
 }

@@ -79,11 +79,7 @@ internal suspend fun SstpClient.sendCallConnected() {
 
     val HLAK = when (networkSetting.currentAuth) {
         AuthSuite.PAP -> ByteArray(32)
-        else -> {
-            parent.inform("An unacceptable authentication protocol chosen", null)
-            status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
-            return
-        }
+        AuthSuite.MSCHAPv2 -> generateChapHLAK(networkSetting)
     }
 
     val cmkSeed = "SSTP inner method derived CMK".toByteArray(Charset.forName("US-ASCII"))
@@ -193,4 +189,67 @@ private class HashSetting(hashProtocol: HashProtocol) {
         }
     }
 
+}
+
+private fun generateChapHLAK(setting: NetworkSetting): ByteArray {
+    val passArray = setting.password.toByteArray(Charset.forName("UTF-16LE"))
+
+    val magic1 = sum(
+        "5468697320697320746865204D505045",
+        "204D6173746572204B6579"
+    ).toHexByteArray()
+
+    val magic2 = sum(
+        "4F6E2074686520636C69656E74207369",
+        "64652C20746869732069732074686520",
+        "73656E64206B65793B206F6E20746865",
+        "2073657276657220736964652C206974",
+        "20697320746865207265636569766520",
+        "6B65792E"
+    ).toHexByteArray()
+
+    val magic3 = sum(
+        "4F6E2074686520636C69656E74207369",
+        "64652C20746869732069732074686520",
+        "72656365697665206B65793B206F6E20",
+        "7468652073657276657220736964652C",
+        "206974206973207468652073656E6420",
+        "6B65792E"
+    ).toHexByteArray()
+
+    val pad1 = sum(
+        "00000000000000000000000000000000",
+        "00000000000000000000000000000000",
+        "0000000000000000"
+    ).toHexByteArray()
+
+    val pad2 = sum(
+        "F2F2F2F2F2F2F2F2F2F2F2F2F2F2F2F2",
+        "F2F2F2F2F2F2F2F2F2F2F2F2F2F2F2F2",
+        "F2F2F2F2F2F2F2F2"
+    ).toHexByteArray()
+
+    return MessageDigest.getInstance("SHA-1").let {
+        it.update(hashMd4(hashMd4(passArray)))
+        it.update(setting.chapSetting.clientResponse)
+        it.update(magic1)
+        val masterkey = it.digest().sliceArray(0 until 16)
+
+        val hlak = ByteArray(32)
+        it.reset()
+        it.update(masterkey)
+        it.update(pad1)
+        it.update(magic2)
+        it.update(pad2)
+        it.digest().copyInto(hlak, endIndex = 16)
+
+        it.reset()
+        it.update(masterkey)
+        it.update(pad1)
+        it.update(magic3)
+        it.update(pad2)
+        it.digest().copyInto(hlak, 16, endIndex = 16)
+
+        hlak
+    }
 }

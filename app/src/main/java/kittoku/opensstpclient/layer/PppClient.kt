@@ -2,9 +2,7 @@ package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.MAX_MTU
-import kittoku.opensstpclient.misc.AuthSuite
-import kittoku.opensstpclient.misc.inform
-import kittoku.opensstpclient.misc.informInvalidUnit
+import kittoku.opensstpclient.misc.*
 import kittoku.opensstpclient.negotiator.*
 import kittoku.opensstpclient.unit.*
 import kotlinx.coroutines.sync.withLock
@@ -12,10 +10,6 @@ import kotlinx.coroutines.sync.withLock
 
 internal enum class LcpState {
     REQ_SENT, ACK_RCVD, ACK_SENT, OPENED
-}
-
-internal enum class PapState {
-    REQ_SENT, ACK_RCVD
 }
 
 internal enum class IpcpState {
@@ -34,8 +28,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
     private var isInitialLcp = true
 
     internal val authTimer = Timer(3_000L)
-    internal val authCounter = Counter(3)
-    internal var papState = PapState.REQ_SENT
+    internal var isAuthFinished = false
     private var isInitialAuth = true
 
     internal val ipcpTimer = Timer(3_000L)
@@ -132,7 +125,8 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
     private suspend fun proceedPap() {
         if (authTimer.isOver) {
-            sendPapRequest()
+            parent.informTimerOver(::proceedPap)
+            kill()
             return
         }
 
@@ -145,6 +139,32 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                 PapCode.AUTHENTICATE_ACK -> receivePapAuthenticateAck()
 
                 PapCode.AUTHENTICATE_NAK -> receivePapAuthenticateNak()
+
+                else -> readAsDiscarded()
+            }
+        }
+
+        incomingBuffer.forget()
+    }
+
+    private suspend fun proceedChap() {
+        if (authTimer.isOver) {
+            parent.informTimerOver(::proceedChap)
+            kill()
+            return
+        }
+
+        if (!hasIncoming) return
+
+        if (PppProtocol.resolve(incomingBuffer.getShort()) != PppProtocol.CHAP) readAsDiscarded()
+        else {
+            val code = incomingBuffer.getByte()
+            when (ChapCode.resolve(code)) {
+                ChapCode.CHALLENGE -> receiveChapChallenge()
+
+                ChapCode.SUCCESS -> receiveChapSuccess()
+
+                ChapCode.FAILURE -> receiveChapFailure()
 
                 else -> readAsDiscarded()
             }
@@ -171,6 +191,19 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                     return
                 }
 
+            }
+
+            PppProtocol.CHAP -> {
+                val code = incomingBuffer.getByte()
+                when (ChapCode.resolve(code)) {
+                    ChapCode.CHALLENGE -> receiveChapChallenge()
+
+                    ChapCode.SUCCESS -> receiveChapSuccess()
+
+                    ChapCode.FAILURE -> receiveChapFailure()
+
+                    else -> readAsDiscarded()
+                }
             }
 
             PppProtocol.IP -> incomingBuffer.convey()
@@ -205,14 +238,19 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                         }
                         else {
                             proceedPap()
-                            if (papState == PapState.ACK_RCVD) status.ppp = PppStatus.NEGOTIATE_IPCP
+                            if (isAuthFinished) status.ppp = PppStatus.NEGOTIATE_IPCP
                         }
                     }
 
-                    else -> {
-                        parent.inform("An unacceptable authentication protocol chosen", null)
-                        kill()
-                        return
+                    AuthSuite.MSCHAPv2 -> {
+                        if (isInitialAuth) {
+                            networkSetting.chapSetting = ChapSetting()
+                            authTimer.reset()
+                            isInitialAuth = false
+                        } else {
+                            proceedChap()
+                            if (isAuthFinished) status.ppp = PppStatus.NEGOTIATE_IPCP
+                        }
                     }
                 }
             }

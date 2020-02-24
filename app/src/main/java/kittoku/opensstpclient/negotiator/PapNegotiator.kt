@@ -1,10 +1,8 @@
 package kittoku.opensstpclient.negotiator
 
-import kittoku.opensstpclient.layer.PapState
 import kittoku.opensstpclient.layer.PppClient
 import kittoku.opensstpclient.misc.DataUnitParsingError
 import kittoku.opensstpclient.misc.informAuthenticationFailed
-import kittoku.opensstpclient.misc.informCounterExhausted
 import kittoku.opensstpclient.misc.informDataUnitParsingError
 import kittoku.opensstpclient.unit.PapAuthenticateAck
 import kittoku.opensstpclient.unit.PapAuthenticateNak
@@ -30,14 +28,6 @@ internal fun PppClient.tryReadingPap(frame: PapFrame): Boolean {
 }
 
 internal suspend fun PppClient.sendPapRequest() {
-    if (authCounter.isExhausted) {
-        parent.informCounterExhausted(::sendPapRequest)
-        kill()
-        return
-    }
-
-    authCounter.consume()
-
     globalIdentifier++
     currentAuthRequestId = globalIdentifier
     val sending = PapAuthenticateRequest()
@@ -61,9 +51,8 @@ internal fun PppClient.receivePapAuthenticateAck() {
     val received = PapAuthenticateAck()
     if (!tryReadingPap(received)) return
 
-    if (papState == PapState.REQ_SENT) {
-        authCounter.reset()
-        papState = PapState.ACK_RCVD
+    if (!isAuthFinished) {
+        isAuthFinished = true
     }
 }
 
@@ -71,7 +60,7 @@ internal fun PppClient.receivePapAuthenticateNak() {
     val received = PapAuthenticateAck()
     if (!tryReadingPap(received)) return
 
-    if (papState == PapState.REQ_SENT) {
+    if (!isAuthFinished) {
         parent.informAuthenticationFailed(::receivePapAuthenticateNak)
         kill()
         return

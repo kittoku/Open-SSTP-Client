@@ -26,13 +26,13 @@ internal class PapAuthenticateRequest : PapFrame() {
 
     override val validLengthRange = 6..Short.MAX_VALUE
 
-    internal var idLength by Delegates.observable<Int>(0) { _, _, new ->
+    private var idLength by Delegates.observable(0) { _, _, new ->
         if (new !in 0..Byte.MAX_VALUE) throw DataUnitParsingError()
     }
 
     internal val idFiled = mutableListOf<Byte>()
 
-    internal var passwordLength by Delegates.observable<Int>(0) { _, _, new ->
+    private var passwordLength by Delegates.observable(0) { _, _, new ->
         if (new !in 0..Byte.MAX_VALUE) throw DataUnitParsingError()
     }
 
@@ -66,11 +66,11 @@ internal class PapAuthenticateRequest : PapFrame() {
 internal abstract class PapAuthenticateAcknowledgement : PapFrame() {
     override val validLengthRange = 4..Short.MAX_VALUE
 
-    internal var msgLength by Delegates.observable<Int>(0) { _, _, new ->
+    private var msgLength by Delegates.observable(0) { _, _, new ->
         if (new !in 0..Byte.MAX_VALUE) throw DataUnitParsingError()
     }
 
-    internal val message = mutableListOf<Byte>()
+    private val message = mutableListOf<Byte>()
 
     override fun read(bytes: IncomingBuffer) {
         readHeader(bytes)

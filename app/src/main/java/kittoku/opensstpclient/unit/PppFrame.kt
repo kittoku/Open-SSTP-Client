@@ -10,6 +10,7 @@ internal const val PPP_HEADER = 0xFF03.toShort()
 internal enum class PppProtocol(val value: Short) {
     LCP(0xC021.toShort()),
     PAP(0xC023.toShort()),
+    CHAP(0xC223.toShort()),
     IPCP(0x8021.toShort()),
     IP(0x0021.toShort());
 

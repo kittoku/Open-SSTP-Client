@@ -12,6 +12,13 @@ internal enum class AuthSuite {
     PAP, MSCHAPv2
 }
 
+internal class ChapSetting {
+    val serverChallenge = ByteArray(16)
+    val clientChallenge = ByteArray(16)
+    val serverResponse = ByteArray(42)
+    val clientResponse = ByteArray(24)
+}
+
 internal class NetworkSetting(
     internal val host: String,
     internal val username: String,
@@ -29,6 +36,7 @@ internal class NetworkSetting(
     internal lateinit var serverCertificate: Certificate
     internal lateinit var hashProtocol: HashProtocol
     internal lateinit var nonce: ByteArray
+    lateinit var chapSetting: ChapSetting
     internal val guid = UUID.randomUUID().toString()
     internal var currentMru = customMru ?: DEFAULT_MRU
     internal var currentMtu = customMtu ?: DEFAULT_MTU

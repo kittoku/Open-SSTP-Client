@@ -123,16 +123,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
 
         val username = prefs.getString(PreferenceKey.USERNAME.value, "") as String
-        if (username == "") {
-            makeToast("Username is missing")
-            return false
-        }
 
         val password = prefs.getString(PreferenceKey.PASSWORD.value, "") as String
-        if (password == "") {
-            makeToast("Password is missing")
-            return false
-        }
 
         val port = prefs.getString(PreferenceKey.PORT.value, "")?.toIntOrNull()
         if (port != null && port !in 0..65535) {

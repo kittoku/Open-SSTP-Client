@@ -12,8 +12,8 @@ Fill `Host`, `Username` and `Password` fields and turn the switch on. If a key i
 the right side of the status bar, establishing a VPN connection has been succeeded. To disconnect 
 the connection, turn the switch off in the home tab or push `DISCONNECT` in the notification.  
 <br>
-![HOME TAB](https://github.com/kittoku/Open-SSTP-Client/raw/master/images/example_home.jpg "success in connecting")
-![SETTING TAB](https://github.com/kittoku/Open-SSTP-Client/raw/master/images/example_setting.jpg "success in connecting")
+<img src="https://github.com/kittoku/Open-SSTP-Client/raw/master/images/example_home.jpg" width=25%>
+<img src="https://github.com/kittoku/Open-SSTP-Client/raw/master/images/example_setting.jpg" width=25%>
 
 ## Setting tab
 You can configure some settings in the setting tab. You need to **push** SAVE button to apply the settings 

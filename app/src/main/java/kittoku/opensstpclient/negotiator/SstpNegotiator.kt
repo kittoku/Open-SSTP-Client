@@ -114,7 +114,7 @@ internal suspend fun SstpClient.sendEchoRequest() {
     echoTimer.reset()
 }
 
-internal suspend fun SstpClient.sendEchoReply() {
+internal suspend fun SstpClient.sendEchoResponse() {
     val sending = SstpEchoResponse().also { it.update() }
     addControlUnit(sending)
 }
@@ -158,7 +158,7 @@ internal suspend fun SstpClient.receiveEchoRequest() {
     val received = SstpEchoRequest()
     if (!tryReadingPacket(received)) return
 
-    sendEchoReply()
+    sendEchoResponse()
 }
 
 internal fun SstpClient.receiveEchoResponse() {

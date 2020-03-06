@@ -6,7 +6,6 @@ import kittoku.opensstpclient.layer.PppClient
 import kittoku.opensstpclient.misc.*
 import kittoku.opensstpclient.unit.*
 import java.nio.charset.Charset
-import java.security.SecureRandom
 
 
 internal fun PppClient.tryReadingLcp(frame: LcpFrame): Boolean {
@@ -83,7 +82,6 @@ internal suspend fun PppClient.sendLcpEchoRequest() {
     globalIdentifier++
     val sending = LcpEchoRequest()
     sending.id = globalIdentifier
-    sending.magicNumber = SecureRandom().nextInt()
     "Abura Mashi Mashi".toByteArray(Charset.forName("US-ASCII")).forEach {
         sending.holder.add(it)
     }
@@ -94,7 +92,6 @@ internal suspend fun PppClient.sendLcpEchoRequest() {
 internal suspend fun PppClient.sendLcpEchoReply(received: LcpEchoRequest) {
     val sending = LcpEchoReply()
     sending.id = received.id
-    sending.magicNumber = received.magicNumber
     "Abura Mashi Mashi".toByteArray(Charset.forName("US-ASCII")).forEach {
         sending.holder.add(it)
     }
@@ -219,4 +216,9 @@ internal suspend fun PppClient.receiveLcpEchoRequest() {
     val received = LcpEchoRequest()
     if (!tryReadingLcp(received)) return
     sendLcpEchoReply(received)
+}
+
+internal fun PppClient.receiveLcpEchoReply() {
+    val received = LcpEchoReply()
+    if (!tryReadingLcp(received)) return
 }

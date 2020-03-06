@@ -184,13 +184,17 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         when (PppProtocol.resolve(incomingBuffer.getShort())) {
             PppProtocol.LCP -> {
-                if (LcpCode.resolve(incomingBuffer.getByte()) == LcpCode.ECHO_REQUEST) receiveLcpEchoRequest()
-                else {
-                    parent.informInvalidUnit(::proceedNetwork)
-                    kill()
-                    return
-                }
+                when (LcpCode.resolve(incomingBuffer.getByte())) {
+                    LcpCode.ECHO_REQUEST -> receiveLcpEchoRequest()
 
+                    LcpCode.ECHO_REPLY -> receiveLcpEchoReply()
+
+                    else -> {
+                        parent.informInvalidUnit(::proceedNetwork)
+                        kill()
+                        return
+                    }
+                }
             }
 
             PppProtocol.CHAP -> {

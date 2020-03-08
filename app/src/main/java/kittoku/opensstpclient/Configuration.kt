@@ -9,5 +9,3 @@ internal const val INCOMING_BUFFER_SIZE = MAX_MRU + 8
 internal const val OUTGOING_BUFFER_SIZE = MAX_MTU + 8
 internal const val DEFAULT_MRU = 1500
 internal const val DEFAULT_MTU = 1500
-internal const val MAX_INTERVAL = 100L
-internal const val INTERVAL_STEP = 10L

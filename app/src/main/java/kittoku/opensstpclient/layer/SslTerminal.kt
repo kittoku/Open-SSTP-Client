@@ -70,7 +70,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
             }
         }
 
-        socket.soTimeout = 100
+        socket.soTimeout = 1_000
         parent.vpnService.protect(socket)
     }
 

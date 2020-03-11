@@ -42,7 +42,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 if (!isClosing) {
                     isClosing = true
 
-                    if (exception != null) {
+                    if (exception != null && exception !is SuicideException) {
                         inform("An unexpected event occurred", exception)
                     }
 

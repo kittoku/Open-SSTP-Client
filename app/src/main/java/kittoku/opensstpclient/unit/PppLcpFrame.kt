@@ -94,19 +94,18 @@ internal class LcpAuthOption : LcpOption() {
 
     internal var protocol: Short = AuthProtocol.PAP.value
 
-    internal val holder = mutableListOf<Byte>()
+    internal var holder = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
         setTypedLength(bytes.getByte())
         protocol = bytes.getShort()
-        holder.clear()
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
+        holder = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
         bytes.putShort(protocol)
-        holder.forEach { bytes.put(it) }
+        bytes.put(holder)
     }
 
     override fun update() {
@@ -117,17 +116,16 @@ internal class LcpAuthOption : LcpOption() {
 internal class LcpUnknownOption(unknownType: Byte) : LcpOption() {
     override val type = unknownType
 
-    internal val holder = mutableListOf<Byte>()
+    internal var holder = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
-        holder.clear()
         setTypedLength(bytes.getByte())
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
+        holder = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        holder.forEach { bytes.put(it) }
+        bytes.put(holder)
     }
 
     override fun update() {
@@ -236,23 +234,22 @@ internal class LcpConfigureReject : LcpConfigureFrame() {
 }
 
 internal abstract class LcpMagicNumberFrame : LcpFrame() {
-    internal val holder = mutableListOf<Byte>()
+    internal var magicNumber = 0
 
-    var magicNumber = 0
+    internal var holder = ByteArray(0)
 
     override val validLengthRange = 8..Short.MAX_VALUE
 
     override fun read(bytes: IncomingBuffer) {
-        holder.clear()
         readHeader(bytes)
         magicNumber = bytes.getInt()
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
+        holder = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
         bytes.putInt(magicNumber)
-        holder.forEach { bytes.put(it) }
+        bytes.put(holder)
     }
 
     override fun update() {

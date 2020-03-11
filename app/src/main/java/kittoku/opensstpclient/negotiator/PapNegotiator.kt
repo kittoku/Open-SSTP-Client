@@ -27,22 +27,17 @@ internal fun PppClient.tryReadingPap(frame: PapFrame): Boolean {
     return true
 }
 
-internal suspend fun PppClient.sendPapRequest() {
+internal fun PppClient.sendPapRequest() {
     globalIdentifier++
     currentAuthRequestId = globalIdentifier
     val sending = PapAuthenticateRequest()
     sending.id = currentAuthRequestId
     parent.networkSetting.also {
-        it.username.toByteArray(Charset.forName("US-ASCII")).forEach { b ->
-            sending.idFiled.add(b)
-        }
-
-        it.password.toByteArray(Charset.forName("US-ASCII")).forEach { b ->
-            sending.passwordFiled.add(b)
-        }
+        sending.idFiled = it.username.toByteArray(Charset.forName("US-ASCII"))
+        sending.passwordFiled = it.password.toByteArray(Charset.forName("US-ASCII"))
     }
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     authTimer.reset()
 }

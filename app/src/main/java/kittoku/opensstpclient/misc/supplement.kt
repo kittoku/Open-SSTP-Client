@@ -1,12 +1,14 @@
 package kittoku.opensstpclient.misc
 
+import java.nio.ByteBuffer
+
 internal fun <K, V> generateResolver(array: Array<K>, map: (K) -> V): (V) -> K? {
     return fun(value: V): K? {
         return array.firstOrNull { map(it) == value }
     }
 }
 
-fun ByteArray.isSame(other: ByteArray): Boolean {
+internal fun ByteArray.isSame(other: ByteArray): Boolean {
     if (this.size != other.size) return false
 
     this.zip(other).forEach {
@@ -51,3 +53,5 @@ internal fun sum(vararg words: String): String {
 
     return result
 }
+
+internal fun ByteBuffer.move(length: Int) = this.position(this.position() + length)

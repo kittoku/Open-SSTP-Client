@@ -1,5 +1,6 @@
 package kittoku.opensstpclient.layer
 
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import kittoku.opensstpclient.ControlClient
 import java.io.FileInputStream
@@ -38,6 +39,8 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
         builder.setMtu(setting.currentMtu)
 
         builder.addRoute("0.0.0.0", 0)
+
+        if (Build.VERSION.SDK_INT >= 21) builder.setBlocking(true)
 
         fd = builder.establish()
 

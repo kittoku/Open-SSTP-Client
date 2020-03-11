@@ -23,7 +23,7 @@ internal fun SstpClient.tryReadingPacket(packet: ControlPacket): Boolean {
     return true
 }
 
-internal suspend fun SstpClient.challengeWholePacket(): Boolean {
+internal fun SstpClient.challengeWholePacket(): Boolean {
     if (!incomingBuffer.challenge(4)) {
         return false
     }
@@ -47,7 +47,7 @@ internal suspend fun SstpClient.challengeWholePacket(): Boolean {
     return true
 }
 
-internal suspend fun SstpClient.sendCallConnectRequest() {
+internal fun SstpClient.sendCallConnectRequest() {
     if (negotiationCounter.isExhausted) {
         parent.informCounterExhausted(::sendCallConnectRequest)
         status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
@@ -57,12 +57,12 @@ internal suspend fun SstpClient.sendCallConnectRequest() {
     negotiationCounter.consume()
 
     val sending = SstpCallConnectRequest().also { it.update() }
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     negotiationTimer.reset()
 }
 
-internal suspend fun SstpClient.sendCallConnected() {
+internal fun SstpClient.sendCallConnected() {
     val sending = SstpCallConnected()
     val cmkInputBuffer = ByteBuffer.allocate(32)
     val cmacInputBuffer = ByteBuffer.allocate(sending.validLengthRange.first)
@@ -96,10 +96,10 @@ internal suspend fun SstpClient.sendCallConnected() {
     }
 
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun SstpClient.sendEchoRequest() {
+internal fun SstpClient.sendEchoRequest() {
     if (echoCounter.isExhausted) {
         parent.informCounterExhausted(::sendEchoRequest)
         status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
@@ -109,18 +109,18 @@ internal suspend fun SstpClient.sendEchoRequest() {
     echoCounter.consume()
 
     val sending = SstpEchoRequest().also { it.update() }
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     echoTimer.reset()
 }
 
-internal suspend fun SstpClient.sendEchoResponse() {
+internal fun SstpClient.sendEchoResponse() {
     val sending = SstpEchoResponse().also { it.update() }
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
 
-internal suspend fun SstpClient.sendLastGreeting() {
+internal fun SstpClient.sendLastGreeting() {
     val sending = when (status.sstp) {
         SstpStatus.CALL_DISCONNECT_IN_PROGRESS_1 -> SstpCallDisconnect()
         SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2 -> SstpCallDisconnectAck()
@@ -128,12 +128,12 @@ internal suspend fun SstpClient.sendLastGreeting() {
     }
 
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     throw SuicideException()
 }
 
-internal suspend fun SstpClient.receiveCallConnectAck() {
+internal fun SstpClient.receiveCallConnectAck() {
     val received = SstpCallConnectAck()
     if (!tryReadingPacket(received)) return
 
@@ -154,7 +154,7 @@ internal suspend fun SstpClient.receiveCallConnectAck() {
     negotiationTimer.reset()
 }
 
-internal suspend fun SstpClient.receiveEchoRequest() {
+internal fun SstpClient.receiveEchoRequest() {
     val received = SstpEchoRequest()
     if (!tryReadingPacket(received)) return
 

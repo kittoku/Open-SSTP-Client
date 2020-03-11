@@ -18,6 +18,7 @@ internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) 
     internal fun getByte(): Byte = buffer.get()
     internal fun getShort(): Short = buffer.short
     internal fun getInt(): Int = buffer.int
+    internal fun get(dst: ByteArray) = buffer.get(dst)
 
     private fun slide() {
         val currentPosition = buffer.position()
@@ -53,7 +54,7 @@ internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) 
         buffer.position(buffer.position() + length)
     }
 
-    internal fun move(length: Int) = buffer.position(buffer.position() + length)
+    internal fun move(length: Int) = buffer.move(length)
 
     internal fun reset() = buffer.reset()
 

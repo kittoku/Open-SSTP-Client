@@ -1,15 +1,18 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.nio.ByteBuffer
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 
 
 internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
+    private val mutex = Mutex()
     internal lateinit var socket: SSLSocket
 
     private fun createSocket() {
@@ -45,10 +48,10 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         socket.startHandshake()
     }
 
-    private suspend fun establishHttpLayer() {
+    private fun establishHttpLayer() {
         val input = InputStreamReader(socket.inputStream, "US-ASCII")
         val output = OutputStreamWriter(socket.outputStream, "US-ASCII")
-        val HTTP_REQUEST = arrayListOf(
+        val HTTP_REQUEST = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
             "Host: ${parent.networkSetting.host}",
@@ -61,22 +64,27 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         val received = mutableListOf<Byte>(0, 0, 0)
         val terminal = listOf<Byte>(0x0D, 0x0A, 0x0D, 0x0A) // \r\n\r\n
 
-        withTimeout(10_000) {
-            while (true) {
-                val c: Int = input.read()
-                received.add(c.toByte())
+        socket.soTimeout = 10_000
+        while (true) {
+            val c: Int = input.read()
+            received.add(c.toByte())
 
-                if (received.subList(received.size - 4, received.size) == terminal) break
-            }
+            if (received.subList(received.size - 4, received.size) == terminal) break
         }
 
         socket.soTimeout = 1_000
         parent.vpnService.protect(socket)
     }
 
-    internal suspend fun initializeSocket() {
+    internal fun initializeSocket() {
         createSocket()
         establishHttpLayer()
+    }
+
+    internal suspend fun send(bytes: ByteBuffer) {
+        mutex.withLock {
+            socket.outputStream.write(bytes.array(), 0, bytes.limit())
+        }
     }
 
     override fun release() {

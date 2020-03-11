@@ -30,30 +30,28 @@ internal class PapAuthenticateRequest : PapFrame() {
         if (new !in 0..Byte.MAX_VALUE) throw DataUnitParsingError()
     }
 
-    internal val idFiled = mutableListOf<Byte>()
+    internal var idFiled = ByteArray(0)
 
     private var passwordLength by Delegates.observable(0) { _, _, new ->
         if (new !in 0..Byte.MAX_VALUE) throw DataUnitParsingError()
     }
 
-    internal val passwordFiled = mutableListOf<Byte>()
+    internal var passwordFiled = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
-        idFiled.clear()
-        passwordFiled.clear()
         readHeader(bytes)
         idLength = bytes.getByte().toInt()
-        repeat(idLength) { idFiled.add(bytes.getByte()) }
+        idFiled = ByteArray(idLength).also { bytes.get(it) }
         passwordLength = bytes.getByte().toInt()
-        repeat(passwordLength) { passwordFiled.add(bytes.getByte()) }
+        passwordFiled = ByteArray(passwordLength).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
         bytes.put(idLength.toByte())
-        idFiled.forEach { bytes.put(it) }
+        bytes.put(idFiled)
         bytes.put(passwordLength.toByte())
-        passwordFiled.forEach { bytes.put(it) }
+        bytes.put(passwordFiled)
     }
 
     override fun update() {
@@ -70,13 +68,13 @@ internal abstract class PapAuthenticateAcknowledgement : PapFrame() {
         if (new !in 0..Byte.MAX_VALUE) throw DataUnitParsingError()
     }
 
-    private val message = mutableListOf<Byte>()
+    private var message = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
         readHeader(bytes)
         if (_length > 4) {
             msgLength = bytes.getByte().toInt()
-            repeat(msgLength) { message.add(bytes.getByte()) }
+            message = ByteArray(msgLength).also { bytes.get(it) }
         }
     }
 
@@ -84,7 +82,7 @@ internal abstract class PapAuthenticateAcknowledgement : PapFrame() {
         writeHeader(bytes)
         if (_length > 4) {
             bytes.put(msgLength.toByte())
-            message.forEach { bytes.put(it) }
+            bytes.put(message)
         }
     }
 

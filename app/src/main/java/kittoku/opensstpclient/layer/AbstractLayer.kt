@@ -1,9 +1,6 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
-import kittoku.opensstpclient.unit.DataUnit
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 
 internal enum class PppStatus {
@@ -53,22 +50,11 @@ internal class Timer(private val maxLength: Long) {
 }
 
 internal abstract class Client(internal val parent: ControlClient) {
-    internal val waitingControlUnits = mutableListOf<DataUnit<*>>()
-    internal val mutex = Mutex()
     internal val status = parent.status
     internal val incomingBuffer = parent.incomingBuffer
-    internal val outgoingBuffer = parent.outgoingBuffer
     internal val networkSetting = parent.networkSetting
 
-    internal abstract suspend fun proceed() // just check its state or timers, not bytes
-
-    internal abstract suspend fun sendDataUnit()
-
-    internal abstract suspend fun sendControlUnit()
-
-    internal suspend fun addControlUnit(unit: DataUnit<*>) {
-        mutex.withLock { waitingControlUnits.add(unit) }
-    }
+    internal abstract fun proceed() // just check its state or timers, not bytes
 }
 
 internal abstract class Terminal(protected val parent: ControlClient) {

@@ -70,22 +70,22 @@ internal class StatusInfo : Attribute() {
 
     internal var status: Int = 0
 
-    internal val holder = mutableListOf<Byte>()
+    internal var holder = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
         readHeader(bytes)
         bytes.move(3)
         targetId = bytes.getByte()
         status = bytes.getInt()
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
+        holder = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        repeat(3) { bytes.put(0) }
+        bytes.put(ByteArray(3))
         bytes.put(targetId)
         bytes.putInt(status)
-        holder.slice(0..min(holder.lastIndex, 63)).forEach { bytes.put(it) }
+        bytes.put(holder.sliceArray(0 until min(holder.size, 64)))
     }
 
     override fun update() {
@@ -110,14 +110,14 @@ internal class CryptoBinding : Attribute() {
         readHeader(bytes)
         bytes.move(3)
         hashProtocol = bytes.getByte()
-        repeat(32) { nonce[it] = bytes.getByte() }
-        repeat(32) { certHash[it] = bytes.getByte() }
-        repeat(32) { compoundMac[it] = bytes.getByte() }
+        bytes.get(nonce)
+        bytes.get(certHash)
+        bytes.get(compoundMac)
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        repeat(3) { bytes.put(0) }
+        bytes.put(ByteArray(3))
         bytes.put(hashProtocol)
         bytes.put(nonce)
         bytes.put(certHash)
@@ -140,12 +140,12 @@ internal class CryptoBindingRequest : Attribute() {
         readHeader(bytes)
         bytes.move(3)
         bitmask = bytes.getByte()
-        repeat(32) { nonce[it] = bytes.getByte() }
+        bytes.get(nonce)
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        repeat(3) { bytes.put(0) }
+        bytes.put(ByteArray(3))
         bytes.put(bitmask)
         bytes.put(nonce)
     }

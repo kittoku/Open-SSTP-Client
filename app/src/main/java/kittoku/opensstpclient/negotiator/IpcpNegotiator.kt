@@ -22,7 +22,7 @@ internal fun PppClient.tryReadingIpcp(frame: IpcpFrame): Boolean {
     return true
 }
 
-internal suspend fun PppClient.sendIpcpConfigureRequest() {
+internal fun PppClient.sendIpcpConfigureRequest() {
     if (ipcpCounter.isExhausted) {
         parent.informCounterExhausted(::sendIpcpConfigureRequest)
         kill()
@@ -40,20 +40,20 @@ internal suspend fun PppClient.sendIpcpConfigureRequest() {
     if (!networkSetting.mgDns.isRejected) sending.optionDns =
         parent.networkSetting.mgDns.create()
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     ipcpTimer.reset()
 }
 
-internal suspend fun PppClient.sendIpcpConfigureAck(received: IpcpConfigureRequest) {
+internal fun PppClient.sendIpcpConfigureAck(received: IpcpConfigureRequest) {
     val sending = IpcpConfigureAck()
     sending.id = received.id
     sending.options = received.options
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.sendIpcpConfigureNak(received: IpcpConfigureRequest) {
+internal fun PppClient.sendIpcpConfigureNak(received: IpcpConfigureRequest) {
     if (received.optionIp != null) {
         received.optionIp = networkSetting.mgIp.create()
     }
@@ -66,18 +66,18 @@ internal suspend fun PppClient.sendIpcpConfigureNak(received: IpcpConfigureReque
     sending.id = received.id
     sending.options = received.options
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.sendIpcpConfigureReject(received: IpcpConfigureRequest) {
+internal fun PppClient.sendIpcpConfigureReject(received: IpcpConfigureRequest) {
     val sending = IpcpConfigureReject()
     sending.id = received.id
     sending.options = received.extractUnknownOption()
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.receiveIpcpConfigureRequest() {
+internal fun PppClient.receiveIpcpConfigureRequest() {
     val received = IpcpConfigureRequest()
     if (!tryReadingIpcp(received)) return
 
@@ -117,7 +117,7 @@ internal suspend fun PppClient.receiveIpcpConfigureRequest() {
 }
 
 
-internal suspend fun PppClient.receiveIpcpConfigureAck() {
+internal fun PppClient.receiveIpcpConfigureAck() {
     val received = IpcpConfigureAck()
     if (!tryReadingIpcp(received)) return
 
@@ -143,7 +143,7 @@ internal suspend fun PppClient.receiveIpcpConfigureAck() {
     }
 }
 
-internal suspend fun PppClient.receiveIpcpConfigureNak() {
+internal fun PppClient.receiveIpcpConfigureNak() {
     val received = IpcpConfigureNak()
     if (!tryReadingIpcp(received)) return
 
@@ -160,7 +160,7 @@ internal suspend fun PppClient.receiveIpcpConfigureNak() {
     if (ipcpState == IpcpState.ACK_RCVD) ipcpState = IpcpState.REQ_SENT
 }
 
-internal suspend fun PppClient.receiveIpcpConfigureReject() {
+internal fun PppClient.receiveIpcpConfigureReject() {
     val received = IpcpConfigureReject()
     if (!tryReadingIpcp(received)) return
 

@@ -50,12 +50,12 @@ internal class IpcpIpOption : IpcpOption() {
 
     override fun read(bytes: IncomingBuffer) {
         setTypedLength(bytes.getByte())
-        repeat(address.size) { address[it] = bytes.getByte() }
+        bytes.get(address)
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        repeat(address.size) { bytes.put(address[it]) }
+        bytes.put(address)
     }
 
     override fun update() {
@@ -72,12 +72,12 @@ internal class IpcpDnsOption : IpcpOption() {
 
     override fun read(bytes: IncomingBuffer) {
         setTypedLength(bytes.getByte())
-        repeat(address.size) { address[it] = bytes.getByte() }
+        bytes.get(address)
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        repeat(address.size) { bytes.put(address[it]) }
+        bytes.put(address)
     }
 
     override fun update() {
@@ -88,17 +88,16 @@ internal class IpcpDnsOption : IpcpOption() {
 internal class IpcpUnknownOption(unknownType: Byte) : IpcpOption() {
     override val type = unknownType
 
-    internal val holder = mutableListOf<Byte>()
+    internal var holder = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
-        holder.clear()
         setTypedLength(bytes.getByte())
-        repeat(_length - validLengthRange.first) { holder.add(bytes.getByte()) }
+        holder = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        holder.forEach { bytes.put(it) }
+        bytes.put(holder)
     }
 
     override fun update() {

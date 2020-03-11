@@ -3,14 +3,13 @@ package kittoku.opensstpclient
 import android.preference.PreferenceManager
 import android.widget.Toast
 import kittoku.opensstpclient.layer.*
-import kittoku.opensstpclient.misc.IncomingBuffer
-import kittoku.opensstpclient.misc.NetworkSetting
-import kittoku.opensstpclient.misc.SuicideException
-import kittoku.opensstpclient.misc.inform
+import kittoku.opensstpclient.misc.*
+import kittoku.opensstpclient.unit.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
+import java.util.concurrent.LinkedBlockingQueue
 
 
 internal class ControlClient(internal val vpnService: SstpVpnService) :
@@ -18,8 +17,10 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     internal lateinit var networkSetting: NetworkSetting
     internal val status = DualClientStatus()
     internal val builder = vpnService.Builder()
+    internal val controlQueue = LinkedBlockingQueue<Any>()
     internal val incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
-    internal val outgoingBuffer = ByteBuffer.allocate(OUTGOING_BUFFER_SIZE)
+    private val controlBuffer = ByteBuffer.allocate(CONTROL_BUFFER_SIZE)
+    private val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
 
     internal lateinit var sslTerminal: SslTerminal
     private lateinit var sstpClient: SstpClient
@@ -27,7 +28,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     internal lateinit var ipTerminal: IpTerminal
 
     private var jobIncoming: Job? = null
-    private var jobOutgoing: Job? = null
+    private var jobControl: Job? = null
+    internal var jobData: Job? = null
 
     private val mutex = Mutex()
     private var isClosing = false
@@ -41,21 +43,29 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             mutex.withLock {
                 if (!isClosing) {
                     isClosing = true
+                    controlQueue.add(0)
 
                     if (exception != null && exception !is SuicideException) {
                         inform("An unexpected event occurred", exception)
                     }
 
-                    jobIncoming?.join()
-                    jobOutgoing?.join()
-
-                    sslTerminal.release()
                     ipTerminal.release()
+                    jobData?.cancel()
+
+                    jobIncoming?.join()
+
+                    withTimeoutOrNull(10_000) {
+                        while (isActive) {
+                            if (jobIncoming?.isCompleted == false) delay(100)
+                            else break
+                        }
+                    }
+                    sslTerminal.release()
+                    jobControl?.cancel()
 
                     inform("Terminate VPN connection", null)
                     vpnService.notifySwitchOff()
                     vpnService.stopForeground(true)
-
                 }
             }
         }
@@ -76,34 +86,51 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             }
         }
 
-        jobOutgoing = launch(handler) {
+        jobControl = launch(handler) {
             while (isActive) {
-                if (isClosing) {
-                    withTimeoutOrNull(10_000) {
-                        while (isActive) {
-                            if (jobIncoming?.isCompleted == false) {
-                                delay(100)
-                                continue
-                            }
+                val candidate = controlQueue.take()
+                if (candidate == 0) break
 
-                            if (sstpClient.waitingControlUnits.any()) {
-                                sstpClient.sendControlUnit()
-                            } else break
-                        }
+                controlBuffer.clear()
+                when (candidate) {
+                    is ControlPacket -> {
+                        candidate.write(controlBuffer)
                     }
 
-                    throw SuicideException()
+                    is PppFrame -> {
+                        controlBuffer.putShort(PacketType.DATA.value)
+                        controlBuffer.putShort((candidate._length + 8).toShort())
+                        candidate.write(controlBuffer)
+                    }
+
+                    else -> throw Exception("Invalid Control Unit")
                 }
+                controlBuffer.flip()
 
-                if (sstpClient.waitingControlUnits.any()) {
-                    sstpClient.sendControlUnit()
-                    continue
-                }
+                sslTerminal.send(controlBuffer)
+            }
+        }
 
-                if (pppClient.waitingControlUnits.any()) pppClient.sendControlUnit()
-                else pppClient.sendDataUnit()
+        jobData = launch(handler, CoroutineStart.LAZY) {
+            while (isActive) {
+                dataBuffer.clear()
 
-                sstpClient.sendDataUnit()
+                val readLength = ipTerminal.ipInput.read(
+                    dataBuffer.array(),
+                    dataBuffer.position() + 8,
+                    networkSetting.currentMtu
+                )
+
+                dataBuffer.putShort(PacketType.DATA.value)
+                dataBuffer.putShort((readLength + 8).toShort())
+                dataBuffer.putShort(PPP_HEADER)
+                dataBuffer.putShort(PppProtocol.IP.value)
+                dataBuffer.move(readLength)
+
+                if (dataBuffer.position() != 0) {
+                    dataBuffer.flip()
+                    sslTerminal.send(dataBuffer)
+                } else delay(100)
             }
         }
     }

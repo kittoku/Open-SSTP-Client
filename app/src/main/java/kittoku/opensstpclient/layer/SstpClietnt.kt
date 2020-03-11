@@ -6,8 +6,6 @@ import kittoku.opensstpclient.negotiator.*
 import kittoku.opensstpclient.unit.MessageType
 import kittoku.opensstpclient.unit.PPP_HEADER
 import kittoku.opensstpclient.unit.PacketType
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.withLock
 
 
 internal class SstpClient(parent: ControlClient) : Client(parent) {
@@ -16,7 +14,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
     internal val echoTimer = Timer(10_000L)
     internal val echoCounter = Counter(1)
 
-    private suspend fun proceedRequestSent() {
+    private fun proceedRequestSent() {
         if (negotiationTimer.isOver) {
             sendCallConnectRequest()
             return
@@ -60,7 +58,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.forget()
     }
 
-    private suspend fun proceedAckReceived() {
+    private fun proceedAckReceived() {
         if (negotiationTimer.isOver) {
             parent.informTimerOver(::proceedAckReceived)
             status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
@@ -112,7 +110,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
         }
     }
 
-    private suspend fun proceedConnected() {
+    private fun proceedConnected() {
         if (echoTimer.isOver) {
             sendEchoRequest()
             return
@@ -162,7 +160,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
         }
     }
 
-    override suspend fun proceed() {
+    override fun proceed() {
         when (status.sstp) {
             SstpStatus.CLIENT_CALL_DISCONNECTED -> {
                 parent.sslTerminal.initializeSocket()
@@ -187,34 +185,5 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
             parent.inform("Received a non-PPP payload", null)
             status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
         }
-    }
-
-    private fun sendPacket(length: Int) {
-        parent.sslTerminal.socket.outputStream.write(outgoingBuffer.array(), 0, length)
-    }
-
-    override suspend fun sendControlUnit() {
-        outgoingBuffer.clear()
-
-        mutex.withLock {
-            waitingControlUnits.removeAt(0).write(outgoingBuffer)
-        }
-
-        sendPacket(outgoingBuffer.position())
-
-    }
-
-    override suspend fun sendDataUnit() {
-        if (outgoingBuffer.position() == 4) {
-            delay(100)
-            return
-        }
-
-        val length = outgoingBuffer.limit()
-        outgoingBuffer.position(0)
-        outgoingBuffer.putShort(PacketType.DATA.value)
-        outgoingBuffer.putShort(length.toShort())
-
-        sendPacket(length)
     }
 }

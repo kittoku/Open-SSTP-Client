@@ -81,7 +81,7 @@ internal class NetworkSetting(
         override fun create() = LcpAuthOption().also {
             if (currentAuth == AuthSuite.MSCHAPv2) {
                 it.protocol = AuthProtocol.CHAP.value
-                it.holder.add(ChapAlgorithm.MSCHAPv2.value)
+                it.holder = ByteArray(1) { ChapAlgorithm.MSCHAPv2.value }
             }
         }
 

@@ -33,21 +33,20 @@ internal class ChapChallenge : ChapFrame() {
 
     internal val value = ByteArray(16)
 
-    internal val name = mutableListOf<Byte>()
+    internal var name = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
-        name.clear()
         readHeader(bytes)
         valueLength = bytes.getByte().toInt()
-        repeat(valueLength) { value[it] = bytes.getByte() }
-        repeat(_length - validLengthRange.first) { name.add(bytes.getByte()) }
+        bytes.get(value)
+        name = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
         bytes.put(valueLength.toByte())
-        value.forEach { bytes.put(it) }
-        name.forEach { bytes.put(it) }
+        bytes.put(value)
+        bytes.put(name)
     }
 
     override fun update() {
@@ -70,27 +69,26 @@ internal class ChapResponse : ChapFrame() {
 
     internal var flag: Byte = 0
 
-    internal val name = mutableListOf<Byte>()
+    internal var name = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
-        name.clear()
         readHeader(bytes)
         valueLength = bytes.getByte().toInt()
-        repeat(challenge.size) { challenge[it] = bytes.getByte() }
+        bytes.get(challenge)
         bytes.move(8)
-        repeat(response.size) { response[it] = bytes.getByte() }
+        bytes.get(response)
         flag = bytes.getByte()
-        repeat(_length - validLengthRange.first) { name.add(bytes.getByte()) }
+        name = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
         bytes.put(valueLength.toByte())
-        challenge.forEach { bytes.put(it) }
-        repeat(8) { bytes.put(0) }
-        response.forEach { bytes.put(it) }
+        bytes.put(challenge)
+        bytes.put(ByteArray(8))
+        bytes.put(response)
         bytes.put(flag)
-        name.forEach { bytes.put(it) }
+        bytes.put(name)
     }
 
     override fun update() {
@@ -105,7 +103,7 @@ internal class ChapSuccess : ChapFrame() {
 
     internal val response = ByteArray(42)
 
-    internal val message = mutableListOf<Byte>()
+    internal var message = ByteArray(0)
 
     private val isValidResponse: Boolean
         get() {
@@ -121,18 +119,17 @@ internal class ChapSuccess : ChapFrame() {
         }
 
     override fun read(bytes: IncomingBuffer) {
-        message.clear()
         readHeader(bytes)
-        repeat(response.size) { response[it] = bytes.getByte() }
-        repeat(_length - validLengthRange.first) { message.add(bytes.getByte()) }
+        bytes.get(response)
+        message = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
 
         if (!isValidResponse) throw DataUnitParsingError()
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        response.forEach { bytes.put(it) }
-        message.forEach { bytes.put(it) }
+        bytes.put(response)
+        bytes.put(message)
     }
 
     override fun update() {
@@ -146,17 +143,16 @@ internal class ChapFailure : ChapFrame() {
 
     override val validLengthRange = 4..Short.MAX_VALUE
 
-    internal val message = mutableListOf<Byte>()
+    internal var message = ByteArray(0)
 
     override fun read(bytes: IncomingBuffer) {
-        message.clear()
         readHeader(bytes)
-        repeat(_length - validLengthRange.first) { message.add(bytes.getByte()) }
+        message = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
     }
 
     override fun write(bytes: ByteBuffer) {
         writeHeader(bytes)
-        message.forEach { bytes.put(it) }
+        bytes.put(message)
     }
 
     override fun update() {

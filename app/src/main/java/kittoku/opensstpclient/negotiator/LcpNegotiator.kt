@@ -24,7 +24,7 @@ internal fun PppClient.tryReadingLcp(frame: LcpFrame): Boolean {
     return true
 }
 
-internal suspend fun PppClient.sendLcpConfigureRequest() {
+internal fun PppClient.sendLcpConfigureRequest() {
     if (lcpCounter.isExhausted) {
         parent.informCounterExhausted(::sendLcpConfigureRequest)
         kill()
@@ -41,20 +41,20 @@ internal suspend fun PppClient.sendLcpConfigureRequest() {
     if (!networkSetting.mgAuth.isRejected) sending.optionAuth =
         parent.networkSetting.mgAuth.create()
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     lcpTimer.reset()
 }
 
-internal suspend fun PppClient.sendLcpConfigureAck(received: LcpConfigureRequest) {
+internal fun PppClient.sendLcpConfigureAck(received: LcpConfigureRequest) {
     val sending = LcpConfigureAck()
     sending.id = received.id
     sending.options = received.options
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.sendLcpConfigureNak(received: LcpConfigureRequest) {
+internal fun PppClient.sendLcpConfigureNak(received: LcpConfigureRequest) {
     if (received.optionMru != null) {
         received.optionMru = networkSetting.mgMru.create()
     }
@@ -67,39 +67,35 @@ internal suspend fun PppClient.sendLcpConfigureNak(received: LcpConfigureRequest
     sending.id = received.id
     sending.options = received.options
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.sendLcpConfigureReject(received: LcpConfigureRequest) {
+internal fun PppClient.sendLcpConfigureReject(received: LcpConfigureRequest) {
     val sending = LcpConfigureReject()
     sending.id = received.id
     sending.options = received.extractUnknownOption()
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.sendLcpEchoRequest() {
+internal fun PppClient.sendLcpEchoRequest() {
     globalIdentifier++
     val sending = LcpEchoRequest()
     sending.id = globalIdentifier
-    "Abura Mashi Mashi".toByteArray(Charset.forName("US-ASCII")).forEach {
-        sending.holder.add(it)
-    }
+    sending.holder = "Abura Mashi Mashi".toByteArray(Charset.forName("US-ASCII"))
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.sendLcpEchoReply(received: LcpEchoRequest) {
+internal fun PppClient.sendLcpEchoReply(received: LcpEchoRequest) {
     val sending = LcpEchoReply()
     sending.id = received.id
-    "Abura Mashi Mashi".toByteArray(Charset.forName("US-ASCII")).forEach {
-        sending.holder.add(it)
-    }
+    sending.holder = "Abura Mashi Mashi".toByteArray(Charset.forName("US-ASCII"))
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 }
 
-internal suspend fun PppClient.receiveLcpConfigureRequest() {
+internal fun PppClient.receiveLcpConfigureRequest() {
     val received = LcpConfigureRequest()
     if (!tryReadingLcp(received)) return
 
@@ -138,7 +134,7 @@ internal suspend fun PppClient.receiveLcpConfigureRequest() {
     }
 }
 
-internal suspend fun PppClient.receiveLcpConfigureAck() {
+internal fun PppClient.receiveLcpConfigureAck() {
     val received = LcpConfigureAck()
     if (!tryReadingLcp(received)) return
 
@@ -163,7 +159,7 @@ internal suspend fun PppClient.receiveLcpConfigureAck() {
     }
 }
 
-internal suspend fun PppClient.receiveLcpConfigureNak() {
+internal fun PppClient.receiveLcpConfigureNak() {
     val received = LcpConfigureNak()
     if (!tryReadingLcp(received)) return
 
@@ -180,7 +176,7 @@ internal suspend fun PppClient.receiveLcpConfigureNak() {
     if (lcpState == LcpState.ACK_RCVD) lcpState = LcpState.REQ_SENT
 }
 
-internal suspend fun PppClient.receiveLcpConfigureReject() {
+internal fun PppClient.receiveLcpConfigureReject() {
     val received = LcpConfigureReject()
     if (!tryReadingLcp(received)) return
 
@@ -212,7 +208,7 @@ internal suspend fun PppClient.receiveLcpConfigureReject() {
     }
 }
 
-internal suspend fun PppClient.receiveLcpEchoRequest() {
+internal fun PppClient.receiveLcpEchoRequest() {
     val received = LcpEchoRequest()
     if (!tryReadingLcp(received)) return
     sendLcpEchoReply(received)

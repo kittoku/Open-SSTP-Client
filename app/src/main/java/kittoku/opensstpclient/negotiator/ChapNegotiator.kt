@@ -27,7 +27,7 @@ internal fun PppClient.tryReadingChap(frame: ChapFrame): Boolean {
     return true
 }
 
-internal suspend fun PppClient.sendChapResponse(received: ChapChallenge) {
+internal fun PppClient.sendChapResponse(received: ChapChallenge) {
     currentAuthRequestId = received.id
     val sending = ChapResponse()
     sending.id = currentAuthRequestId
@@ -38,18 +38,16 @@ internal suspend fun PppClient.sendChapResponse(received: ChapChallenge) {
         generateResponse(it)
         it.chapSetting.clientChallenge.copyInto(sending.challenge)
         it.chapSetting.clientResponse.copyInto(sending.response)
-        it.username.toByteArray(Charset.forName("US-ASCII")).forEach { b ->
-            sending.name.add(b)
-        }
+        sending.name = it.username.toByteArray(Charset.forName("US-ASCII"))
     }
 
     sending.update()
-    addControlUnit(sending)
+    parent.controlQueue.add(sending)
 
     authTimer.reset()
 }
 
-internal suspend fun PppClient.receiveChapChallenge() {
+internal fun PppClient.receiveChapChallenge() {
     val received = ChapChallenge()
     if (!tryReadingChap(received)) return
 

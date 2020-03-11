@@ -1,11 +1,9 @@
 package kittoku.opensstpclient.layer
 
 import kittoku.opensstpclient.ControlClient
-import kittoku.opensstpclient.MAX_MTU
 import kittoku.opensstpclient.misc.*
 import kittoku.opensstpclient.negotiator.*
 import kittoku.opensstpclient.unit.*
-import kotlinx.coroutines.sync.withLock
 
 
 internal enum class LcpState {
@@ -55,7 +53,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.position(incomingBuffer.pppLimit)
     }
 
-    private suspend fun proceedLcp() {
+    private fun proceedLcp() {
         if (lcpTimer.isOver) {
             sendLcpConfigureRequest()
             if (lcpState == LcpState.ACK_RCVD) lcpState = LcpState.REQ_SENT
@@ -89,7 +87,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.forget()
     }
 
-    private suspend fun proceedIpcp() {
+    private fun proceedIpcp() {
         if (ipcpTimer.isOver) {
             sendIpcpConfigureRequest()
             if (ipcpState == IpcpState.ACK_RCVD) ipcpState = IpcpState.REQ_SENT
@@ -123,7 +121,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.forget()
     }
 
-    private suspend fun proceedPap() {
+    private fun proceedPap() {
         if (authTimer.isOver) {
             parent.informTimerOver(::proceedPap)
             kill()
@@ -147,7 +145,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.forget()
     }
 
-    private suspend fun proceedChap() {
+    private fun proceedChap() {
         if (authTimer.isOver) {
             parent.informTimerOver(::proceedChap)
             kill()
@@ -173,7 +171,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.forget()
     }
 
-    private suspend fun proceedNetwork() {
+    private fun proceedNetwork() {
         if (echoTimer.isOver) sendLcpEchoRequest()
 
         if (!hasIncoming) return
@@ -218,7 +216,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         incomingBuffer.forget()
     }
 
-    override suspend fun proceed() {
+    override fun proceed() {
         if (!canStartPpp) return
 
         when (status.ppp) {
@@ -278,40 +276,13 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                         }
 
                         status.ppp = PppStatus.NETWORK
+                        parent.jobData?.start()
                         echoTimer.reset()
                     }
                 }
             }
 
             PppStatus.NETWORK -> proceedNetwork()
-        }
-    }
-
-    override suspend fun sendControlUnit() {
-        outgoingBuffer.clear()
-        outgoingBuffer.position(4)
-
-        mutex.withLock {
-            waitingControlUnits.removeAt(0).write(outgoingBuffer)
-        }
-
-        outgoingBuffer.limit(outgoingBuffer.position())
-    }
-
-    override suspend fun sendDataUnit() {
-        outgoingBuffer.clear()
-        outgoingBuffer.position(4)
-
-        if (status.ppp == PppStatus.NETWORK) {
-            parent.ipTerminal.ipInput.also {
-                val readLength = it.read(outgoingBuffer.array(), 8, MAX_MTU)
-                if (readLength != 0) {
-                    outgoingBuffer.putShort(PPP_HEADER)
-                    outgoingBuffer.putShort(PppProtocol.IP.value)
-                    outgoingBuffer.position(8 + readLength)
-                    outgoingBuffer.limit(outgoingBuffer.position())
-                }
-            }
         }
     }
 

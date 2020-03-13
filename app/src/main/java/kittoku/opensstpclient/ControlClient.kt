@@ -3,9 +3,13 @@ package kittoku.opensstpclient
 import android.preference.PreferenceManager
 import android.widget.Toast
 import kittoku.opensstpclient.layer.*
-import kittoku.opensstpclient.misc.*
+import kittoku.opensstpclient.misc.IncomingBuffer
+import kittoku.opensstpclient.misc.NetworkSetting
+import kittoku.opensstpclient.misc.SuicideException
+import kittoku.opensstpclient.misc.inform
 import kittoku.opensstpclient.unit.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
@@ -19,8 +23,6 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     internal val builder = vpnService.Builder()
     internal val controlQueue = LinkedBlockingQueue<Any>()
     internal val incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
-    private val controlBuffer = ByteBuffer.allocate(CONTROL_BUFFER_SIZE)
-    private val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
 
     internal lateinit var sslTerminal: SslTerminal
     private lateinit var sstpClient: SstpClient
@@ -87,6 +89,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
 
         jobControl = launch(handler) {
+            val controlBuffer = ByteBuffer.allocate(CONTROL_BUFFER_SIZE)
+
             while (isActive) {
                 val candidate = controlQueue.take()
                 if (candidate == 0) break
@@ -112,25 +116,67 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
 
         jobData = launch(handler, CoroutineStart.LAZY) {
-            while (isActive) {
-                dataBuffer.clear()
+            val channel = Channel<ByteBuffer>(0)
+            val readBufferAlpha = ByteBuffer.allocate(networkSetting.currentMtu)
+            val readBufferBeta = ByteBuffer.allocate(networkSetting.currentMtu)
+            var isBlockingAlpha = true
 
-                val readLength = ipTerminal.ipInput.read(
-                    dataBuffer.array(),
-                    dataBuffer.position() + 8,
-                    networkSetting.currentMtu
-                )
+            launch { // buffer packets
+                val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
+                val minCapacity = networkSetting.currentMtu + 8
 
-                dataBuffer.putShort(PacketType.DATA.value)
-                dataBuffer.putShort((readLength + 8).toShort())
-                dataBuffer.putShort(PPP_HEADER)
-                dataBuffer.putShort(PppProtocol.IP.value)
-                dataBuffer.move(readLength)
+                fun encapsulate(src: ByteBuffer) {
+                    dataBuffer.putShort(PacketType.DATA.value)
+                    dataBuffer.putShort((src.limit() + 8).toShort())
+                    dataBuffer.putShort(PPP_HEADER)
+                    dataBuffer.putShort(PppProtocol.IP.value)
+                    dataBuffer.put(src)
+                }
 
-                if (dataBuffer.position() != 0) {
+                while (isActive) {
+                    dataBuffer.clear()
+                    encapsulate(channel.receive())
+
+                    val start = System.currentTimeMillis()
+                    while (isActive) {
+                        val polled = channel.poll()
+                        if (polled == null) {
+                            if (System.currentTimeMillis() - start >= 10) break
+                            else delay(1)
+                        } else {
+                            encapsulate(polled)
+                            if (dataBuffer.remaining() < minCapacity) break
+                        }
+                    }
+
                     dataBuffer.flip()
                     sslTerminal.send(dataBuffer)
-                } else delay(100)
+                }
+            }
+
+            suspend fun read(dst: ByteBuffer) {
+                dst.clear()
+                dst.position(
+                    ipTerminal.ipInput.read(
+                        dst.array(),
+                        0,
+                        networkSetting.currentMtu
+                    )
+                )
+                dst.flip()
+
+                if (dst.limit() > 0) channel.send(dst)
+                else delay(100)
+            }
+
+            while (isActive) {
+                isBlockingAlpha = if (isBlockingAlpha) {
+                    read(readBufferAlpha)
+                    false
+                } else {
+                    read(readBufferBeta)
+                    true
+                }
             }
         }
     }

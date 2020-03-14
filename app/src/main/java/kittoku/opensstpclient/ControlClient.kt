@@ -137,16 +137,13 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     dataBuffer.clear()
                     encapsulate(channel.receive())
 
-                    val start = System.currentTimeMillis()
                     while (isActive) {
+                        delay(1)
                         val polled = channel.poll()
-                        if (polled == null) {
-                            if (System.currentTimeMillis() - start >= 10) break
-                            else delay(1)
-                        } else {
+                        if (polled != null) {
                             encapsulate(polled)
                             if (dataBuffer.remaining() < minCapacity) break
-                        }
+                        } else break
                     }
 
                     dataBuffer.flip()

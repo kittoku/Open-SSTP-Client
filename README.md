@@ -5,7 +5,7 @@ So no test with other servers is done. Its behavior may be still unstable.
 
 ## Installation
 * You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.0.3/osc-1.0.3.apk) and install it
+* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.0.4/osc-1.0.4.apk) and install it
 
 ## Usage
 Fill `Host`, `Username` and `Password` fields and turn the switch on. If a key icon gets to show on 

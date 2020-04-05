@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        title = "Open SSTP Client: ${BuildConfig.VERSION_NAME}"
+
         val tabs = findViewById<TabLayout>(R.id.tabs)
         tabs.addTab(tabs.newTab().setText("HOME"), 0)
         tabs.addTab(tabs.newTab().setText("SETTING"), 1)

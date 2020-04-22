@@ -225,10 +225,9 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                     sendLcpConfigureRequest()
                     isInitialLcp = false
                 }
-                else {
-                    proceedLcp()
-                    if (lcpState == LcpState.OPENED) status.ppp = PppStatus.AUTHENTICATE
-                }
+
+                proceedLcp()
+                if (lcpState == LcpState.OPENED) status.ppp = PppStatus.AUTHENTICATE
             }
 
             PppStatus.AUTHENTICATE -> {
@@ -238,10 +237,9 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                             sendPapRequest()
                             isInitialAuth = false
                         }
-                        else {
-                            proceedPap()
-                            if (isAuthFinished) status.ppp = PppStatus.NEGOTIATE_IPCP
-                        }
+
+                        proceedPap()
+                        if (isAuthFinished) status.ppp = PppStatus.NEGOTIATE_IPCP
                     }
 
                     AuthSuite.MSCHAPv2 -> {
@@ -249,10 +247,10 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                             networkSetting.chapSetting = ChapSetting()
                             authTimer.reset()
                             isInitialAuth = false
-                        } else {
-                            proceedChap()
-                            if (isAuthFinished) status.ppp = PppStatus.NEGOTIATE_IPCP
                         }
+
+                        proceedChap()
+                        if (isAuthFinished) status.ppp = PppStatus.NEGOTIATE_IPCP
                     }
                 }
             }
@@ -262,23 +260,22 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                     sendIpcpConfigureRequest()
                     isInitialIpcp = false
                 }
-                else {
-                    proceedIpcp()
-                    if (ipcpState == IpcpState.OPENED) {
-                        parent.ipTerminal.also {
-                            try {
-                                it.initializeTun()
-                            } catch (e: Exception) {
-                                parent.inform("Failed to create VPN interface", e)
-                                kill()
-                                return
-                            }
-                        }
 
-                        status.ppp = PppStatus.NETWORK
-                        parent.jobData?.start()
-                        echoTimer.reset()
+                proceedIpcp()
+                if (ipcpState == IpcpState.OPENED) {
+                    parent.ipTerminal.also {
+                        try {
+                            it.initializeTun()
+                        } catch (e: Exception) {
+                            parent.inform("Failed to create VPN interface", e)
+                            kill()
+                            return
+                        }
                     }
+
+                    status.ppp = PppStatus.NETWORK
+                    parent.jobData?.start()
+                    echoTimer.reset()
                 }
             }
 

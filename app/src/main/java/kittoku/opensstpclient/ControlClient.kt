@@ -230,6 +230,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
         if (!(isPapAcceptable || isMschapv2Acceptable)) {
             makeToast("No authentication protocol was accepted")
+            return false
         }
 
         val isHvIgnored = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)

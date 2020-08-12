@@ -1,8 +1,8 @@
 package kittoku.opensstpclient
 
 import android.os.Bundle
-import android.support.design.widget.TabLayout
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.tabs.TabLayout
 
 
 internal enum class PreferenceKey(val value: String) {

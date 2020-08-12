@@ -8,8 +8,6 @@ import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.v4.app.Fragment
-import android.support.v4.content.LocalBroadcastManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +15,8 @@ import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 
 class HomeFragment : Fragment() {

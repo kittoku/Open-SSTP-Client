@@ -42,7 +42,7 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
 
         if (Build.VERSION.SDK_INT >= 21) builder.setBlocking(true)
 
-        fd = builder.establish()
+        fd = builder.establish()!!
 
         ipInput = FileInputStream(fd.fileDescriptor)
 

@@ -12,14 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:text="Port"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <EditText
-        android:id="@+id/port"
+        android:id="@+id/editPort"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -36,14 +35,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="MRU"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <EditText
-        android:id="@+id/mru"
+        android:id="@+id/editMru"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -60,14 +58,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="MTU"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <EditText
-        android:id="@+id/mtu"
+        android:id="@+id/editMtu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -84,14 +81,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="Address Prefix"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <EditText
-        android:id="@+id/prefix"
+        android:id="@+id/editPrefix"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -108,18 +104,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="SSL protocol"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/spinnerSsl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp" />
 
     <TextView
@@ -127,27 +121,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="32dp"
         android:text="Acceptable Authentication Protocol"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <CheckBox
-        android:id="@+id/pap"
+        android:id="@+id/checkboxPap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="PAP" />
 
     <CheckBox
-        android:id="@+id/mschapv2"
+        android:id="@+id/checkboxMschapv2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="MS-CHAPv2" />
 
@@ -156,37 +147,71 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="32dp"
         android:text="Insecure Options"
         android:textColor="@android:color/black"
         tools:textSize="18sp" />
 
     <CheckBox
-        android:id="@+id/hvIgnored"
+        android:id="@+id/checkboxHvIgnored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="Disable Hostname Verifier" />
 
     <CheckBox
-        android:id="@+id/decryptable"
+        android:id="@+id/checkboxDecryptable"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="Decryptable Mode" />
 
-    <Button
-        android:id="@+id/button"
+    <TextView
+        android:id="@+id/titleCertificate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="32dp"
-        android:text="SAVE" />
+        android:text="Trusted Certificates"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonCert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50dp"
+            android:minHeight="18dp"
+            android:text="SELECT"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textCert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:hint="No Folder Selected"
+            android:textColor="@android:color/black"
+            tools:textSize="14sp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="SAVE"
+        android:textSize="18sp" />
 
 </LinearLayout>

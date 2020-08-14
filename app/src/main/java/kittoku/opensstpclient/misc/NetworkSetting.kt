@@ -31,7 +31,8 @@ internal class NetworkSetting(
     internal val isPapAcceptable: Boolean,
     internal val isMschapv2Acceptable: Boolean,
     internal val isHvIgnored: Boolean,
-    internal val isDecryptable: Boolean
+    internal val isDecryptable: Boolean,
+    internal val certUri: String?
 ) {
     internal lateinit var serverCertificate: Certificate
     internal lateinit var hashProtocol: HashProtocol

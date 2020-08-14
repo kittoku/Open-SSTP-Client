@@ -3,6 +3,7 @@ package kittoku.opensstpclient
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 internal enum class PreferenceKey(val value: String) {
@@ -19,7 +20,8 @@ internal enum class PreferenceKey(val value: String) {
     HV_IGNORED("HV_IGNORED"),
     DECRYPTABLE("DECRYPTABLE"),
     LOG("LOG"),
-    SWITCH("SWITCH")
+    SWITCH("SWITCH"),
+    CERTIFICATE("CERTIFICATE"),
 }
 
 class MainActivity : AppCompatActivity() {
@@ -30,9 +32,8 @@ class MainActivity : AppCompatActivity() {
 
         title = "Open SSTP Client: ${BuildConfig.VERSION_NAME}"
 
-        val tabs = findViewById<TabLayout>(R.id.tabs)
-        tabs.addTab(tabs.newTab().setText("HOME"), 0)
-        tabs.addTab(tabs.newTab().setText("SETTING"), 1)
+        tabBar.addTab(tabBar.newTab().setText("HOME"), 0)
+        tabBar.addTab(tabBar.newTab().setText("SETTING"), 1)
 
         val fm = supportFragmentManager
         val homeFragment = HomeFragment()
@@ -40,14 +41,14 @@ class MainActivity : AppCompatActivity() {
 
         fun update(tab: Int) {
             fm.beginTransaction().also {
-                it.replace(R.id.container, if (tab == 0) homeFragment else settingFragment)
+                it.replace(container.id, if (tab == 0) homeFragment else settingFragment)
                 it.commit()
             }
         }
 
         update(0)
 
-        tabs.addOnTabSelectedListener(
+        tabBar.addOnTabSelectedListener(
             object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     update(tab?.position ?: 0)

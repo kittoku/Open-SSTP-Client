@@ -1,14 +1,18 @@
 package kittoku.opensstpclient.layer
 
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 import kittoku.opensstpclient.ControlClient
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.BufferedInputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.nio.ByteBuffer
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLSocket
-import javax.net.ssl.SSLSocketFactory
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import javax.net.ssl.*
 
 
 internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
@@ -16,7 +20,41 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
     internal lateinit var socket: SSLSocket
 
     private fun createSocket() {
-        socket = SSLSocketFactory.getDefault().createSocket(
+        val socketFactory = if (parent.networkSetting.certUri != null) {
+            val uri = Uri.parse(parent.networkSetting.certUri)
+            val document = DocumentFile.fromTreeUri(parent.vpnService, uri)!!
+
+            val certFactory = CertificateFactory.getInstance("X.509")
+            val keyStore = KeyStore.getDefaultType().let {
+                KeyStore.getInstance(it)
+            }
+            keyStore.load(null, null)
+
+            for (file in document.listFiles()) {
+                if (file.isFile) {
+                    val stream =
+                        BufferedInputStream(parent.vpnService.contentResolver.openInputStream(file.uri))
+                    val ca = certFactory.generateCertificate(stream) as X509Certificate
+                    keyStore.setCertificateEntry(file.name, ca)
+                    stream.close()
+                }
+            }
+
+            val tmFactory = TrustManagerFactory.getDefaultAlgorithm().let {
+                TrustManagerFactory.getInstance(it)
+            }
+            tmFactory.init(keyStore)
+
+            val sslContext = SSLContext.getInstance("TLS").also {
+                it.init(null, tmFactory.trustManagers, null)
+            }
+
+            sslContext.socketFactory
+        } else {
+            SSLSocketFactory.getDefault()
+        }
+
+        socket = socketFactory.createSocket(
             parent.networkSetting.host,
             parent.networkSetting.port ?: 443
         ) as SSLSocket

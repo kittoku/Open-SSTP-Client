@@ -11,7 +11,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:text="Host"
         android:textColor="@android:color/black"
@@ -24,12 +23,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="Username"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/host"
+        app:layout_constraintTop_toBottomOf="@+id/editHost"
         tools:textSize="18sp" />
 
     <TextView
@@ -37,16 +35,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="Password"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username"
+        app:layout_constraintTop_toBottomOf="@+id/editUsername"
         tools:textSize="18sp" />
 
     <EditText
-        android:id="@+id/host"
+        android:id="@+id/editHost"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -62,7 +59,7 @@
         app:layout_constraintTop_toBottomOf="@+id/titleHost" />
 
     <EditText
-        android:id="@+id/username"
+        android:id="@+id/editUsername"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -79,7 +76,7 @@
         app:layout_constraintTop_toBottomOf="@+id/titleUsername" />
 
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/editPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -100,9 +97,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginRight="24dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password" />
+        app:layout_constraintTop_toBottomOf="@+id/editPassword" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
@@ -118,7 +114,7 @@
         app:layout_constraintTop_toBottomOf="@+id/connector">
 
         <TextView
-            android:id="@+id/log"
+            android:id="@+id/textLog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#000000"

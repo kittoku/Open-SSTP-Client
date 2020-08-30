@@ -264,3 +264,30 @@ internal class LcpEchoRequest : LcpMagicNumberFrame() {
 internal class LcpEchoReply : LcpMagicNumberFrame() {
     override val code = LcpCode.ECHO_REPLY.value
 }
+
+internal class LcpProtocolReject : LcpFrame() {
+    internal var rejectedProtocol: Short = 0
+
+    internal var holder = ByteArray(0)
+
+    override val code = LcpCode.PROTOCOL_REJECT.value
+
+    override val validLengthRange = 6..Short.MAX_VALUE
+
+    override fun read(bytes: IncomingBuffer) {
+        readHeader(bytes)
+        rejectedProtocol = bytes.getShort()
+        holder = ByteArray(_length - validLengthRange.first).also { bytes.get(it) }
+    }
+
+    override fun write(bytes: ByteBuffer) {
+        writeHeader(bytes)
+        bytes.putShort(rejectedProtocol)
+        bytes.put(holder)
+    }
+
+    override fun update() {
+        _length = validLengthRange.first + holder.size
+    }
+
+}

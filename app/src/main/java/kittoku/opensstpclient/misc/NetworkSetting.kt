@@ -30,6 +30,8 @@ internal class NetworkSetting(
     internal val sslProtocol: String,
     internal val isPapAcceptable: Boolean,
     internal val isMschapv2Acceptable: Boolean,
+    internal val isIpv4Enabled: Boolean,
+    internal val isIpv6Enabled: Boolean,
     internal val isHvIgnored: Boolean,
     internal val isDecryptable: Boolean,
     internal val certUri: String?
@@ -44,6 +46,7 @@ internal class NetworkSetting(
     internal var currentAuth = if (isMschapv2Acceptable) AuthSuite.MSCHAPv2 else AuthSuite.PAP
     internal val currentIp = ByteArray(4)
     internal val currentDns = ByteArray(4)
+    internal val currentIpv6 = ByteArray(8)
 
     internal val mgMru = object : OptionManager<LcpMruOption>() {
         override fun create() = LcpMruOption().also {
@@ -141,6 +144,18 @@ internal class NetworkSetting(
 
         override fun compromiseNak(option: IpcpDnsOption) {
             option.address.copyInto(currentDns)
+        }
+    }
+
+    internal val mgIpv6 = object : OptionManager<Ipv6cpIdentifierOption>() {
+        override fun create() = Ipv6cpIdentifierOption().also {
+            currentIpv6.copyInto(it.identifier)
+        }
+
+        override fun compromiseReq(option: Ipv6cpIdentifierOption) = true
+
+        override fun compromiseNak(option: Ipv6cpIdentifierOption) {
+            option.identifier.copyInto(currentIpv6)
         }
     }
 }

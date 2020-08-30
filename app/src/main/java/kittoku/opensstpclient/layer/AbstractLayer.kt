@@ -4,7 +4,7 @@ import kittoku.opensstpclient.ControlClient
 
 
 internal enum class PppStatus {
-    NEGOTIATE_LCP, AUTHENTICATE, NEGOTIATE_IPCP, NETWORK
+    NEGOTIATE_LCP, AUTHENTICATE, NEGOTIATE_IPCP, NEGOTIATE_IPV6CP, NETWORK
 }
 
 internal enum class SstpStatus {

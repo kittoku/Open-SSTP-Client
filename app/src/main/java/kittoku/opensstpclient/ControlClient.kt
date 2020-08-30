@@ -125,17 +125,39 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
                 val minCapacity = networkSetting.currentMtu + 8
 
-                fun encapsulate(src: ByteBuffer) {
+                val ipv4Version: Int = (0x4).shl(28)
+                val ipv6Version: Int = (0x6).shl(28)
+                val versionMask: Int = (0xF).shl(28)
+
+                fun encapsulate(src: ByteBuffer): Boolean // true if data protocol is enabled
+                {
+                    val header = src.getInt(0)
+                    val version = when (header and versionMask) {
+                        ipv4Version -> {
+                            if (!networkSetting.isIpv4Enabled) return false
+                            PppProtocol.IP.value
+                        }
+
+                        ipv6Version -> {
+                            if (!networkSetting.isIpv6Enabled) return false
+                            PppProtocol.IPV6.value
+                        }
+
+                        else -> throw Exception("Invalid data protocol was detected")
+                    }
+
                     dataBuffer.putShort(PacketType.DATA.value)
                     dataBuffer.putShort((src.limit() + 8).toShort())
                     dataBuffer.putShort(PPP_HEADER)
-                    dataBuffer.putShort(PppProtocol.IP.value)
+                    dataBuffer.putShort(version)
                     dataBuffer.put(src)
+
+                    return true
                 }
 
                 while (isActive) {
                     dataBuffer.clear()
-                    encapsulate(channel.receive())
+                    if (!encapsulate(channel.receive())) continue
 
                     while (isActive) {
                         delay(1)
@@ -233,6 +255,13 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             return false
         }
 
+        val isIpv4Enabled = prefs.getBoolean(PreferenceKey.IPv4.value, true)
+        val isIpv6Enabled = prefs.getBoolean(PreferenceKey.IPv6.value, false)
+        if (!(isIpv4Enabled || isIpv6Enabled)) {
+            makeToast("No network control protocol was accepted")
+            return false
+        }
+
         val isHvIgnored = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
         val isDecryptable = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
 
@@ -242,8 +271,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
         networkSetting = NetworkSetting(
             host, username, password, port, mru, mtu, prefix, ssl,
-            isPapAcceptable, isMschapv2Acceptable, isHvIgnored, isDecryptable,
-            certUri
+            isPapAcceptable, isMschapv2Acceptable, isIpv4Enabled, isIpv6Enabled,
+            isHvIgnored, isDecryptable, certUri
         )
 
         return true

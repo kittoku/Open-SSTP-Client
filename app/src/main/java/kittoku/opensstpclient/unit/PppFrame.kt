@@ -12,7 +12,9 @@ internal enum class PppProtocol(val value: Short) {
     PAP(0xC023.toShort()),
     CHAP(0xC223.toShort()),
     IPCP(0x8021.toShort()),
-    IP(0x0021.toShort());
+    IP(0x0021.toShort()),
+    IPV6CP(0x8057.toShort()),
+    IPV6(0x0057.toShort());
 
     companion object {
         internal val resolve = generateResolver(values(), PppProtocol::value)

@@ -143,6 +143,32 @@
         android:text="MS-CHAPv2" />
 
     <TextView
+        android:id="@+id/titleNcp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Enabled Network Control Protocols"
+        android:textColor="@android:color/black"
+        tools:textSize="18sp" />
+
+    <CheckBox
+        android:id="@+id/checkboxIpv4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="IPv4" />
+
+    <CheckBox
+        android:id="@+id/checkboxIpv6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="IPv6" />
+
+    <TextView
         android:id="@+id/titleInsecure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

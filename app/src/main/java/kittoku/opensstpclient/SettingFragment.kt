@@ -67,6 +67,8 @@ class SettingFragment : Fragment() {
 
         checkboxPap.isChecked = prefs.getBoolean(PreferenceKey.PAP.value, true)
         checkboxMschapv2.isChecked = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
+        checkboxIpv4.isChecked = prefs.getBoolean(PreferenceKey.IPv4.value, true)
+        checkboxIpv6.isChecked = prefs.getBoolean(PreferenceKey.IPv6.value, false)
         checkboxHvIgnored.isChecked = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
         checkboxDecryptable.isChecked = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
     }
@@ -81,6 +83,8 @@ class SettingFragment : Fragment() {
 
         editor.putBoolean(PreferenceKey.PAP.value, checkboxPap.isChecked)
         editor.putBoolean(PreferenceKey.MSCHAPv2.value, checkboxMschapv2.isChecked)
+        editor.putBoolean(PreferenceKey.IPv4.value, checkboxIpv4.isChecked)
+        editor.putBoolean(PreferenceKey.IPv6.value, checkboxIpv6.isChecked)
         editor.putBoolean(PreferenceKey.HV_IGNORED.value, checkboxHvIgnored.isChecked)
         editor.putBoolean(PreferenceKey.DECRYPTABLE.value, checkboxDecryptable.isChecked)
 

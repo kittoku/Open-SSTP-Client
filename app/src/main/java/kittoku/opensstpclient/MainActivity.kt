@@ -22,6 +22,8 @@ internal enum class PreferenceKey(val value: String) {
     LOG("LOG"),
     SWITCH("SWITCH"),
     CERTIFICATE("CERTIFICATE"),
+    IPv4("IPv4"),
+    IPv6("IPv6")
 }
 
 class MainActivity : AppCompatActivity() {

@@ -5,7 +5,7 @@ So no test with other servers is done. Its behavior may be still unstable.
 
 ## Installation
 * You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.0.5/osc-1.0.5.apk) and install it
+* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.1.0/osc-1.1.0.apk) and install it
 
 ## Usage
 Fill `Host`, `Username` and `Password` fields and turn the switch on. If a key icon gets to show on 
@@ -17,7 +17,15 @@ the connection, turn the switch off in the home tab or push `DISCONNECT` in the 
 
 ## Setting tab
 You can configure some settings in the setting tab. You need to **push** SAVE button to apply the settings 
-**before** connecting. 
+**before** connecting. Some settings to be noted are written below:
+
+### Enabled Network Control Protocols
+You can choose what network protocol PPP layer tries enabling. Remember, IPv6 option just gives the device 
+a link local address, never guarantees that you can communicate perfectly with IPv6 protocol.
+
+### Trusted Certificates
+If you choose a certain directory, the client uses ONLY certificates in the directory, but the default 
+certificate store. I made this option for debugging. 
 
 ## Notice
 * `Host` field can also contain IP address, but cannot include a port number. You can configure it in

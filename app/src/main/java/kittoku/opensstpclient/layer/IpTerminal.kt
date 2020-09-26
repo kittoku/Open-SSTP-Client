@@ -67,7 +67,9 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
 
         builder.setMtu(setting.currentMtu)
 
-        builder.addRoute("0.0.0.0", 0)
+        if (!setting.isOnlyLan) {
+            builder.addRoute("0.0.0.0", 0)
+        }
 
         if (Build.VERSION.SDK_INT >= 21) builder.setBlocking(true)
 

@@ -71,6 +71,7 @@ class SettingFragment : Fragment() {
         checkboxIpv6.isChecked = prefs.getBoolean(PreferenceKey.IPv6.value, false)
         checkboxHvIgnored.isChecked = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
         checkboxDecryptable.isChecked = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
+        checkboxOnlyLan.isChecked = prefs.getBoolean(PreferenceKey.ONLY_LAN.value, false)
     }
 
     private fun savePreferences() {
@@ -87,6 +88,7 @@ class SettingFragment : Fragment() {
         editor.putBoolean(PreferenceKey.IPv6.value, checkboxIpv6.isChecked)
         editor.putBoolean(PreferenceKey.HV_IGNORED.value, checkboxHvIgnored.isChecked)
         editor.putBoolean(PreferenceKey.DECRYPTABLE.value, checkboxDecryptable.isChecked)
+        editor.putBoolean(PreferenceKey.ONLY_LAN.value, checkboxOnlyLan.isChecked)
 
         editor.apply()
     }

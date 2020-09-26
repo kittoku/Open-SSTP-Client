@@ -153,30 +153,48 @@
         tools:textSize="18sp" />
 
     <CheckBox
-        android:id="@+id/checkboxIpv4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:text="IPv4" />
+            android:id="@+id/checkboxIpv4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="IPv4"/>
 
     <CheckBox
-        android:id="@+id/checkboxIpv6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:text="IPv6" />
+            android:id="@+id/checkboxIpv6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="IPv6"/>
 
     <TextView
-        android:id="@+id/titleInsecure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
-        android:text="Insecure Options"
-        android:textColor="@android:color/black"
-        tools:textSize="18sp" />
+            android:id="@+id/titleRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:text="Routing Option"
+            android:textColor="@android:color/black"
+            tools:textSize="18sp"/>
+
+    <CheckBox
+            android:id="@+id/checkboxOnlyLan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="Route Only packets to LAN"/>
+
+    <TextView
+            android:id="@+id/titleInsecure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:text="Insecure Options"
+            android:textColor="@android:color/black"
+            tools:textSize="18sp"/>
 
     <CheckBox
         android:id="@+id/checkboxHvIgnored"

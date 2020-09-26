@@ -262,6 +262,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             return false
         }
 
+        val isOnlyLan = prefs.getBoolean(PreferenceKey.ONLY_LAN.value, false)
+
         val isHvIgnored = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
         val isDecryptable = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
 
@@ -272,7 +274,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         networkSetting = NetworkSetting(
             host, username, password, port, mru, mtu, prefix, ssl,
             isPapAcceptable, isMschapv2Acceptable, isIpv4Enabled, isIpv6Enabled,
-            isHvIgnored, isDecryptable, certUri
+            isOnlyLan, isHvIgnored, isDecryptable, certUri
         )
 
         return true

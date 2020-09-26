@@ -32,6 +32,7 @@ internal class NetworkSetting(
     internal val isMschapv2Acceptable: Boolean,
     internal val isIpv4Enabled: Boolean,
     internal val isIpv6Enabled: Boolean,
+    internal val isOnlyLan: Boolean,
     internal val isHvIgnored: Boolean,
     internal val isDecryptable: Boolean,
     internal val certUri: String?

@@ -8,6 +8,7 @@ import kittoku.opensstpclient.misc.toHexByteArray
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
+import java.nio.ByteBuffer
 
 
 internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
@@ -25,6 +26,19 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
         return 16
     }
 
+    private fun getNetworkAddress(array: ByteArray, prefixLength: Int): InetAddress {
+        val buffer = ByteBuffer.allocate(4)
+        buffer.put(array)
+
+        var num = buffer.getInt(0)
+        var mask: Int = -1
+        mask = mask.shl(32 - prefixLength)
+        num = num and mask
+        buffer.putInt(0, num)
+
+        return InetAddress.getByAddress(buffer.array())
+    }
+
     internal fun initializeTun() {
         val setting = parent.networkSetting
         val builder = parent.builder
@@ -38,13 +52,16 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
                 throw Exception("Null IPv4 address was given")
             }
 
-            builder.addAddress(
-                InetAddress.getByAddress(setting.currentIp),
-                setting.customPrefix ?: getPrefixLength(setting.currentIp)
-            )
+            val prefix = setting.customPrefix ?: getPrefixLength(setting.currentIp)
+            val hostAddress = InetAddress.getByAddress(setting.currentIp)
+            val networkAddress = getNetworkAddress(setting.currentIp, prefix)
+
+            builder.addAddress(hostAddress, prefix)
+            builder.addRoute(networkAddress, prefix)
 
             if (!setting.mgDns.isRejected) {
-                builder.addDnsServer(InetAddress.getByAddress(setting.currentDns))
+                val dnsAddress = InetAddress.getByAddress(setting.currentDns)
+                builder.addDnsServer(dnsAddress)
             }
         }
 

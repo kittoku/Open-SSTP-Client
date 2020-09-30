@@ -63,6 +63,10 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
                 val dnsAddress = InetAddress.getByAddress(setting.currentDns)
                 builder.addDnsServer(dnsAddress)
             }
+
+            if (!setting.isOnlyLan) {
+                builder.addRoute("0.0.0.0", 0)
+            }
         }
 
         if (setting.isIpv6Enabled) {
@@ -76,17 +80,17 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
 
             val address = ByteArray(16)
             "FE80".toHexByteArray().copyInto(address)
-            ByteArray(6).copyInto(address, startIndex = 2)
-            setting.currentIpv6.copyInto(address, startIndex = 6)
+            ByteArray(6).copyInto(address, destinationOffset = 2)
+            setting.currentIpv6.copyInto(address, destinationOffset = 8)
 
             builder.addAddress(InetAddress.getByAddress(address), 64)
+
+            if (!setting.isOnlyLan) {
+                builder.addRoute("::", 0)
+            }
         }
 
         builder.setMtu(setting.currentMtu)
-
-        if (!setting.isOnlyLan) {
-            builder.addRoute("0.0.0.0", 0)
-        }
 
         if (Build.VERSION.SDK_INT >= 21) builder.setBlocking(true)
 

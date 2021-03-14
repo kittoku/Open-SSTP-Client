@@ -20,8 +20,8 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
     internal lateinit var socket: SSLSocket
 
     private fun createSocket() {
-        val socketFactory = if (parent.networkSetting.certUri != null) {
-            val uri = Uri.parse(parent.networkSetting.certUri)
+        val socketFactory = if (parent.networkSetting.SSL_DO_ADD_CERT) {
+            val uri = Uri.parse(parent.networkSetting.SSL_CERT_DIR)
             val document = DocumentFile.fromTreeUri(parent.vpnService, uri)!!
 
             val certFactory = CertificateFactory.getInstance("X.509")
@@ -55,17 +55,17 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         }
 
         socket = socketFactory.createSocket(
-            parent.networkSetting.host,
-            parent.networkSetting.port ?: 443
+            parent.networkSetting.HOME_HOST,
+            parent.networkSetting.SSL_PORT
         ) as SSLSocket
 
-        parent.networkSetting.sslProtocol.also {
+        parent.networkSetting.SSL_VERSION.also {
             if (it != "DEFAULT") {
                 socket.enabledProtocols = arrayOf(it)
             }
         }
 
-        if (parent.networkSetting.isDecryptable) {
+        if (parent.networkSetting.SSL_DO_DECRYPT) {
             socket.enabledCipherSuites = arrayOf(
                 "TLS_RSA_WITH_AES_128_CBC_SHA",
                 "TLS_RSA_WITH_AES_256_CBC_SHA"
@@ -74,9 +74,9 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
 
         HttpsURLConnection.getDefaultHostnameVerifier().also {
             if (!it.verify(
-                    parent.networkSetting.host,
+                    parent.networkSetting.HOME_HOST,
                     socket.session
-                ) && !parent.networkSetting.isHvIgnored
+                ) && !parent.networkSetting.SSL_DO_VERIFY
             ) {
                 throw Exception("Failed to verify the hostname")
             }
@@ -92,7 +92,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         val HTTP_REQUEST = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
-            "Host: ${parent.networkSetting.host}",
+            "Host: ${parent.networkSetting.HOME_HOST}",
             "SSTPCORRELATIONID: {${parent.networkSetting.guid}}"
         ).joinToString(separator = "\r\n", postfix = "\r\n\r\n")
 

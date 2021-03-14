@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="HOME_HOST"
+        android:title="Host" />
+
+    <EditTextPreference
+        android:key="HOME_USER"
+        android:title="Username" />
+
+    <EditTextPreference
+        android:key="HOME_PASS"
+        android:title="Password" />
+
+    <SwitchPreferenceCompat android:key="HOME_CONNECTOR" />
+
+</PreferenceScreen>

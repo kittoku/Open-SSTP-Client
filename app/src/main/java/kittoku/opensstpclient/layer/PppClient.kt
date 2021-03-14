@@ -302,7 +302,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
                         proceedPap()
                         if (isAuthFinished) {
-                            status.ppp = if (networkSetting.isIpv4Enabled) {
+                            status.ppp = if (networkSetting.PPP_IPv4_ENABLED) {
                                 PppStatus.NEGOTIATE_IPCP
                             } else {
                                 PppStatus.NEGOTIATE_IPV6CP
@@ -319,7 +319,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
                         proceedChap()
                         if (isAuthFinished) {
-                            status.ppp = if (networkSetting.isIpv4Enabled) {
+                            status.ppp = if (networkSetting.PPP_IPv4_ENABLED) {
                                 PppStatus.NEGOTIATE_IPCP
                             } else {
                                 PppStatus.NEGOTIATE_IPV6CP
@@ -337,7 +337,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
                 proceedIpcp()
                 if (ipcpState == IpcpState.OPENED) {
-                    if (networkSetting.isIpv6Enabled) {
+                    if (networkSetting.PPP_IPv6_ENABLED) {
                         status.ppp = PppStatus.NEGOTIATE_IPV6CP
                     } else startNetworking()
                 }

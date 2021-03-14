@@ -167,9 +167,9 @@ internal fun SstpClient.receiveEchoResponse() {
 }
 
 private class HashSetting(hashProtocol: HashProtocol) {
-    internal val cmacSize: Short // little endian
-    internal val digestProtocol: String
-    internal val macProtocol: String
+    val cmacSize: Short // little endian
+    val digestProtocol: String
+    val macProtocol: String
 
     init {
         when (hashProtocol) {
@@ -192,7 +192,7 @@ private class HashSetting(hashProtocol: HashProtocol) {
 }
 
 private fun generateChapHLAK(setting: NetworkSetting): ByteArray {
-    val passArray = setting.password.toByteArray(Charset.forName("UTF-16LE"))
+    val passArray = setting.HOME_PASS.toByteArray(Charset.forName("UTF-16LE"))
 
     val magic1 = sum(
         "5468697320697320746865204D505045",

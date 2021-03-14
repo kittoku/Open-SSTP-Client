@@ -10,19 +10,19 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Build
-import android.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
+import kittoku.opensstpclient.fragment.BoolPreference
 
 
 internal enum class VpnAction(val value: String) {
-    ACTION_CONNECT("kittoku.opensstpclient.START"),
-    ACTION_DISCONNECT("kittoku.opensstpclient.STOP"),
-    ACTION_UPDATE("kittoku.opensstpclient.UPDATE")
+    ACTION_CONNECT("kittoku.opensstpclient.CONNECT"),
+    ACTION_DISCONNECT("kittoku.opensstpclient.DISCONNECT"),
+    ACTION_SWITCH_OFF("kittoku.opensstpclient.SWITCH_OFF")
 }
 
 internal class SstpVpnService : VpnService() {
-    private val TAG = "SstpVpnService"
     private val CHANNEL_ID = "OpenSSTPClient"
     private var controlClient: ControlClient?  = null
 
@@ -34,10 +34,6 @@ internal class SstpVpnService : VpnService() {
         } else {
             controlClient?.kill(null)
             controlClient = ControlClient(this).also {
-                if (!it.prepareSetting()) {
-                    notifySwitchOff()
-                    return Service.START_NOT_STICKY
-                }
                 beForegrounded()
                 it.run()
             }
@@ -74,9 +70,10 @@ internal class SstpVpnService : VpnService() {
 
     internal fun notifySwitchOff() {
         PreferenceManager.getDefaultSharedPreferences(applicationContext).also {
-            it.edit().putBoolean(PreferenceKey.SWITCH.value, false).apply()
+            it.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
         }
+
         LocalBroadcastManager.getInstance(applicationContext)
-            .sendBroadcast(Intent(VpnAction.ACTION_UPDATE.value))
+            .sendBroadcast(Intent(VpnAction.ACTION_SWITCH_OFF.value))
     }
 }

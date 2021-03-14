@@ -181,7 +181,7 @@ internal fun PppClient.receiveLcpConfigureReject() {
     if (!tryReadingLcp(received)) return
 
     if (received.optionMru != null) {
-        if (networkSetting.customMru == null || networkSetting.customMru >= DEFAULT_MRU) {
+        if (networkSetting.PPP_MRU >= DEFAULT_MRU) {
             networkSetting.mgMru.isRejected = true
             networkSetting.currentMru = DEFAULT_MRU
         } else {

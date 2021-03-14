@@ -43,7 +43,7 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
         val setting = parent.networkSetting
         val builder = parent.builder
 
-        if (setting.isIpv4Enabled) {
+        if (setting.PPP_IPv4_ENABLED) {
             if (setting.mgIp.isRejected) {
                 throw Exception("IPv4 NCP was rejected")
             }
@@ -52,7 +52,8 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
                 throw Exception("Null IPv4 address was given")
             }
 
-            val prefix = setting.customPrefix ?: getPrefixLength(setting.currentIp)
+            val prefix =
+                if (setting.IP_PREFIX == 0) getPrefixLength(setting.currentIp) else setting.IP_PREFIX
             val hostAddress = InetAddress.getByAddress(setting.currentIp)
             val networkAddress = getNetworkAddress(setting.currentIp, prefix)
 
@@ -64,12 +65,12 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
                 builder.addDnsServer(dnsAddress)
             }
 
-            if (!setting.isOnlyLan) {
+            if (!setting.IP_ONLY_LAN) {
                 builder.addRoute("0.0.0.0", 0)
             }
         }
 
-        if (setting.isIpv6Enabled) {
+        if (setting.PPP_IPv6_ENABLED) {
             if (setting.mgIpv6.isRejected) {
                 throw Exception("IPv6 NCP was rejected")
             }
@@ -85,7 +86,7 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
 
             builder.addAddress(InetAddress.getByAddress(address), 64)
 
-            if (!setting.isOnlyLan) {
+            if (!setting.IP_ONLY_LAN) {
                 builder.addRoute("::", 0)
             }
         }

@@ -38,7 +38,7 @@ internal fun PppClient.sendChapResponse(received: ChapChallenge) {
         generateResponse(it)
         it.chapSetting.clientChallenge.copyInto(sending.challenge)
         it.chapSetting.clientResponse.copyInto(sending.response)
-        sending.name = it.username.toByteArray(Charset.forName("US-ASCII"))
+        sending.name = it.HOME_USER.toByteArray(Charset.forName("US-ASCII"))
     }
 
     sending.update()
@@ -113,8 +113,8 @@ private fun addParity(bytes: ByteArray): ByteArray {
 }
 
 private fun generateResponse(setting: NetworkSetting) {
-    val userArray = setting.username.toByteArray(Charset.forName("US-ASCII"))
-    val passArray = setting.password.toByteArray(Charset.forName("UTF-16LE"))
+    val userArray = setting.HOME_USER.toByteArray(Charset.forName("US-ASCII"))
+    val passArray = setting.HOME_PASS.toByteArray(Charset.forName("UTF-16LE"))
 
     val challenge = MessageDigest.getInstance("SHA-1").let {
         it.update(setting.chapSetting.clientChallenge)
@@ -142,8 +142,8 @@ private fun generateResponse(setting: NetworkSetting) {
 }
 
 private fun authenticateResponse(setting: NetworkSetting): Boolean {
-    val userArray = setting.username.toByteArray(Charset.forName("US-ASCII"))
-    val passArray = setting.password.toByteArray(Charset.forName("UTF-16LE"))
+    val userArray = setting.HOME_USER.toByteArray(Charset.forName("US-ASCII"))
+    val passArray = setting.HOME_PASS.toByteArray(Charset.forName("UTF-16LE"))
 
     val magic1 = sum(
         "4D616769632073657276657220746F20",

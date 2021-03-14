@@ -33,8 +33,8 @@ internal fun PppClient.sendPapRequest() {
     val sending = PapAuthenticateRequest()
     sending.id = currentAuthRequestId
     parent.networkSetting.also {
-        sending.idFiled = it.username.toByteArray(Charset.forName("US-ASCII"))
-        sending.passwordFiled = it.password.toByteArray(Charset.forName("US-ASCII"))
+        sending.idFiled = it.HOME_USER.toByteArray(Charset.forName("US-ASCII"))
+        sending.passwordFiled = it.HOME_PASS.toByteArray(Charset.forName("US-ASCII"))
     }
     sending.update()
     parent.controlQueue.add(sending)

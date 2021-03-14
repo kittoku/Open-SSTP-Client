@@ -1,7 +1,8 @@
 package kittoku.opensstpclient
 
-import android.preference.PreferenceManager
-import android.widget.Toast
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
+import androidx.preference.PreferenceManager
 import kittoku.opensstpclient.layer.*
 import kittoku.opensstpclient.misc.IncomingBuffer
 import kittoku.opensstpclient.misc.NetworkSetting
@@ -12,17 +13,23 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.BufferedOutputStream
 import java.nio.ByteBuffer
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 
 internal class ControlClient(internal val vpnService: SstpVpnService) :
     CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()) {
-    internal lateinit var networkSetting: NetworkSetting
+    internal val networkSetting = NetworkSetting(
+        PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
+    )
     internal val status = DualClientStatus()
     internal val builder = vpnService.Builder()
     internal val controlQueue = LinkedBlockingQueue<Any>()
     internal val incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
+    internal var logStream: BufferedOutputStream? = null
 
     internal lateinit var sslTerminal: SslTerminal
     private lateinit var sstpClient: SstpClient
@@ -66,6 +73,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     jobControl?.cancel()
 
                     inform("Terminate VPN connection", null)
+                    logStream?.close()
+
                     vpnService.notifySwitchOff()
                     vpnService.stopForeground(true)
                 }
@@ -74,6 +83,9 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     }
 
     internal fun run() {
+        if (networkSetting.LOG_DO_SAVE_LOG) {
+            prepareLog()
+        }
         inform("Establish VPN connection", null)
         prepareLayers()
 
@@ -134,12 +146,12 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     val header = src.getInt(0)
                     val version = when (header and versionMask) {
                         ipv4Version -> {
-                            if (!networkSetting.isIpv4Enabled) return false
+                            if (!networkSetting.PPP_IPv4_ENABLED) return false
                             PppProtocol.IP.value
                         }
 
                         ipv6Version -> {
-                            if (!networkSetting.isIpv6Enabled) return false
+                            if (!networkSetting.PPP_IPv6_ENABLED) return false
                             PppProtocol.IPV6.value
                         }
 
@@ -200,90 +212,19 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
     }
 
-    private fun makeToast(cause: String) {
-        Toast.makeText(vpnService.applicationContext, "INVALID SETTING: $cause", Toast.LENGTH_LONG)
-            .show()
-    }
-
-    internal fun prepareSetting(): Boolean {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
-
-        val host = prefs.getString(PreferenceKey.HOST.value, "") as String
-        if (host == "") {
-            makeToast("Host is missing")
-            return false
-        }
-
-        val username = prefs.getString(PreferenceKey.USERNAME.value, "") as String
-
-        val password = prefs.getString(PreferenceKey.PASSWORD.value, "") as String
-
-        val port = prefs.getString(PreferenceKey.PORT.value, "")?.toIntOrNull()
-        if (port != null && port !in 0..65535) {
-            makeToast("The given port is out of 0-65535")
-            return false
-        }
-
-        val mru = prefs.getString(PreferenceKey.MRU.value, "")?.toIntOrNull()
-        if (mru != null && mru !in MIN_MRU..MAX_MRU) {
-            makeToast("The given MRU is out of $MIN_MRU-$MAX_MRU")
-            return false
-        }
-
-        val mtu = prefs.getString(PreferenceKey.MTU.value, "")?.toIntOrNull()
-        if (mtu != null && mtu !in MIN_MTU..MAX_MTU) {
-            makeToast("The given MTU is out of $MIN_MTU-$MAX_MTU")
-            return false
-        }
-
-        val prefix = prefs.getString(PreferenceKey.PREFIX.value, "")?.toIntOrNull()
-        if (prefix != null && prefix !in 0..32) {
-            makeToast("The given address prefix is out of 0-32")
-            return false
-        }
-
-        val ssl = sslMap[prefs.getInt(PreferenceKey.SSL.value, 0)]
-        if (ssl == null) {
-            makeToast("No valid SSL protocol was chosen")
-            return false
-        }
-
-        val isPapAcceptable = prefs.getBoolean(PreferenceKey.PAP.value, true)
-        val isMschapv2Acceptable = prefs.getBoolean(PreferenceKey.MSCHAPv2.value, true)
-        if (!(isPapAcceptable || isMschapv2Acceptable)) {
-            makeToast("No authentication protocol was accepted")
-            return false
-        }
-
-        val isIpv4Enabled = prefs.getBoolean(PreferenceKey.IPv4.value, true)
-        val isIpv6Enabled = prefs.getBoolean(PreferenceKey.IPv6.value, false)
-        if (!(isIpv4Enabled || isIpv6Enabled)) {
-            makeToast("No network control protocol was accepted")
-            return false
-        }
-
-        val isOnlyLan = prefs.getBoolean(PreferenceKey.ONLY_LAN.value, false)
-
-        val isHvIgnored = prefs.getBoolean(PreferenceKey.HV_IGNORED.value, false)
-        val isDecryptable = prefs.getBoolean(PreferenceKey.DECRYPTABLE.value, false)
-
-        val certUri = prefs.getString(PreferenceKey.CERTIFICATE.value, "")!!.let {
-            if (it == "") null else it
-        }
-
-        networkSetting = NetworkSetting(
-            host, username, password, port, mru, mtu, prefix, ssl,
-            isPapAcceptable, isMschapv2Acceptable, isIpv4Enabled, isIpv6Enabled,
-            isOnlyLan, isHvIgnored, isDecryptable, certUri
-        )
-
-        return true
-    }
-
     private fun prepareLayers() {
         sslTerminal = SslTerminal(this)
         sstpClient = SstpClient(this)
         pppClient = PppClient(this)
         ipTerminal = IpTerminal(this)
+    }
+
+    private fun prepareLog() {
+        val currentTime = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
+        val filename = "log_osc_${currentTime}.txt"
+        val uri = Uri.parse(networkSetting.LOG_DIR)
+        DocumentFile.fromTreeUri(vpnService, uri)!!.createFile("text/plain", filename).also {
+            logStream = BufferedOutputStream(vpnService.contentResolver.openOutputStream(it!!.uri))
+        }
     }
 }

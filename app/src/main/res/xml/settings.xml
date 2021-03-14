@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="ssl_layer_category"
+        android:title="SSL Layer">
+
+        <EditTextPreference
+            android:key="SSL_PORT"
+            android:title="Port Number" />
+
+        <DropDownPreference
+            android:entries="@array/ssl_versions"
+            android:entryValues="@array/ssl_versions"
+            android:key="SSL_VERSION"
+            android:title="SSL Version" />
+
+        <CheckBoxPreference
+            android:key="SSL_DO_VERIFY"
+            android:title="Verify Hostname" />
+
+        <CheckBoxPreference
+            android:key="SSL_DO_DECRYPT"
+            android:title="Use Decryptable Mode" />
+
+        <SwitchPreference
+            android:key="SSL_DO_ADD_CERT"
+            android:title="Add Trusted Certificates" />
+
+        <Preference
+            android:dependency="SSL_DO_ADD_CERT"
+            android:key="SSL_CERT_DIR"
+            android:title="Select Certificates Directory" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ppp_layer"
+        android:title="PPP Layer">
+
+        <EditTextPreference
+            android:key="PPP_MRU"
+            android:title="MRU" />
+
+        <EditTextPreference
+            android:key="PPP_MTU"
+            android:title="MTU" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ppp_auth_category"
+        android:title="PPP Authentication Protocol">
+
+        <CheckBoxPreference
+            android:key="PPP_PAP_ENABLED"
+            android:title="Enable PAP" />
+
+        <CheckBoxPreference
+            android:key="PPP_MSCHAPv2_ENABLED"
+            android:title="Enable MS-CHAPv2" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ppp_network_category"
+        android:title="PPP Network Protocol">
+
+        <CheckBoxPreference
+            android:key="PPP_IPv4_ENABLED"
+            android:title="Enable IPv4" />
+
+        <CheckBoxPreference
+            android:key="PPP_IPv6_ENABLED"
+            android:title="Enable IPv6" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ip_layer"
+        android:title="IP Layer">
+
+        <EditTextPreference
+            android:key="IP_PREFIX"
+            android:title="Address Prefix Length" />
+
+        <CheckBoxPreference
+            android:key="IP_ONLY_LAN"
+            android:title="Route Only Packets to LAN" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="log"
+        android:title="Log">
+
+        <SwitchPreference
+            android:key="LOG_DO_SAVE_LOG"
+            android:title="Save Log" />
+
+        <Preference
+            android:dependency="LOG_DO_SAVE_LOG"
+            android:key="LOG_DIR"
+            android:title="Select Log Directory" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

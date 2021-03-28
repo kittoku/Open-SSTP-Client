@@ -52,8 +52,7 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
                 throw Exception("Null IPv4 address was given")
             }
 
-            val prefix =
-                if (setting.IP_PREFIX == 0) getPrefixLength(setting.currentIp) else setting.IP_PREFIX
+            val prefix = if (setting.IP_PREFIX == 0) getPrefixLength(setting.currentIp) else setting.IP_PREFIX
             val hostAddress = InetAddress.getByAddress(setting.currentIp)
             val networkAddress = getNetworkAddress(setting.currentIp, prefix)
 
@@ -85,8 +84,9 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
             setting.currentIpv6.copyInto(address, destinationOffset = 8)
 
             builder.addAddress(InetAddress.getByAddress(address), 64)
+            builder.addRoute("fc00::", 7)
 
-            if (!setting.IP_ONLY_LAN) {
+            if (!setting.IP_ONLY_ULA) {
                 builder.addRoute("::", 0)
             }
         }

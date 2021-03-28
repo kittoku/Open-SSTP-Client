@@ -86,7 +86,11 @@
 
         <CheckBoxPreference
             android:key="IP_ONLY_LAN"
-            android:title="Route Only Packets to LAN" />
+            android:title="Route Only Packets to LAN (IPv4)" />
+
+        <CheckBoxPreference
+            android:key="IP_ONLY_ULA"
+            android:title="Route Only Packets to ULA (IPv6)" />
 
     </PreferenceCategory>
 

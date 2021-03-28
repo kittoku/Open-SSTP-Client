@@ -43,6 +43,7 @@ internal class NetworkSetting(prefs: SharedPreferences) {
     internal val PPP_IPv6_ENABLED = BoolPreference.PPP_IPv6_ENABLED.getValue(prefs)
     internal val IP_PREFIX = IntPreference.IP_PREFIX.getValue(prefs)
     internal val IP_ONLY_LAN = BoolPreference.IP_ONLY_LAN.getValue(prefs)
+    internal val IP_ONLY_ULA = BoolPreference.IP_ONLY_ULA.getValue(prefs)
     internal val LOG_DO_SAVE_LOG = BoolPreference.LOG_DO_SAVE_LOG.getValue(prefs)
     internal val LOG_DIR = DirPreference.LOG_DIR.getValue(prefs)
 

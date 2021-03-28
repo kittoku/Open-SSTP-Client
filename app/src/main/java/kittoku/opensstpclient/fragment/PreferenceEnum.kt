@@ -133,6 +133,7 @@ internal enum class BoolPreference(override val defaultValue: Boolean) :
     PPP_IPv4_ENABLED(true),
     PPP_IPv6_ENABLED(false),
     IP_ONLY_LAN(false),
+    IP_ONLY_ULA(false),
     LOG_DO_SAVE_LOG(false);
 
     override fun getValue(prefs: SharedPreferences): Boolean {

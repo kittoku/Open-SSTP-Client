@@ -26,6 +26,7 @@ private val settingPreferences = arrayOf<PreferenceWrapper<*>>(
     BoolPreference.PPP_IPv6_ENABLED,
     IntPreference.IP_PREFIX,
     BoolPreference.IP_ONLY_LAN,
+    BoolPreference.IP_ONLY_ULA,
     BoolPreference.LOG_DO_SAVE_LOG,
     DirPreference.LOG_DIR,
 )

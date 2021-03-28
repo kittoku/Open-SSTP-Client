@@ -1,7 +1,5 @@
 package kittoku.opensstpclient
 
-import android.R.drawable.ic_media_pause
-import android.R.drawable.ic_notification_overlay
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -55,10 +53,11 @@ internal class SstpVpnService : VpnService() {
         ).setAction(VpnAction.ACTION_DISCONNECT.value)
         val pendingIntent = PendingIntent.getService(applicationContext, 0, intent, 0)
         val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID).also {
-            it.setSmallIcon(ic_notification_overlay)
-            it.setContentText("Open SSTP Client connecting")
+            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+            it.setContentText("Disconnect SSTP connection")
             it.priority = NotificationCompat.PRIORITY_DEFAULT
-            it.addAction(ic_media_pause, "DISCONNECT", pendingIntent)
+            it.setContentIntent(pendingIntent)
+            it.setAutoCancel(true)
         }
 
         startForeground(1, builder.build())

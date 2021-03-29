@@ -89,6 +89,12 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         inform("Establish VPN connection", null)
         prepareLayers()
 
+        launchJobIncoming()
+        launchJobControl()
+        launchJobData()
+    }
+
+    private fun launchJobIncoming() {
         jobIncoming = launch(handler) {
             while (isActive) {
                 sstpClient.proceed()
@@ -99,7 +105,9 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 }
             }
         }
+    }
 
+    private fun launchJobControl() {
         jobControl = launch(handler) {
             val controlBuffer = ByteBuffer.allocate(CONTROL_BUFFER_SIZE)
 
@@ -126,7 +134,9 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 sslTerminal.send(controlBuffer)
             }
         }
+    }
 
+    private fun launchJobData() {
         jobData = launch(handler, CoroutineStart.LAZY) {
             val channel = Channel<ByteBuffer>(0)
             val readBufferAlpha = ByteBuffer.allocate(networkSetting.currentMtu)

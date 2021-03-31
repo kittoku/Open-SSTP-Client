@@ -1,6 +1,5 @@
 package kittoku.opensstpclient.layer
 
-import android.os.Build
 import android.os.ParcelFileDescriptor
 import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.misc.isSame
@@ -93,7 +92,7 @@ internal class IpTerminal(parent: ControlClient) : Terminal(parent) {
 
         builder.setMtu(setting.currentMtu)
 
-        if (Build.VERSION.SDK_INT >= 21) builder.setBlocking(true)
+        builder.setBlocking(true)
 
         fd = builder.establish()!!
 

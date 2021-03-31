@@ -208,8 +208,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 )
                 dst.flip()
 
-                if (dst.limit() > 0) channel.send(dst)
-                else delay(100)
+                channel.send(dst)
             }
 
             while (isActive) {

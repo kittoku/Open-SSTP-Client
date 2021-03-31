@@ -122,6 +122,40 @@ internal enum class DirPreference(override val defaultValue: String) : Preferenc
     }
 }
 
+internal enum class StatusPreference(override val defaultValue: String) : PreferenceWrapper<String> {
+    STATUS("");
+
+    override fun getValue(prefs: SharedPreferences): String {
+        return prefs.getString(name, defaultValue)!!
+    }
+
+    override fun setValue(fragment: PreferenceFragmentCompat, value: String) {
+        fragment.findPreference<Preference>(name)!!.also {
+            it.sharedPreferences.edit().also { editor ->
+                editor.putString(name, value)
+                editor.apply()
+            }
+
+            it.provideSummary(value)
+        }
+    }
+
+    override fun initPreference(fragment: PreferenceFragmentCompat, prefs: SharedPreferences) {
+        fragment.findPreference<Preference>(name)!!.also {
+            it.provideSummary(getValue(it.sharedPreferences))
+            initValue(fragment, prefs)
+        }
+    }
+
+    private fun Preference.provideSummary(value: String) {
+        summary = if (TextUtils.isEmpty(value)) {
+            "[No Connection Established]"
+        } else {
+            value
+        }
+    }
+}
+
 internal enum class BoolPreference(override val defaultValue: Boolean) :
     PreferenceWrapper<Boolean> {
     HOME_CONNECTOR(false),

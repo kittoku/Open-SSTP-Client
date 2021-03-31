@@ -15,4 +15,13 @@
 
     <SwitchPreferenceCompat android:key="HOME_CONNECTOR" />
 
+    <PreferenceCategory>
+
+        <Preference
+            android:key="STATUS"
+            android:title="Current Status" />
+
+    </PreferenceCategory>
+
+
 </PreferenceScreen>

@@ -9,15 +9,13 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.preference.PreferenceManager
-import kittoku.opensstpclient.fragment.BoolPreference
 
 
 internal enum class VpnAction(val value: String) {
     ACTION_CONNECT("kittoku.opensstpclient.CONNECT"),
     ACTION_DISCONNECT("kittoku.opensstpclient.DISCONNECT"),
-    ACTION_SWITCH_OFF("kittoku.opensstpclient.SWITCH_OFF")
+    ACTION_SWITCH_OFF("kittoku.opensstpclient.SWITCH_OFF"),
+    ACTION_UPDATE_STATUS("kittoku.opensstpclient.UPDATE_STATUS"),
 }
 
 internal class SstpVpnService : VpnService() {
@@ -65,14 +63,5 @@ internal class SstpVpnService : VpnService() {
 
     override fun onDestroy() {
         controlClient?.kill(null)
-    }
-
-    internal fun notifySwitchOff() {
-        PreferenceManager.getDefaultSharedPreferences(applicationContext).also {
-            it.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
-        }
-
-        LocalBroadcastManager.getInstance(applicationContext)
-            .sendBroadcast(Intent(VpnAction.ACTION_SWITCH_OFF.value))
     }
 }

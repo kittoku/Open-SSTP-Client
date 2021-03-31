@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.VpnService
+import android.net.*
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
@@ -20,6 +20,7 @@ private val homePreferences = arrayOf<PreferenceWrapper<*>>(
     StrPreference.HOME_HOST,
     StrPreference.HOME_USER,
     StrPreference.HOME_PASS,
+    StatusPreference.STATUS,
 )
 
 class HomeFragment : PreferenceFragmentCompat() {
@@ -31,7 +32,7 @@ class HomeFragment : PreferenceFragmentCompat() {
         }
 
         attachConnectorListener()
-        setSwitchOffListener()
+        registerBroadcastReceiver()
     }
 
     private fun attachConnectorListener() {
@@ -64,21 +65,36 @@ class HomeFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun setSwitchOffListener() {
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    if (intent?.action == VpnAction.ACTION_SWITCH_OFF.value) {
+    private fun registerBroadcastReceiver() {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    VpnAction.ACTION_SWITCH_OFF.value -> {
                         if (activity != null) {
                             detachConnectorListener()
                             BoolPreference.HOME_CONNECTOR.setValue(this@HomeFragment, false)
                             attachConnectorListener()
                         }
                     }
+
+                    VpnAction.ACTION_UPDATE_STATUS.value -> {
+                        StatusPreference.STATUS.initPreference(
+                            this@HomeFragment,
+                            preferenceManager.sharedPreferences
+                        )
+                    }
                 }
-            },
-            IntentFilter().also { it.addAction(VpnAction.ACTION_SWITCH_OFF.value) }
-        )
+            }
+        }
+
+        val filter = IntentFilter().also {
+            it.addAction(VpnAction.ACTION_SWITCH_OFF.value)
+            it.addAction(VpnAction.ACTION_UPDATE_STATUS.value)
+        }
+
+        LocalBroadcastManager.getInstance(requireContext()).also {
+            it.registerReceiver(receiver, filter)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

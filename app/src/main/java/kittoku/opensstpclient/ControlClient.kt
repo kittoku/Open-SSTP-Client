@@ -1,13 +1,13 @@
 package kittoku.opensstpclient
 
+import android.content.Intent
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import kittoku.opensstpclient.fragment.BoolPreference
 import kittoku.opensstpclient.layer.*
-import kittoku.opensstpclient.misc.IncomingBuffer
-import kittoku.opensstpclient.misc.NetworkSetting
-import kittoku.opensstpclient.misc.SuicideException
-import kittoku.opensstpclient.misc.inform
+import kittoku.opensstpclient.misc.*
 import kittoku.opensstpclient.unit.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +29,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     internal val builder = vpnService.Builder()
     internal val controlQueue = LinkedBlockingQueue<Any>()
     internal val incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
+    private val observer = NetworkObserver(vpnService)
     internal var logStream: BufferedOutputStream? = null
 
     internal lateinit var sslTerminal: SslTerminal
@@ -75,7 +76,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     inform("Terminate VPN connection", null)
                     logStream?.close()
 
-                    vpnService.notifySwitchOff()
+                    notifySwitchOff()
+                    observer.close()
                     vpnService.stopForeground(true)
                 }
             }
@@ -236,5 +238,14 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         DocumentFile.fromTreeUri(vpnService, uri)!!.createFile("text/plain", filename).also {
             logStream = BufferedOutputStream(vpnService.contentResolver.openOutputStream(it!!.uri))
         }
+    }
+
+    private fun notifySwitchOff() {
+        PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext).also {
+            it.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
+        }
+
+        LocalBroadcastManager.getInstance(vpnService.applicationContext)
+            .sendBroadcast(Intent(VpnAction.ACTION_SWITCH_OFF.value))
     }
 }

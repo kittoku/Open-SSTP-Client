@@ -19,7 +19,7 @@ internal enum class VpnAction(val value: String) {
 }
 
 internal class SstpVpnService : VpnService() {
-    private val CHANNEL_ID = "OpenSSTPClient"
+    internal val CHANNEL_ID = "OpenSSTPClient"
     private var controlClient: ControlClient?  = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

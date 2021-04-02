@@ -168,6 +168,7 @@ internal enum class BoolPreference(override val defaultValue: Boolean) :
     PPP_IPv6_ENABLED(false),
     IP_ONLY_LAN(false),
     IP_ONLY_ULA(false),
+    RECONNECTION_ENABLED(false),
     LOG_DO_SAVE_LOG(false);
 
     override fun getValue(prefs: SharedPreferences): Boolean {
@@ -191,7 +192,9 @@ internal enum class IntPreference(override val defaultValue: Int) : PreferenceWr
     SSL_PORT(443),
     PPP_MRU(DEFAULT_MRU),
     PPP_MTU(DEFAULT_MTU),
-    IP_PREFIX(0);
+    IP_PREFIX(0),
+    RECONNECTION_COUNT(3),
+    RECONNECTION_INTERVAL(10);
 
     override fun getValue(prefs: SharedPreferences): Int {
         return prefs.getString(name, defaultValue.toString())!!.toIntOrNull() ?: defaultValue

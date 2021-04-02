@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:key="ssl_layer_category"
+        android:key="SSL_LAYER"
         android:title="SSL Layer">
 
         <EditTextPreference
@@ -35,7 +35,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="ppp_layer"
+        android:key="PPP_LAYER"
         android:title="PPP Layer">
 
         <EditTextPreference
@@ -49,7 +49,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="ppp_auth_category"
+        android:key="PPP_AUTH"
         android:title="PPP Authentication Protocol">
 
         <CheckBoxPreference
@@ -63,7 +63,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="ppp_network_category"
+        android:key="PPP_NETWORK"
         android:title="PPP Network Protocol">
 
         <CheckBoxPreference
@@ -77,7 +77,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="ip_layer"
+        android:key="IP_LAYER"
         android:title="IP Layer">
 
         <EditTextPreference
@@ -95,7 +95,27 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="log"
+        android:key="RECONNECTION"
+        android:title="Reconnection">
+
+        <SwitchPreference
+            android:key="RECONNECTION_ENABLED"
+            android:title="Enable Reconnection" />
+
+        <EditTextPreference
+            android:dependency="RECONNECTION_ENABLED"
+            android:key="RECONNECTION_COUNT"
+            android:title="Retry Count" />
+
+        <EditTextPreference
+            android:dependency="RECONNECTION_ENABLED"
+            android:key="RECONNECTION_INTERVAL"
+            android:title="Retry Interval (second)" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="LOG"
         android:title="Log">
 
         <SwitchPreference

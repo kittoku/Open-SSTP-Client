@@ -1,11 +1,16 @@
 package kittoku.opensstpclient
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
+import android.net.VpnService
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import kittoku.opensstpclient.fragment.BoolPreference
+import kittoku.opensstpclient.fragment.IntPreference
 import kittoku.opensstpclient.layer.*
 import kittoku.opensstpclient.misc.*
 import kittoku.opensstpclient.unit.*
@@ -20,17 +25,42 @@ import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 
+internal class ReconnectionSettings(prefs: SharedPreferences) {
+    internal val isEnabled = BoolPreference.RECONNECTION_ENABLED.getValue(prefs)
+    private val initialCount = if (isEnabled) IntPreference.RECONNECTION_COUNT.getValue(prefs) else 0
+    private var currentCount = initialCount
+    private val interval = IntPreference.RECONNECTION_INTERVAL.getValue(prefs)
+    internal val intervalMillis = (interval * 1000).toLong()
+    internal val isRetryable: Boolean
+        get() = currentCount > 0
+
+    internal fun resetCount() {
+        currentCount = initialCount
+    }
+
+    internal fun consumeCount() {
+        currentCount--
+    }
+
+    internal fun generateMessage(): String {
+        val triedCount = initialCount - currentCount
+        return "Reconnection will be tried in $interval seconds (COUNT: $triedCount/$initialCount)"
+    }
+}
+
+
 internal class ControlClient(internal val vpnService: SstpVpnService) :
     CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()) {
-    internal val networkSetting = NetworkSetting(
-        PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
-    )
-    internal val status = DualClientStatus()
-    internal val builder = vpnService.Builder()
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
+
+    internal lateinit var networkSetting: NetworkSetting
+    internal lateinit var status: DualClientStatus
+    internal lateinit var builder: VpnService.Builder
+    internal lateinit var incomingBuffer: IncomingBuffer
+    private lateinit var observer: NetworkObserver
     internal val controlQueue = LinkedBlockingQueue<Any>()
-    internal val incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
-    private val observer = NetworkObserver(vpnService)
     internal var logStream: BufferedOutputStream? = null
+    internal val reconnectionSettings = ReconnectionSettings(prefs)
 
     internal lateinit var sslTerminal: SslTerminal
     private lateinit var sstpClient: SstpClient
@@ -40,12 +70,36 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     private var jobIncoming: Job? = null
     private var jobControl: Job? = null
     internal var jobData: Job? = null
+    private val isAllJobCompleted: Boolean
+        get() {
+            arrayOf(jobIncoming, jobControl, jobData).forEach {
+                if (it?.isCompleted != true) {
+                    return false
+                }
+            }
+
+            return true
+        }
 
     private val mutex = Mutex()
     private var isClosing = false
 
     private val handler = CoroutineExceptionHandler { _, exception ->
         if (!isClosing) kill(exception)
+    }
+
+    init {
+        initialize()
+    }
+
+    private fun initialize() {
+        networkSetting = NetworkSetting(prefs)
+        status = DualClientStatus()
+        builder = vpnService.Builder()
+        incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
+        observer = NetworkObserver(vpnService)
+        controlQueue.clear()
+        isClosing = false
     }
 
     internal fun kill(exception: Throwable?) {
@@ -64,7 +118,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
                     jobIncoming?.join()
 
-                    withTimeoutOrNull(10_000) {
+                    withTimeout(10_000) {
                         while (isActive) {
                             if (jobIncoming?.isCompleted == false) delay(100)
                             else break
@@ -73,19 +127,61 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     sslTerminal.release()
                     jobControl?.cancel()
 
-                    inform("Terminate VPN connection", null)
-                    logStream?.close()
-
-                    notifySwitchOff()
                     observer.close()
-                    vpnService.stopForeground(true)
+
+
+                    if (exception != null && reconnectionSettings.isEnabled) {
+                        if (reconnectionSettings.isRetryable) {
+                            tryReconnection()
+                            return@withLock
+                        } else {
+                            inform("Exhausted retry counts", null)
+                            makeNotification(0, "Failed to reconnect")
+                        }
+                    }
+
+                    bye()
                 }
             }
         }
     }
 
+    private fun bye() {
+        inform("Terminate VPN connection", null)
+        logStream?.close()
+        notifySwitchOff()
+        vpnService.stopForeground(true)
+    }
+
+    private fun tryReconnection() {
+        launch {
+            reconnectionSettings.consumeCount()
+            makeNotification(0, reconnectionSettings.generateMessage())
+            delay(reconnectionSettings.intervalMillis)
+
+            val result = withTimeoutOrNull(10_000) {
+                while (true) {
+                    if (isAllJobCompleted) {
+                        return@withTimeoutOrNull true
+                    } else {
+                        delay(1)
+                    }
+                }
+            }
+
+            if (result == null) {
+                inform("The last session cannot be cleaned up", null)
+                makeNotification(0, "Failed to reconnect")
+                bye()
+            } else {
+                initialize()
+                run()
+            }
+        }
+    }
+
     internal fun run() {
-        if (networkSetting.LOG_DO_SAVE_LOG) {
+        if (networkSetting.LOG_DO_SAVE_LOG && logStream == null) {
             prepareLog()
         }
         inform("Establish VPN connection", null)
@@ -239,9 +335,25 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
     }
 
+    private fun makeNotification(id: Int, message: String) {
+        val builder = NotificationCompat.Builder(vpnService.applicationContext, vpnService.CHANNEL_ID).also {
+            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+            it.setContentText(message)
+            it.priority = NotificationCompat.PRIORITY_DEFAULT
+            it.setAutoCancel(true)
+        }
+
+        NotificationManagerCompat.from(vpnService.applicationContext).also {
+            it.notify(id, builder.build())
+        }
+
+        inform(message, null)
+    }
+
     private fun notifySwitchOff() {
-        PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext).also {
-            it.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
+        prefs.edit().also {
+            it.putBoolean(BoolPreference.HOME_CONNECTOR.name, false)
+            it.apply()
         }
 
         LocalBroadcastManager.getInstance(vpnService.applicationContext)

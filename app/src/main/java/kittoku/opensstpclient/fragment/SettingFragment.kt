@@ -27,6 +27,9 @@ private val settingPreferences = arrayOf<PreferenceWrapper<*>>(
     IntPreference.IP_PREFIX,
     BoolPreference.IP_ONLY_LAN,
     BoolPreference.IP_ONLY_ULA,
+    BoolPreference.RECONNECTION_ENABLED,
+    IntPreference.RECONNECTION_COUNT,
+    IntPreference.RECONNECTION_INTERVAL,
     BoolPreference.LOG_DO_SAVE_LOG,
     DirPreference.LOG_DIR,
 )

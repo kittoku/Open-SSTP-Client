@@ -171,6 +171,13 @@ class HomeFragment : PreferenceFragmentCompat() {
             }
         }
 
+        IntPreference.RECONNECTION_COUNT.getValue(prefs).also {
+            if (it < 1) {
+                makeToast("Retry Count must be a positive integer")
+                return false
+            }
+        }
+
         val doSaveLog = BoolPreference.LOG_DO_SAVE_LOG.getValue(prefs)
         val logDir = DirPreference.LOG_DIR.getValue(prefs)
         if (doSaveLog && logDir.isEmpty()) {

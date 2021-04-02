@@ -369,6 +369,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
         }
 
         status.ppp = PppStatus.NETWORK
+        parent.reconnectionSettings.resetCount()
         parent.jobData?.start()
         echoTimer.reset()
     }

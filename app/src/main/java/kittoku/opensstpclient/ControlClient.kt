@@ -44,7 +44,7 @@ internal class ReconnectionSettings(prefs: SharedPreferences) {
 
     internal fun generateMessage(): String {
         val triedCount = initialCount - currentCount
-        return "Reconnection will be tried in $interval seconds (COUNT: $triedCount/$initialCount)"
+        return "Reconnection will be tried (COUNT: $triedCount/$initialCount)"
     }
 }
 

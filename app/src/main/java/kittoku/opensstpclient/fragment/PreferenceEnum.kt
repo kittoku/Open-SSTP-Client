@@ -184,6 +184,7 @@ internal enum class BoolPreference(override val defaultValue: Boolean) :
     override fun initPreference(fragment: PreferenceFragmentCompat, prefs: SharedPreferences) {
         fragment.findPreference<TwoStatePreference>(name)!!.also {
             initValue(fragment, prefs)
+            it.isSingleLineTitle = false
         }
     }
 }

@@ -234,6 +234,76 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
     }
 
+    private fun launchJobEncapsulate(channel: Channel<ByteBuffer>) {
+        launch { // buffer packets
+            val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
+            val minCapacity = networkSetting.currentMtu + 8
+
+            val ipv4Version: Int = (0x4).shl(28)
+            val ipv6Version: Int = (0x6).shl(28)
+            val versionMask: Int = (0xF).shl(28)
+
+            var polled: ByteBuffer?
+
+            fun encapsulate(src: ByteBuffer): Boolean // true if data protocol is enabled
+            {
+                val header = src.getInt(0)
+                val version = when (header and versionMask) {
+                    ipv4Version -> {
+                        if (!networkSetting.PPP_IPv4_ENABLED) return false
+                        PppProtocol.IP.value
+                    }
+
+                    ipv6Version -> {
+                        if (!networkSetting.PPP_IPv6_ENABLED) return false
+                        PppProtocol.IPV6.value
+                    }
+
+                    else -> throw Exception("Invalid data protocol was detected")
+                }
+
+                dataBuffer.putShort(PacketType.DATA.value)
+                dataBuffer.putShort((src.limit() + 8).toShort())
+                dataBuffer.putShort(PPP_HEADER)
+                dataBuffer.putShort(version)
+                dataBuffer.put(src)
+
+                return true
+            }
+
+
+            while (isActive) {
+                dataBuffer.clear()
+                if (!encapsulate(channel.receive())) continue
+
+                while (isActive) {
+                    // First challenge
+                    polled = channel.poll()
+                    if (polled != null) {
+                        encapsulate(polled)
+                        if (dataBuffer.remaining() < minCapacity) break
+                        continue
+                    }
+
+                    delay(1)
+
+                    // Second challenge
+                    polled = channel.poll()
+                    if (polled != null) {
+                        encapsulate(polled)
+                        if (dataBuffer.remaining() < minCapacity) break
+                        continue
+                    }
+
+                    break
+                }
+
+                dataBuffer.flip()
+                sslTerminal.send(dataBuffer)
+            }
+        }
+    }
+
     private fun launchJobData() {
         jobData = launch(handler, CoroutineStart.LAZY) {
             val channel = Channel<ByteBuffer>(0)
@@ -241,57 +311,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
             val readBufferBeta = ByteBuffer.allocate(networkSetting.currentMtu)
             var isBlockingAlpha = true
 
-            launch { // buffer packets
-                val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
-                val minCapacity = networkSetting.currentMtu + 8
-
-                val ipv4Version: Int = (0x4).shl(28)
-                val ipv6Version: Int = (0x6).shl(28)
-                val versionMask: Int = (0xF).shl(28)
-
-                fun encapsulate(src: ByteBuffer): Boolean // true if data protocol is enabled
-                {
-                    val header = src.getInt(0)
-                    val version = when (header and versionMask) {
-                        ipv4Version -> {
-                            if (!networkSetting.PPP_IPv4_ENABLED) return false
-                            PppProtocol.IP.value
-                        }
-
-                        ipv6Version -> {
-                            if (!networkSetting.PPP_IPv6_ENABLED) return false
-                            PppProtocol.IPV6.value
-                        }
-
-                        else -> throw Exception("Invalid data protocol was detected")
-                    }
-
-                    dataBuffer.putShort(PacketType.DATA.value)
-                    dataBuffer.putShort((src.limit() + 8).toShort())
-                    dataBuffer.putShort(PPP_HEADER)
-                    dataBuffer.putShort(version)
-                    dataBuffer.put(src)
-
-                    return true
-                }
-
-                while (isActive) {
-                    dataBuffer.clear()
-                    if (!encapsulate(channel.receive())) continue
-
-                    while (isActive) {
-                        delay(1)
-                        val polled = channel.poll()
-                        if (polled != null) {
-                            encapsulate(polled)
-                            if (dataBuffer.remaining() < minCapacity) break
-                        } else break
-                    }
-
-                    dataBuffer.flip()
-                    sslTerminal.send(dataBuffer)
-                }
-            }
+            launchJobEncapsulate(channel)
 
             suspend fun read(dst: ByteBuffer) {
                 dst.clear()

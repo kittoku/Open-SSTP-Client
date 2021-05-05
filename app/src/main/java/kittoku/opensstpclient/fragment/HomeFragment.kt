@@ -1,15 +1,11 @@
 package kittoku.opensstpclient.fragment
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.net.*
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -20,10 +16,13 @@ private val homePreferences = arrayOf<PreferenceWrapper<*>>(
     StrPreference.HOME_HOST,
     StrPreference.HOME_USER,
     StrPreference.HOME_PASS,
+    BoolPreference.HOME_CONNECTOR,
     StatusPreference.STATUS,
 )
 
 class HomeFragment : PreferenceFragmentCompat() {
+    lateinit var sharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener // for avoiding GC
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.home, rootKey)
 
@@ -31,11 +30,33 @@ class HomeFragment : PreferenceFragmentCompat() {
             it.initPreference(this, preferenceManager.sharedPreferences)
         }
 
+        attachSharedPreferenceListener()
         attachConnectorListener()
-        registerBroadcastReceiver()
+    }
+
+    private fun attachSharedPreferenceListener() {
+        // for updating by both user and system
+        sharedPreferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+            when (key) {
+                BoolPreference.HOME_CONNECTOR.name -> {
+                    BoolPreference.HOME_CONNECTOR.also {
+                        it.setValue(this, it.getValue(prefs))
+                    }
+                }
+
+                StatusPreference.STATUS.name -> {
+                    StatusPreference.STATUS.also {
+                        it.setValue(this, it.getValue(prefs))
+                    }
+                }
+            }
+        }
+
+        preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
     }
 
     private fun attachConnectorListener() {
+        // for disconnecting by user in HomeFragment
         findPreference<SwitchPreferenceCompat>(BoolPreference.HOME_CONNECTOR.name)!!.also {
             it.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newState ->
                 if (newState == true) {
@@ -56,44 +77,6 @@ class HomeFragment : PreferenceFragmentCompat() {
 
                 true
             }
-        }
-    }
-
-    private fun detachConnectorListener() {
-        findPreference<SwitchPreferenceCompat>(BoolPreference.HOME_CONNECTOR.name)!!.also {
-            it.onPreferenceChangeListener = null
-        }
-    }
-
-    private fun registerBroadcastReceiver() {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                when (intent?.action) {
-                    VpnAction.ACTION_SWITCH_OFF.value -> {
-                        if (activity != null) {
-                            detachConnectorListener()
-                            BoolPreference.HOME_CONNECTOR.setValue(this@HomeFragment, false)
-                            attachConnectorListener()
-                        }
-                    }
-
-                    VpnAction.ACTION_UPDATE_STATUS.value -> {
-                        StatusPreference.STATUS.initPreference(
-                            this@HomeFragment,
-                            preferenceManager.sharedPreferences
-                        )
-                    }
-                }
-            }
-        }
-
-        val filter = IntentFilter().also {
-            it.addAction(VpnAction.ACTION_SWITCH_OFF.value)
-            it.addAction(VpnAction.ACTION_UPDATE_STATUS.value)
-        }
-
-        LocalBroadcastManager.getInstance(requireContext()).also {
-            it.registerReceiver(receiver, filter)
         }
     }
 

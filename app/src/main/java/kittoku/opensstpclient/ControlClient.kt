@@ -1,13 +1,11 @@
 package kittoku.opensstpclient
 
-import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.net.VpnService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import kittoku.opensstpclient.fragment.BoolPreference
 import kittoku.opensstpclient.fragment.IntPreference
@@ -149,7 +147,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     private fun bye() {
         inform("Terminate VPN connection", null)
         logStream?.close()
-        notifySwitchOff()
+        prefs.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
         vpnService.stopForeground(true)
     }
 
@@ -368,15 +366,5 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
 
         inform(message, null)
-    }
-
-    private fun notifySwitchOff() {
-        prefs.edit().also {
-            it.putBoolean(BoolPreference.HOME_CONNECTOR.name, false)
-            it.apply()
-        }
-
-        LocalBroadcastManager.getInstance(vpnService.applicationContext)
-            .sendBroadcast(Intent(VpnAction.ACTION_SWITCH_OFF.value))
     }
 }

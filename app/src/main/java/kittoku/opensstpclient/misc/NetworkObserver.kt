@@ -1,11 +1,9 @@
 package kittoku.opensstpclient.misc
 
-import android.content.Intent
 import android.net.*
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import android.os.Build
 import androidx.preference.PreferenceManager
 import kittoku.opensstpclient.SstpVpnService
-import kittoku.opensstpclient.VpnAction
 import kittoku.opensstpclient.fragment.StatusPreference
 
 internal class NetworkObserver(vpnService: SstpVpnService) {
@@ -13,13 +11,10 @@ internal class NetworkObserver(vpnService: SstpVpnService) {
 
     private val callback: ConnectivityManager.NetworkCallback
 
-    private val broadcaster = LocalBroadcastManager.getInstance(vpnService.applicationContext)
-
     private val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
 
     init {
         wipeStatus()
-        notifyStatusUpdated()
 
         val request = NetworkRequest.Builder().let {
             it.addTransportType(NetworkCapabilities.TRANSPORT_VPN)
@@ -29,12 +24,21 @@ internal class NetworkObserver(vpnService: SstpVpnService) {
 
 
         callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    manager.getLinkProperties(network)?.also { linkProperties ->
+                        makeSummary(linkProperties).also {
+                            prefs.edit().putString(StatusPreference.STATUS.name, it).apply()
+                        }
+                    }
+
+                }
+            }
+
             override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
                 makeSummary(linkProperties).also {
                     prefs.edit().putString(StatusPreference.STATUS.name, it).apply()
                 }
-
-                notifyStatusUpdated()
             }
         }
 
@@ -66,10 +70,6 @@ internal class NetworkObserver(vpnService: SstpVpnService) {
         }
     }
 
-    private fun notifyStatusUpdated() {
-        broadcaster.sendBroadcast(Intent(VpnAction.ACTION_UPDATE_STATUS.value))
-    }
-
     private fun wipeStatus() {
         prefs.edit().putString(StatusPreference.STATUS.name, "").apply()
     }
@@ -77,6 +77,5 @@ internal class NetworkObserver(vpnService: SstpVpnService) {
     internal fun close() {
         manager.unregisterNetworkCallback(callback)
         wipeStatus()
-        notifyStatusUpdated()
     }
 }

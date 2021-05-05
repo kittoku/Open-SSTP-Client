@@ -235,7 +235,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     }
 
     private fun launchJobEncapsulate(channel: Channel<ByteBuffer>) {
-        launch { // buffer packets
+        launch(handler) { // buffer packets
             val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
             val minCapacity = networkSetting.currentMtu + 8
 

@@ -67,10 +67,11 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
     private var jobIncoming: Job? = null
     private var jobControl: Job? = null
+    private var jobEncapsulate: Job? = null
     internal var jobData: Job? = null
     private val isAllJobCompleted: Boolean
         get() {
-            arrayOf(jobIncoming, jobControl, jobData).forEach {
+            arrayOf(jobIncoming, jobControl, jobEncapsulate, jobData).forEach {
                 if (it?.isCompleted != true) {
                     return false
                 }
@@ -111,20 +112,31 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                         inform("An unexpected event occurred", exception)
                     }
 
+                    // no more packets needed to be retrieved
                     ipTerminal.release()
                     jobData?.cancel()
+                    jobEncapsulate?.cancel()
 
+                    // wait until SstpClient.sendLastGreeting() is invoked
                     jobIncoming?.join()
 
+                    // wait until jobControl finishes sending messages
                     withTimeout(10_000) {
                         while (isActive) {
-                            if (jobIncoming?.isCompleted == false) delay(100)
+                            if (jobControl?.isCompleted == false) {
+                                delay(100)
+                            }
                             else break
                         }
                     }
+
+                    // avoid jobControl being stuck with socket
                     sslTerminal.release()
+
+                    // ensure jobControl is completed
                     jobControl?.cancel()
 
+                    // release ConnectivityManager resource
                     observer.close()
 
 
@@ -138,6 +150,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                         }
                     }
 
+
                     bye()
                 }
             }
@@ -149,6 +162,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         logStream?.close()
         prefs.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
         vpnService.stopForeground(true)
+        vpnService.stopSelf()
     }
 
     private fun tryReconnection() {
@@ -233,7 +247,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     }
 
     private fun launchJobEncapsulate(channel: Channel<ByteBuffer>) {
-        launch(handler) { // buffer packets
+        jobEncapsulate = launch(handler) { // buffer packets
             val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
             val minCapacity = networkSetting.currentMtu + 8
 

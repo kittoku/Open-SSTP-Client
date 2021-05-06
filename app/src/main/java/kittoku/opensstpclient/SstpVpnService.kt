@@ -24,6 +24,7 @@ internal class SstpVpnService : VpnService() {
         return if (VpnAction.ACTION_DISCONNECT.value == intent?.action ?: false) {
             controlClient?.kill(null)
             controlClient = null
+
             Service.START_NOT_STICKY
         } else {
             controlClient?.kill(null)

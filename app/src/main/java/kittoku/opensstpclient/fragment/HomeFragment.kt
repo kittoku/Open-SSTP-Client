@@ -21,7 +21,7 @@ private val homePreferences = arrayOf<PreferenceWrapper<*>>(
 )
 
 class HomeFragment : PreferenceFragmentCompat() {
-    lateinit var sharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener // for avoiding GC
+    private lateinit var sharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener // for avoiding GC
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.home, rootKey)

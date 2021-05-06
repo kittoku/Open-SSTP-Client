@@ -5,7 +5,7 @@ So no test with other servers is done. Its behavior may be still unstable.
 
 ## Installation
 * You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.2.0/osc-1.2.0.apk) and install it
+* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.2.1/osc-1.2.1.apk) and install it
 * When the latest version is unstable, you can download old versions in [Releases page](https://github.com/kittoku/Open-SSTP-Client/releases)
 
 ## Usage

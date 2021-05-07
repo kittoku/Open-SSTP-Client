@@ -119,14 +119,14 @@ class HomeFragment : PreferenceFragmentCompat() {
             return false
         }
 
-        IntPreference.PPP_MRU.getValue(prefs).also {
+        val mru = IntPreference.PPP_MRU.getValue(prefs).also {
             if (it !in MIN_MRU..MAX_MRU) {
                 makeToast("The given MRU is out of $MIN_MRU-$MAX_MRU")
                 return false
             }
         }
 
-        IntPreference.PPP_MTU.getValue(prefs).also {
+        val mtu = IntPreference.PPP_MTU.getValue(prefs).also {
             if (it !in MIN_MTU..MAX_MTU) {
                 makeToast("The given MRU is out of $MIN_MTU-$MAX_MTU")
                 return false
@@ -157,6 +157,20 @@ class HomeFragment : PreferenceFragmentCompat() {
         IntPreference.RECONNECTION_COUNT.getValue(prefs).also {
             if (it < 1) {
                 makeToast("Retry Count must be a positive integer")
+                return false
+            }
+        }
+
+        IntPreference.BUFFER_INCOMING.getValue(prefs).also {
+            if (it < 2 * mru) {
+                makeToast("Incoming Buffer Size must be >= 2 * MRU")
+                return false
+            }
+        }
+
+        IntPreference.BUFFER_OUTGOING.getValue(prefs).also {
+            if (it < 2 * mtu) {
+                makeToast("Outgoing Buffer Size must be >= 2 * MTU")
                 return false
             }
         }

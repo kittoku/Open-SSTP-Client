@@ -30,6 +30,8 @@ private val settingPreferences = arrayOf<PreferenceWrapper<*>>(
     BoolPreference.RECONNECTION_ENABLED,
     IntPreference.RECONNECTION_COUNT,
     IntPreference.RECONNECTION_INTERVAL,
+    IntPreference.BUFFER_INCOMING,
+    IntPreference.BUFFER_OUTGOING,
     BoolPreference.LOG_DO_SAVE_LOG,
     DirPreference.LOG_DIR,
 )

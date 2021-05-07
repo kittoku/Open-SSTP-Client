@@ -195,7 +195,9 @@ internal enum class IntPreference(override val defaultValue: Int) : PreferenceWr
     PPP_MTU(DEFAULT_MTU),
     IP_PREFIX(0),
     RECONNECTION_COUNT(3),
-    RECONNECTION_INTERVAL(10);
+    RECONNECTION_INTERVAL(10),
+    BUFFER_INCOMING(16384),
+    BUFFER_OUTGOING(16384);
 
     override fun getValue(prefs: SharedPreferences): Int {
         return prefs.getString(name, defaultValue.toString())!!.toIntOrNull() ?: defaultValue

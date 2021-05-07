@@ -115,6 +115,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="BUFFER"
+        android:title="Buffer Size">
+
+        <EditTextPreference
+            android:key="BUFFER_INCOMING"
+            android:title="Incoming Buffer Size" />
+
+        <EditTextPreference
+            android:key="BUFFER_OUTGOING"
+            android:title="Outgoing Buffer Size" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="LOG"
         android:title="Log">
 

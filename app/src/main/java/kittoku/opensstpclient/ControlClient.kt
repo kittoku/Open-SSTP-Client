@@ -95,7 +95,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         networkSetting = NetworkSetting(prefs)
         status = DualClientStatus()
         builder = vpnService.Builder()
-        incomingBuffer = IncomingBuffer(INCOMING_BUFFER_SIZE, this)
+        incomingBuffer = IncomingBuffer(networkSetting.BUFFER_INCOMING, this)
         observer = NetworkObserver(vpnService)
         controlQueue.clear()
         isClosing = false
@@ -248,7 +248,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
     private fun launchJobEncapsulate(channel: Channel<ByteBuffer>) {
         jobEncapsulate = launch(handler) { // buffer packets
-            val dataBuffer = ByteBuffer.allocate(DATA_BUFFER_SIZE)
+            val dataBuffer = ByteBuffer.allocate(networkSetting.BUFFER_OUTGOING)
             val minCapacity = networkSetting.currentMtu + 8
 
             val ipv4Version: Int = (0x4).shl(28)

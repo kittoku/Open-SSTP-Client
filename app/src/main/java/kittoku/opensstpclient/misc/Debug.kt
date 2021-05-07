@@ -2,6 +2,9 @@ package kittoku.opensstpclient.misc
 
 import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.unit.DataUnit
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.io.BufferedOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.reflect.KFunction
@@ -10,6 +13,23 @@ import kotlin.reflect.KFunction
 internal class DataUnitParsingError : Error("Failed to parse data unit")
 
 internal class SuicideException : Exception("Kill this client as intended")
+
+internal class TickRecorder(private val key:String, private val logStream: BufferedOutputStream) {
+    private val mutex = Mutex()
+    private var lastTick = System.currentTimeMillis()
+
+    internal suspend fun tick(event: String, value: String="NULL") {
+        mutex.withLock {
+            val currentTick = System.currentTimeMillis()
+            val diff = currentTick - lastTick
+            lastTick = currentTick
+
+            "TICK, $key, $currentTick, $diff, $event, $value\n".also {
+                logStream.write(it.toHexByteArray())
+            }
+        }
+    }
+}
 
 internal fun ControlClient.inform(message: String, cause: Throwable?) {
     val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
@@ -24,7 +44,6 @@ internal fun ControlClient.inform(message: String, cause: Throwable?) {
 
     logStream?.write(printing.toByteArray())
 }
-
 
 internal fun ControlClient.informDataUnitParsingError(unit: DataUnit<*>, cause: DataUnitParsingError) {
     inform("Failed to parse ${unit::class.simpleName}", cause)

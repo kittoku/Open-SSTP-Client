@@ -122,6 +122,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
     internal suspend fun send(bytes: ByteBuffer) {
         mutex.withLock {
             socket.outputStream.write(bytes.array(), 0, bytes.limit())
+            socket.outputStream.flush()
         }
     }
 

@@ -156,12 +156,31 @@ internal enum class StatusPreference(override val defaultValue: String) : Prefer
     }
 }
 
-internal enum class BoolPreference(override val defaultValue: Boolean) :
-    PreferenceWrapper<Boolean> {
+internal enum class SetPreference(override val defaultValue: Set<String>) : PreferenceWrapper<Set<String>> {
+    SSL_SUITES(setOf<String>());
+
+    override fun getValue(prefs: SharedPreferences): Set<String> {
+        return prefs.getStringSet(name, defaultValue)!!
+    }
+
+    override fun setValue(fragment: PreferenceFragmentCompat, value: Set<String>) {
+        fragment.findPreference<MultiSelectListPreference>(name)!!.also {
+            it.values = value
+        }
+    }
+
+    override fun initPreference(fragment: PreferenceFragmentCompat, prefs: SharedPreferences) {
+        fragment.findPreference<MultiSelectListPreference>(name)!!.also {
+            initValue(fragment, prefs)
+        }
+    }
+}
+
+internal enum class BoolPreference(override val defaultValue: Boolean) : PreferenceWrapper<Boolean> {
     HOME_CONNECTOR(false),
     SSL_DO_VERIFY(true),
-    SSL_DO_DECRYPT(false),
     SSL_DO_ADD_CERT(false),
+    SSL_DO_SELECT_SUITES(false),
     PPP_PAP_ENABLED(true),
     PPP_MSCHAPv2_ENABLED(true),
     PPP_IPv4_ENABLED(true),

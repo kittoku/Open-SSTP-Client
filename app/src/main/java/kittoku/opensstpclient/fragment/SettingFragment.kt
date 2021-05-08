@@ -3,9 +3,12 @@ package kittoku.opensstpclient.fragment
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.preference.DropDownPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kittoku.opensstpclient.R
+import javax.net.ssl.SSLContext
 
 
 private const val CERT_DIR_REQUEST_CODE: Int = 0
@@ -15,9 +18,10 @@ private val settingPreferences = arrayOf<PreferenceWrapper<*>>(
     IntPreference.SSL_PORT,
     StrPreference.SSL_VERSION,
     BoolPreference.SSL_DO_VERIFY,
-    BoolPreference.SSL_DO_DECRYPT,
     BoolPreference.SSL_DO_ADD_CERT,
     DirPreference.SSL_CERT_DIR,
+    BoolPreference.SSL_DO_SELECT_SUITES,
+    SetPreference.SSL_SUITES,
     IntPreference.PPP_MRU,
     IntPreference.PPP_MTU,
     BoolPreference.PPP_PAP_ENABLED,
@@ -44,8 +48,25 @@ internal class SettingFragment : PreferenceFragmentCompat() {
             it.initPreference(this, preferenceManager.sharedPreferences)
         }
 
+        initSSLPreferences()
         setCertDirListener()
         setLogDirListener()
+    }
+
+    private fun initSSLPreferences() {
+        val params = SSLContext.getDefault().supportedSSLParameters
+
+        findPreference<DropDownPreference>(StrPreference.SSL_VERSION.name)!!.also {
+            val versions = arrayOf("DEFAULT") + params.protocols
+
+            it.entries = versions
+            it.entryValues = versions
+        }
+
+        findPreference<MultiSelectListPreference>(SetPreference.SSL_SUITES.name)!!.also {
+            it.entries = params.cipherSuites
+            it.entryValues = params.cipherSuites
+        }
     }
 
     private fun setCertDirListener() {

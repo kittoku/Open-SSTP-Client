@@ -19,37 +19,39 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
     private val mutex = Mutex()
     internal lateinit var socket: SSLSocket
 
+    private fun createTrustManagers(): Array<TrustManager> {
+        val uri = Uri.parse(parent.networkSetting.SSL_CERT_DIR)
+        val document = DocumentFile.fromTreeUri(parent.vpnService, uri)!!
+
+        val certFactory = CertificateFactory.getInstance("X.509")
+        val keyStore = KeyStore.getDefaultType().let {
+            KeyStore.getInstance(it)
+        }
+        keyStore.load(null, null)
+
+        for (file in document.listFiles()) {
+            if (file.isFile) {
+                val stream =
+                    BufferedInputStream(parent.vpnService.contentResolver.openInputStream(file.uri))
+                val ca = certFactory.generateCertificate(stream) as X509Certificate
+                keyStore.setCertificateEntry(file.name, ca)
+                stream.close()
+            }
+        }
+
+        val tmFactory = TrustManagerFactory.getDefaultAlgorithm().let {
+            TrustManagerFactory.getInstance(it)
+        }
+        tmFactory.init(keyStore)
+
+        return tmFactory.trustManagers
+    }
+
     private fun createSocket() {
         val socketFactory = if (parent.networkSetting.SSL_DO_ADD_CERT) {
-            val uri = Uri.parse(parent.networkSetting.SSL_CERT_DIR)
-            val document = DocumentFile.fromTreeUri(parent.vpnService, uri)!!
-
-            val certFactory = CertificateFactory.getInstance("X.509")
-            val keyStore = KeyStore.getDefaultType().let {
-                KeyStore.getInstance(it)
-            }
-            keyStore.load(null, null)
-
-            for (file in document.listFiles()) {
-                if (file.isFile) {
-                    val stream =
-                        BufferedInputStream(parent.vpnService.contentResolver.openInputStream(file.uri))
-                    val ca = certFactory.generateCertificate(stream) as X509Certificate
-                    keyStore.setCertificateEntry(file.name, ca)
-                    stream.close()
-                }
-            }
-
-            val tmFactory = TrustManagerFactory.getDefaultAlgorithm().let {
-                TrustManagerFactory.getInstance(it)
-            }
-            tmFactory.init(keyStore)
-
-            val sslContext = SSLContext.getInstance("TLS").also {
-                it.init(null, tmFactory.trustManagers, null)
-            }
-
-            sslContext.socketFactory
+            val context = SSLContext.getInstance(parent.networkSetting.SSL_VERSION) as SSLContext
+            context.init(null, createTrustManagers(), null)
+            context.socketFactory
         } else {
             SSLSocketFactory.getDefault()
         }
@@ -65,11 +67,12 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
             }
         }
 
-        if (parent.networkSetting.SSL_DO_DECRYPT) {
-            socket.enabledCipherSuites = arrayOf(
-                "TLS_RSA_WITH_AES_128_CBC_SHA",
-                "TLS_RSA_WITH_AES_256_CBC_SHA"
-            )
+        if (parent.networkSetting.SSL_DO_SELECT_SUITES) {
+            val sortedSuites = socket.supportedCipherSuites.filter {
+                parent.networkSetting.SSL_SUITES.contains(it)
+            }
+
+            socket.enabledCipherSuites = sortedSuites.toTypedArray()
         }
 
         HttpsURLConnection.getDefaultHostnameVerifier().also {

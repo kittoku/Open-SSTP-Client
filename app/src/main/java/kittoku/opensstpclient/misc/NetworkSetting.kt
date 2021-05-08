@@ -3,10 +3,7 @@ package kittoku.opensstpclient.misc
 import android.content.SharedPreferences
 import kittoku.opensstpclient.MAX_MTU
 import kittoku.opensstpclient.MIN_MRU
-import kittoku.opensstpclient.fragment.BoolPreference
-import kittoku.opensstpclient.fragment.DirPreference
-import kittoku.opensstpclient.fragment.IntPreference
-import kittoku.opensstpclient.fragment.StrPreference
+import kittoku.opensstpclient.fragment.*
 import kittoku.opensstpclient.unit.*
 import java.security.cert.Certificate
 import java.util.*
@@ -32,9 +29,10 @@ internal class NetworkSetting(prefs: SharedPreferences) {
     internal val SSL_PORT = IntPreference.SSL_PORT.getValue(prefs)
     internal val SSL_VERSION = StrPreference.SSL_VERSION.getValue(prefs)
     internal val SSL_DO_VERIFY = BoolPreference.SSL_DO_VERIFY.getValue(prefs)
-    internal val SSL_DO_DECRYPT = BoolPreference.SSL_DO_DECRYPT.getValue(prefs)
     internal val SSL_DO_ADD_CERT = BoolPreference.SSL_DO_ADD_CERT.getValue(prefs)
     internal val SSL_CERT_DIR = DirPreference.SSL_CERT_DIR.getValue(prefs)
+    internal val SSL_DO_SELECT_SUITES = BoolPreference.SSL_DO_SELECT_SUITES.getValue(prefs)
+    internal val SSL_SUITES = SetPreference.SSL_SUITES.getValue(prefs)
     internal val PPP_MRU = IntPreference.PPP_MRU.getValue(prefs)
     internal val PPP_MTU = IntPreference.PPP_MTU.getValue(prefs)
     internal val PPP_PAP_ENABLED = BoolPreference.PPP_PAP_ENABLED.getValue(prefs)

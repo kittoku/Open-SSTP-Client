@@ -113,9 +113,22 @@ class HomeFragment : PreferenceFragmentCompat() {
         }
 
         val doAddCerts = BoolPreference.SSL_DO_ADD_CERT.getValue(prefs)
+        val version = StrPreference.SSL_VERSION.getValue(prefs)
         val certDir = DirPreference.SSL_CERT_DIR.getValue(prefs)
+        if (doAddCerts && version == "DEFAULT") {
+            makeToast("Adding trusted certificates needs SSL version to be specified")
+            return false
+        }
+
         if (doAddCerts && certDir.isEmpty()) {
             makeToast("No certificates directory was selected")
+            return false
+        }
+
+        val doSelectSuites = BoolPreference.SSL_DO_SELECT_SUITES.getValue(prefs)
+        val suites = SetPreference.SSL_SUITES.getValue(prefs)
+        if (doSelectSuites && suites.isEmpty()) {
+            makeToast("No cipher suite was selected")
             return false
         }
 

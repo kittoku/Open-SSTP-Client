@@ -10,18 +10,12 @@
             android:title="Port Number" />
 
         <DropDownPreference
-            android:entries="@array/ssl_versions"
-            android:entryValues="@array/ssl_versions"
             android:key="SSL_VERSION"
             android:title="SSL Version" />
 
         <CheckBoxPreference
             android:key="SSL_DO_VERIFY"
             android:title="Verify Hostname" />
-
-        <CheckBoxPreference
-            android:key="SSL_DO_DECRYPT"
-            android:title="Use Decryptable Mode" />
 
         <SwitchPreference
             android:key="SSL_DO_ADD_CERT"
@@ -31,6 +25,15 @@
             android:dependency="SSL_DO_ADD_CERT"
             android:key="SSL_CERT_DIR"
             android:title="Select Certificates Directory" />
+
+        <SwitchPreference
+            android:key="SSL_DO_SELECT_SUITES"
+            android:title="Enable Only Selected Cipher Suites" />
+
+        <MultiSelectListPreference
+            android:dependency="SSL_DO_SELECT_SUITES"
+            android:key="SSL_SUITES"
+            android:title="Select Cipher Suites" />
 
     </PreferenceCategory>
 

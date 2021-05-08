@@ -2,8 +2,6 @@ package kittoku.opensstpclient.misc
 
 import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.unit.DataUnit
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.io.BufferedOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -14,19 +12,17 @@ internal class DataUnitParsingError : Error("Failed to parse data unit")
 
 internal class SuicideException : Exception("Kill this client as intended")
 
-internal class TickRecorder(private val key:String, private val logStream: BufferedOutputStream) {
-    private val mutex = Mutex()
-    private var lastTick = System.currentTimeMillis()
+internal class Ticker(private val key:String, private val logStream: BufferedOutputStream) {
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
+    private var lastTick = System.nanoTime()
 
-    internal suspend fun tick(event: String, value: String="NULL") {
-        mutex.withLock {
-            val currentTick = System.currentTimeMillis()
-            val diff = currentTick - lastTick
-            lastTick = currentTick
+    internal fun tick(event: String, value: String="NULL") {
+        val currentTick = System.nanoTime()
+        val diff = currentTick - lastTick
+        lastTick = currentTick
 
-            "TICK, $key, $currentTick, $diff, $event, $value\n".also {
-                logStream.write(it.toHexByteArray())
-            }
+        "TICK, $key, ${dateFormat.format(Date())}, $diff, $event, $value\n".also {
+            logStream.write(it.toByteArray())
         }
     }
 }

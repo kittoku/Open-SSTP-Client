@@ -3,15 +3,15 @@ package kittoku.opensstpclient.misc
 import android.net.*
 import android.os.Build
 import androidx.preference.PreferenceManager
-import kittoku.opensstpclient.SstpVpnService
+import kittoku.opensstpclient.ControlClient
 import kittoku.opensstpclient.fragment.StatusPreference
 
-internal class NetworkObserver(vpnService: SstpVpnService) {
-    private val manager = vpnService.getSystemService(ConnectivityManager::class.java)
+internal class NetworkObserver(val parent: ControlClient) {
+    private val manager = parent.vpnService.getSystemService(ConnectivityManager::class.java)
 
     private val callback: ConnectivityManager.NetworkCallback
 
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(vpnService.applicationContext)
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(parent.vpnService.applicationContext)
 
     init {
         wipeStatus()
@@ -64,6 +64,10 @@ internal class NetworkObserver(vpnService: SstpVpnService) {
         properties.routes.forEach {
             summary.add(it.toString())
         }
+        summary.add("")
+
+        summary.add("[Cipher Suite]")
+        summary.add(parent.sslTerminal.socket.session.cipherSuite)
 
         return summary.reduce { acc, s ->
             acc + "\n" + s

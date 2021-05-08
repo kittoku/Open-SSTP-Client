@@ -96,7 +96,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         status = DualClientStatus()
         builder = vpnService.Builder()
         incomingBuffer = IncomingBuffer(networkSetting.BUFFER_INCOMING, this)
-        observer = NetworkObserver(vpnService)
+        observer = NetworkObserver(this)
         controlQueue.clear()
         isClosing = false
     }

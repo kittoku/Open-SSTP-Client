@@ -17,7 +17,7 @@
 
     <PreferenceCategory>
 
-        <Preference
+        <kittoku.opensstpclient.fragment.LongSummaryPreference
             android:key="STATUS"
             android:title="Current Status" />
 

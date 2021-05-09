@@ -2,6 +2,7 @@ package kittoku.opensstpclient.fragment
 
 import android.text.TextUtils
 import androidx.preference.EditTextPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 
 
@@ -18,6 +19,14 @@ internal val passwordSummaryProvider = Preference.SummaryProvider<EditTextPrefer
         "[No Value Entered]"
     } else {
         "[Password Entered]"
+    }
+}
+
+internal val suitesSummaryProvider = Preference.SummaryProvider<MultiSelectListPreference> {
+    when (it.values.size) {
+        0 -> "[No Suite Selected]"
+        1 -> "1 Suite Selected"
+        else -> "${it.values.size} Suites Selected"
     }
 }
 

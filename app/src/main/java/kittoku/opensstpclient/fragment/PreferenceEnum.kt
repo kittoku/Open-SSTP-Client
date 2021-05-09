@@ -171,6 +171,7 @@ internal enum class SetPreference(override val defaultValue: Set<String>) : Pref
 
     override fun initPreference(fragment: PreferenceFragmentCompat, prefs: SharedPreferences) {
         fragment.findPreference<MultiSelectListPreference>(name)!!.also {
+            it.summaryProvider = suitesSummaryProvider
             initValue(fragment, prefs)
         }
     }

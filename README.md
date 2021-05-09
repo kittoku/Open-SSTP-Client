@@ -5,7 +5,7 @@ So no test with other servers is done. Its behavior may be still unstable.
 
 ## Installation
 * You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.2.1/osc-1.2.1.apk) and install it
+* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.3.0/osc-1.3.0.apk) and install it
 * When the latest version is unstable, you can download old versions in [Releases page](https://github.com/kittoku/Open-SSTP-Client/releases)
 
 ## Usage
@@ -44,11 +44,10 @@ It is almost impossible that I can debug a problem caused in any environments bu
 app, there are many possible reasons to cause the problem and I cannot identify the real one unless the 
 problem can be reproduced in my environment.
 
-So it is strongly encouraged that you should debug by yourself. With `Decryptable Mode`, this client tries 
+So it is strongly encouraged that you should debug by yourself. With `Select Cipher Suites` option, this client tries 
 to use `TLS_RSA_WITH_AES_128_CBC_SHA` or `TLS_RSA_WITH_AES_256_CBC_SHA` as a cipher suite so that you 
 can decrypt and investigate packets with software like WireShark. I think there can be a similar app for 
-Android. In my experience, Specifying TLS version explicitly is necessary to decrypt. Don't forget the
-great software, Android Studio and its emulator (v^ー°)
+Android. Don't forget the great software, Android Studio and its emulator (v^ー°)
 
 I don't have Windows Server OS. So I don't officially support accessing to it, but there is a
  successful case. See [this issue](https://github.com/kittoku/Open-SSTP-Client/issues/8#issuecomment-590241322).

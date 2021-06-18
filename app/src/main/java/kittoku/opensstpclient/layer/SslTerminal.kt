@@ -75,13 +75,15 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
             socket.enabledCipherSuites = sortedSuites.toTypedArray()
         }
 
-        HttpsURLConnection.getDefaultHostnameVerifier().also {
-            if (!it.verify(
-                    parent.networkSetting.HOME_HOST,
-                    socket.session
-                ) && !parent.networkSetting.SSL_DO_VERIFY
-            ) {
-                throw Exception("Failed to verify the hostname")
+        if (parent.networkSetting.SSL_DO_VERIFY) {
+            HttpsURLConnection.getDefaultHostnameVerifier().also {
+                if (!it.verify(
+                        parent.networkSetting.HOME_HOST,
+                        socket.session
+                    )
+                ) {
+                    throw Exception("Failed to verify the hostname")
+                }
             }
         }
 

@@ -3,7 +3,7 @@ package kittoku.opensstpclient.misc
 import kittoku.opensstpclient.ControlClient
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
-import kotlin.math.min
+import kotlin.math.max
 
 
 internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) {
@@ -31,7 +31,7 @@ internal class IncomingBuffer(capacity: Int, private val parent: ControlClient) 
 
         buffer.position(currentPosition - currentMark)
         buffer.limit(currentLimit - currentMark)
-        pppLimit = min(currentPppLimit - currentMark, 0)
+        pppLimit = max(currentPppLimit - currentMark, 0)
     }
 
     private fun supply() {

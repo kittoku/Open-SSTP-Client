@@ -7,7 +7,7 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        applicationId "kittoku.opensstpclient"
+        applicationId "kittoku.osc"
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 15

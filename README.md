@@ -4,9 +4,7 @@ This is an open-sourced Secure Socket Tunneling Protocol (MS-SSTP) client for An
 So no test with other servers is done. Its behavior may be still unstable.
 
 ## Installation
-* You need to [allow unknown sources](https://developer.android.com/studio/publish/#unknown-sources) 
-* Download .apk file [here](https://github.com/kittoku/Open-SSTP-Client/releases/download/v1.3.2/osc-1.3.2.apk) and install it
-* When the latest version is unstable, you can download old versions in [Releases page](https://github.com/kittoku/Open-SSTP-Client/releases)
+You can download and install the latest version via [Google Play](https://play.google.com/store/apps/details?id=kittoku.osc)
 
 ## Usage
 Enter `Host`, `Username` and `Password` preferences and turn the switch on. If a key icon gets to show on 

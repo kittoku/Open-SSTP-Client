@@ -55,7 +55,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     internal lateinit var status: DualClientStatus
     internal lateinit var builder: VpnService.Builder
     internal lateinit var incomingBuffer: IncomingBuffer
-    private lateinit var observer: NetworkObserver
+    private var observer: NetworkObserver? = null
     internal val controlQueue = LinkedBlockingQueue<Any>()
     internal var logStream: BufferedOutputStream? = null
     internal val reconnectionSettings = ReconnectionSettings(prefs)
@@ -68,7 +68,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     private var jobIncoming: Job? = null
     private var jobControl: Job? = null
     private var jobEncapsulate: Job? = null
-    internal var jobData: Job? = null
+    private var jobData: Job? = null
     private val isAllJobCompleted: Boolean
         get() {
             arrayOf(jobIncoming, jobControl, jobEncapsulate, jobData).forEach {
@@ -96,7 +96,6 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         status = DualClientStatus()
         builder = vpnService.Builder()
         incomingBuffer = IncomingBuffer(networkSetting.BUFFER_INCOMING, this)
-        observer = NetworkObserver(this)
         controlQueue.clear()
         isClosing = false
     }
@@ -111,6 +110,9 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     if (exception != null && exception !is SuicideException) {
                         inform("An unexpected event occurred", exception)
                     }
+
+                    // release ConnectivityManager resource
+                    observer?.close()
 
                     // no more packets needed to be retrieved
                     ipTerminal.release()
@@ -135,9 +137,6 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
                     // ensure jobControl is completed
                     jobControl?.cancel()
-
-                    // release ConnectivityManager resource
-                    observer.close()
 
 
                     if (exception != null && reconnectionSettings.isEnabled) {
@@ -201,7 +200,6 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
 
         launchJobIncoming()
         launchJobControl()
-        launchJobData()
     }
 
     private fun launchJobIncoming() {
@@ -304,8 +302,8 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
         }
     }
 
-    private fun launchJobData() {
-        jobData = launch(handler, CoroutineStart.LAZY) {
+    internal fun launchJobData() {
+        jobData = launch(handler) {
             val channel = Channel<ByteBuffer>(0)
             val readBufferAlpha = ByteBuffer.allocate(networkSetting.currentMtu)
             val readBufferBeta = ByteBuffer.allocate(networkSetting.currentMtu)
@@ -337,6 +335,10 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 }
             }
         }
+    }
+
+    internal fun attachNetworkObserver() {
+        observer = NetworkObserver(this)
     }
 
     private fun prepareLayers() {

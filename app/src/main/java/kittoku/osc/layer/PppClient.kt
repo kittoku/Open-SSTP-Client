@@ -358,6 +358,8 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
     }
 
     private fun startNetworking() {
+        parent.attachNetworkObserver()
+
         parent.ipTerminal.also {
             try {
                 it.initializeTun()
@@ -370,7 +372,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         status.ppp = PppStatus.NETWORK
         parent.reconnectionSettings.resetCount()
-        parent.jobData?.start()
+        parent.launchJobData()
         echoTimer.reset()
     }
 

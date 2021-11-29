@@ -1,149 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <PreferenceCategory
-        android:key="SSL_LAYER"
-        android:title="SSL Layer">
-
-        <EditTextPreference
-            android:key="SSL_PORT"
-            android:title="Port Number" />
-
-        <DropDownPreference
-            android:key="SSL_VERSION"
-            android:title="SSL Version" />
-
-        <CheckBoxPreference
-            android:key="SSL_DO_VERIFY"
-            android:title="Verify Hostname" />
-
-        <SwitchPreference
-            android:key="SSL_DO_ADD_CERT"
-            android:title="Add Trusted Certificates" />
-
-        <Preference
-            android:dependency="SSL_DO_ADD_CERT"
-            android:key="SSL_CERT_DIR"
-            android:title="Select Certificates Directory" />
-
-        <SwitchPreference
-            android:key="SSL_DO_SELECT_SUITES"
-            android:title="Enable Only Selected Cipher Suites" />
-
-        <MultiSelectListPreference
-            android:dependency="SSL_DO_SELECT_SUITES"
-            android:key="SSL_SUITES"
-            android:title="Select Cipher Suites" />
-
+    <PreferenceCategory android:title="SSL Layer">
+        <kittoku.osc.preference.custom.SSLPortPreference android:key="SSL_PORT"/>
+        <kittoku.osc.preference.custom.SSLVersionPreference android:key="SSL_VERSION"/>
+        <kittoku.osc.preference.custom.SSLDoVerifyPreference android:key="SSL_DO_VERIFY"/>
+        <kittoku.osc.preference.custom.SSLDoAddCertPreference android:key="SSL_DO_ADD_CERT"/>
+        <kittoku.osc.preference.custom.SSLCertDirPreference android:key="SSL_CERT_DIR"/>
+        <kittoku.osc.preference.custom.SSLDoSelectSuitesPreference android:key="SSL_DO_SELECT_SUITES"/>
+        <kittoku.osc.preference.custom.SSLSuitesPreference android:key="SSL_SUITES"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="PPP_LAYER"
-        android:title="PPP Layer">
-
-        <EditTextPreference
-            android:key="PPP_MRU"
-            android:title="MRU" />
-
-        <EditTextPreference
-            android:key="PPP_MTU"
-            android:title="MTU" />
-
+    <PreferenceCategory android:title="PPP Layer">
+        <kittoku.osc.preference.custom.PPPMruPreference android:key="PPP_MRU"/>
+        <kittoku.osc.preference.custom.PPPMtuPreference android:key="PPP_MTU"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="PPP_AUTH"
-        android:title="PPP Authentication Protocol">
-
-        <CheckBoxPreference
-            android:key="PPP_PAP_ENABLED"
-            android:title="Enable PAP" />
-
-        <CheckBoxPreference
-            android:key="PPP_MSCHAPv2_ENABLED"
-            android:title="Enable MS-CHAPv2" />
-
+    <PreferenceCategory android:title="PPP Authentication Protocol">
+        <kittoku.osc.preference.custom.PPPPapEnabledPreference android:key="PPP_PAP_ENABLED"/>
+        <kittoku.osc.preference.custom.PPPMsChapv2EnabledPreference android:key="PPP_MSCHAPv2_ENABLED"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="PPP_NETWORK"
-        android:title="PPP Network Protocol">
-
-        <CheckBoxPreference
-            android:key="PPP_IPv4_ENABLED"
-            android:title="Enable IPv4" />
-
-        <CheckBoxPreference
-            android:key="PPP_IPv6_ENABLED"
-            android:title="Enable IPv6" />
-
+    <PreferenceCategory android:title="PPP Network Protocol">
+        <kittoku.osc.preference.custom.PPPIPv4EnabledPreference android:key="PPP_IPv4_ENABLED"/>
+        <kittoku.osc.preference.custom.PPPIPv6EnabledPreference android:key="PPP_IPv6_ENABLED"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="IP_LAYER"
-        android:title="IP Layer">
-
-        <EditTextPreference
-            android:key="IP_PREFIX"
-            android:title="Address Prefix Length" />
-
-        <CheckBoxPreference
-            android:key="IP_ONLY_LAN"
-            android:title="Route Only Packets to LAN (IPv4)" />
-
-        <CheckBoxPreference
-            android:key="IP_ONLY_ULA"
-            android:title="Route Only Packets to ULA (IPv6)" />
-
+    <PreferenceCategory android:title="IP Layer">
+        <kittoku.osc.preference.custom.IPPrefixPreference android:key="IP_PREFIX"/>
+        <kittoku.osc.preference.custom.IPOnlyLanPreference android:key="IP_ONLY_LAN"/>
+        <kittoku.osc.preference.custom.IPOnlyUlaPreference android:key="IP_ONLY_ULA"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="RECONNECTION"
-        android:title="Reconnection">
-
-        <SwitchPreference
-            android:key="RECONNECTION_ENABLED"
-            android:title="Enable Reconnection" />
-
-        <EditTextPreference
-            android:dependency="RECONNECTION_ENABLED"
-            android:key="RECONNECTION_COUNT"
-            android:title="Retry Count" />
-
-        <EditTextPreference
-            android:dependency="RECONNECTION_ENABLED"
-            android:key="RECONNECTION_INTERVAL"
-            android:title="Retry Interval (second)" />
-
+    <PreferenceCategory android:title="Reconnection">
+        <kittoku.osc.preference.custom.ReconnectionEnabledPreference android:key="RECONNECTION_ENABLED"/>
+        <kittoku.osc.preference.custom.ReconnectionCountPreference android:key="RECONNECTION_COUNT"/>
+        <kittoku.osc.preference.custom.ReconnectionIntervalPreference android:key="RECONNECTION_INTERVAL"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="BUFFER"
-        android:title="Buffer Size">
-
-        <EditTextPreference
-            android:key="BUFFER_INCOMING"
-            android:title="Incoming Buffer Size" />
-
-        <EditTextPreference
-            android:key="BUFFER_OUTGOING"
-            android:title="Outgoing Buffer Size" />
-
+    <PreferenceCategory android:title="Buffer Size">
+        <kittoku.osc.preference.custom.BufferIncomingPreference android:key="BUFFER_INCOMING"/>
+        <kittoku.osc.preference.custom.BufferOutgoingPreference android:key="BUFFER_OUTGOING"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="LOG"
-        android:title="Log">
-
-        <SwitchPreference
-            android:key="LOG_DO_SAVE_LOG"
-            android:title="Save Log" />
-
-        <Preference
-            android:dependency="LOG_DO_SAVE_LOG"
-            android:key="LOG_DIR"
-            android:title="Select Log Directory" />
-
+    <PreferenceCategory android:title="Log">
+        <kittoku.osc.preference.custom.LogDoSaveLogPreference android:key="LOG_DO_SAVE_LOG"/>
+        <kittoku.osc.preference.custom.LogDirPreference android:key="LOG_DIR"/>
     </PreferenceCategory>
-
 </PreferenceScreen>

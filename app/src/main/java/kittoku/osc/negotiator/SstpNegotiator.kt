@@ -192,7 +192,7 @@ private class HashSetting(hashProtocol: HashProtocol) {
 }
 
 private fun generateChapHLAK(setting: NetworkSetting): ByteArray {
-    val passArray = setting.HOME_PASS.toByteArray(Charset.forName("UTF-16LE"))
+    val passArray = setting.HOME_PASSWORD.toByteArray(Charset.forName("UTF-16LE"))
 
     val magic1 = sum(
         "5468697320697320746865204D505045",

@@ -1,27 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <EditTextPreference
-        android:key="HOME_HOST"
-        android:title="Host" />
-
-    <EditTextPreference
-        android:key="HOME_USER"
-        android:title="Username" />
-
-    <EditTextPreference
-        android:key="HOME_PASS"
-        android:title="Password" />
-
-    <SwitchPreferenceCompat android:key="HOME_CONNECTOR" />
+    <kittoku.osc.preference.custom.HomeHostnamePreference android:key="HOME_HOSTNAME"/>
+    <kittoku.osc.preference.custom.HomeUsernamePreference android:key="HOME_USERNAME"/>
+    <kittoku.osc.preference.custom.HomePasswordPreference android:key="HOME_PASSWORD"/>
+    <kittoku.osc.preference.custom.HomeConnectorPreference android:key="HOME_CONNECTOR" />
 
     <PreferenceCategory>
-
-        <kittoku.osc.fragment.LongSummaryPreference
-            android:key="STATUS"
-            android:title="Current Status" />
-
+        <kittoku.osc.preference.custom.HomeStatusPreference android:key="HOME_STATUS"/>
     </PreferenceCategory>
-
-
 </PreferenceScreen>

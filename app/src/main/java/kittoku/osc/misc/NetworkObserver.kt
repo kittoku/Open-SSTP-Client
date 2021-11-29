@@ -4,13 +4,13 @@ import android.net.*
 import android.os.Build
 import androidx.preference.PreferenceManager
 import kittoku.osc.ControlClient
-import kittoku.osc.fragment.StatusPreference
+import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.setStringPrefValue
+
 
 internal class NetworkObserver(val parent: ControlClient) {
     private val manager = parent.vpnService.getSystemService(ConnectivityManager::class.java)
-
     private val callback: ConnectivityManager.NetworkCallback
-
     private val prefs = PreferenceManager.getDefaultSharedPreferences(parent.vpnService.applicationContext)
 
     init {
@@ -26,26 +26,21 @@ internal class NetworkObserver(val parent: ControlClient) {
         callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    manager.getLinkProperties(network)?.also { linkProperties ->
-                        makeSummary(linkProperties).also {
-                            prefs.edit().putString(StatusPreference.STATUS.name, it).apply()
-                        }
+                    manager.getLinkProperties(network)?.also {
+                        updateSummary(it)
                     }
-
                 }
             }
 
             override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
-                makeSummary(linkProperties).also {
-                    prefs.edit().putString(StatusPreference.STATUS.name, it).apply()
-                }
+                updateSummary(linkProperties)
             }
         }
 
         manager.registerNetworkCallback(request, callback)
     }
 
-    private fun makeSummary(properties: LinkProperties): String {
+    private fun updateSummary(properties: LinkProperties) {
         val summary = mutableListOf<String>()
 
         summary.add("[Assigned IP Address]")
@@ -70,17 +65,22 @@ internal class NetworkObserver(val parent: ControlClient) {
         summary.add("PROTOCOL: ${parent.sslTerminal.socket.session.protocol}")
         summary.add("SUITE: ${parent.sslTerminal.socket.session.cipherSuite}")
 
-        return summary.reduce { acc, s ->
+        summary.reduce { acc, s ->
             acc + "\n" + s
+        }.also {
+            setStringPrefValue(it, OscPreference.HOME_STATUS, prefs)
         }
     }
 
     private fun wipeStatus() {
-        prefs.edit().putString(StatusPreference.STATUS.name, "").apply()
+        setStringPrefValue("", OscPreference.HOME_STATUS, prefs)
     }
 
     internal fun close() {
-        manager.unregisterNetworkCallback(callback)
+        try {
+            manager.unregisterNetworkCallback(callback)
+        } catch (_: IllegalArgumentException) {} // already unregistered
+
         wipeStatus()
     }
 }

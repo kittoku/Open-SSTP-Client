@@ -5,89 +5,58 @@ import android.content.*
 import android.net.*
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.View
 import android.widget.Toast
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
 import kittoku.osc.*
+import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.custom.HomeConnectorPreference
 
-
-private val homePreferences = arrayOf<PreferenceWrapper<*>>(
-    StrPreference.HOME_HOST,
-    StrPreference.HOME_USER,
-    StrPreference.HOME_PASS,
-    BoolPreference.HOME_CONNECTOR,
-    StatusPreference.STATUS,
-)
 
 class HomeFragment : PreferenceFragmentCompat() {
-    private lateinit var sharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener // for avoiding GC
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.home, rootKey)
-
-        homePreferences.forEach {
-            it.initPreference(this, preferenceManager.sharedPreferences)
-        }
-
-        attachSharedPreferenceListener()
-        attachConnectorListener()
     }
 
-    private fun attachSharedPreferenceListener() {
-        // for updating by both user and system
-        sharedPreferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-            when (key) {
-                BoolPreference.HOME_CONNECTOR.name -> {
-                    BoolPreference.HOME_CONNECTOR.also {
-                        it.setValue(this, it.getValue(prefs))
-                    }
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-                StatusPreference.STATUS.name -> {
-                    StatusPreference.STATUS.also {
-                        it.setValue(this, it.getValue(prefs))
-                    }
-                }
-            }
-        }
-
-        preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
+        attachSwitchListener()
     }
 
-    private fun attachConnectorListener() {
-        // for disconnecting by user in HomeFragment
-        findPreference<SwitchPreferenceCompat>(BoolPreference.HOME_CONNECTOR.name)!!.also {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            startVpnService(ACTION_VPN_CONNECT)
+        }
+    }
+
+    private fun startVpnService(action: String) {
+        context?.startService(Intent(context, SstpVpnService::class.java).setAction(action))
+    }
+
+    private fun attachSwitchListener() {
+        findPreference<HomeConnectorPreference>(OscPreference.HOME_CONNECTOR.name)!!.also {
             it.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newState ->
                 if (newState == true) {
                     if (!checkPreferences()) {
                         return@OnPreferenceChangeListener false
                     }
 
-                    val intent = VpnService.prepare(context)
-
-                    if (intent != null) {
+                    VpnService.prepare(context)?.also { intent ->
                         startActivityForResult(intent, 0)
-                    } else {
-                        onActivityResult(0, Activity.RESULT_OK, null)
-                    }
+                    } ?: onActivityResult(0, Activity.RESULT_OK, null)
                 } else {
-                    startVpnService(VpnAction.ACTION_DISCONNECT)
+                    startVpnService(ACTION_VPN_DISCONNECT)
                 }
 
                 true
             }
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            startVpnService(VpnAction.ACTION_CONNECT)
-        }
-    }
-
-    private fun startVpnService(action: VpnAction) {
-        context?.startService(Intent(context, SstpVpnService::class.java).setAction(action.value))
     }
 
     private fun makeToast(cause: String) {
@@ -98,23 +67,23 @@ class HomeFragment : PreferenceFragmentCompat() {
         val prefs = preferenceManager.sharedPreferences
 
 
-        StrPreference.HOME_HOST.getValue(prefs).also {
+        getStringPrefValue(OscPreference.HOME_HOSTNAME, prefs).also {
             if (TextUtils.isEmpty(it)) {
                 makeToast("Host is missing")
                 return false
             }
         }
 
-        IntPreference.SSL_PORT.getValue(prefs).also {
+        getIntPrefValue(OscPreference.SSL_PORT, prefs).also {
             if (it !in 0..65535) {
                 makeToast("The given port is out of 0-65535")
                 return false
             }
         }
 
-        val doAddCerts = BoolPreference.SSL_DO_ADD_CERT.getValue(prefs)
-        val version = StrPreference.SSL_VERSION.getValue(prefs)
-        val certDir = DirPreference.SSL_CERT_DIR.getValue(prefs)
+        val doAddCerts = getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, prefs)
+        val version = getStringPrefValue(OscPreference.SSL_VERSION, prefs)
+        val certDir = getStringPrefValue(OscPreference.SSL_CERT_DIR, prefs)
         if (doAddCerts && version == "DEFAULT") {
             makeToast("Adding trusted certificates needs SSL version to be specified")
             return false
@@ -125,71 +94,71 @@ class HomeFragment : PreferenceFragmentCompat() {
             return false
         }
 
-        val doSelectSuites = BoolPreference.SSL_DO_SELECT_SUITES.getValue(prefs)
-        val suites = SetPreference.SSL_SUITES.getValue(prefs)
+        val doSelectSuites = getBooleanPrefValue(OscPreference.SSL_DO_SELECT_SUITES, prefs)
+        val suites = getSetPrefValue(OscPreference.SSL_SUITES, prefs)
         if (doSelectSuites && suites.isEmpty()) {
             makeToast("No cipher suite was selected")
             return false
         }
 
-        val mru = IntPreference.PPP_MRU.getValue(prefs).also {
+        val mru = getIntPrefValue(OscPreference.PPP_MRU, prefs).also {
             if (it !in MIN_MRU..MAX_MRU) {
                 makeToast("The given MRU is out of $MIN_MRU-$MAX_MRU")
                 return false
             }
         }
 
-        val mtu = IntPreference.PPP_MTU.getValue(prefs).also {
+        val mtu = getIntPrefValue(OscPreference.PPP_MTU, prefs).also {
             if (it !in MIN_MTU..MAX_MTU) {
                 makeToast("The given MRU is out of $MIN_MTU-$MAX_MTU")
                 return false
             }
         }
 
-        val isIpv4Enabled = BoolPreference.PPP_IPv4_ENABLED.getValue(prefs)
-        val isIpv6Enabled = BoolPreference.PPP_IPv6_ENABLED.getValue(prefs)
+        val isIpv4Enabled = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
+        val isIpv6Enabled = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
         if (!isIpv4Enabled && !isIpv6Enabled) {
             makeToast("No network protocol was enabled")
             return false
         }
 
-        val isPapEnabled = BoolPreference.PPP_PAP_ENABLED.getValue(prefs)
-        val isMschapv2Enabled = BoolPreference.PPP_MSCHAPv2_ENABLED.getValue(prefs)
+        val isPapEnabled = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
+        val isMschapv2Enabled = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
         if (!isPapEnabled && !isMschapv2Enabled) {
             makeToast("No authentication protocol was enabled")
             return false
         }
 
-        IntPreference.IP_PREFIX.getValue(prefs).also {
+        getIntPrefValue(OscPreference.IP_PREFIX, prefs).also {
             if (it !in 0..32) {
                 makeToast("The given address prefix length is out of 0-32")
                 return false
             }
         }
 
-        IntPreference.RECONNECTION_COUNT.getValue(prefs).also {
+        getIntPrefValue(OscPreference.RECONNECTION_COUNT, prefs).also {
             if (it < 1) {
                 makeToast("Retry Count must be a positive integer")
                 return false
             }
         }
 
-        IntPreference.BUFFER_INCOMING.getValue(prefs).also {
+        getIntPrefValue(OscPreference.BUFFER_INCOMING, prefs).also {
             if (it < 2 * mru) {
                 makeToast("Incoming Buffer Size must be >= 2 * MRU")
                 return false
             }
         }
 
-        IntPreference.BUFFER_OUTGOING.getValue(prefs).also {
+        getIntPrefValue(OscPreference.BUFFER_OUTGOING, prefs).also {
             if (it < 2 * mtu) {
                 makeToast("Outgoing Buffer Size must be >= 2 * MTU")
                 return false
             }
         }
 
-        val doSaveLog = BoolPreference.LOG_DO_SAVE_LOG.getValue(prefs)
-        val logDir = DirPreference.LOG_DIR.getValue(prefs)
+        val doSaveLog = getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, prefs)
+        val logDir = getStringPrefValue(OscPreference.LOG_DIR, prefs)
         if (doSaveLog && logDir.isEmpty()) {
             makeToast("No log directory was selected")
             return false
@@ -199,4 +168,3 @@ class HomeFragment : PreferenceFragmentCompat() {
         return true
     }
 }
-

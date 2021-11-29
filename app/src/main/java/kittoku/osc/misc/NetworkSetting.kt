@@ -3,7 +3,11 @@ package kittoku.osc.misc
 import android.content.SharedPreferences
 import kittoku.osc.MAX_MTU
 import kittoku.osc.MIN_MRU
-import kittoku.osc.fragment.*
+import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.unit.*
 import java.security.cert.Certificate
 import java.util.*
@@ -23,29 +27,29 @@ internal class ChapSetting {
 }
 
 internal class NetworkSetting(prefs: SharedPreferences) {
-    internal val HOME_HOST = StrPreference.HOME_HOST.getValue(prefs)
-    internal val HOME_USER = StrPreference.HOME_USER.getValue(prefs)
-    internal val HOME_PASS = StrPreference.HOME_PASS.getValue(prefs)
-    internal val SSL_PORT = IntPreference.SSL_PORT.getValue(prefs)
-    internal val SSL_VERSION = StrPreference.SSL_VERSION.getValue(prefs)
-    internal val SSL_DO_VERIFY = BoolPreference.SSL_DO_VERIFY.getValue(prefs)
-    internal val SSL_DO_ADD_CERT = BoolPreference.SSL_DO_ADD_CERT.getValue(prefs)
-    internal val SSL_CERT_DIR = DirPreference.SSL_CERT_DIR.getValue(prefs)
-    internal val SSL_DO_SELECT_SUITES = BoolPreference.SSL_DO_SELECT_SUITES.getValue(prefs)
-    internal val SSL_SUITES = SetPreference.SSL_SUITES.getValue(prefs)
-    internal val PPP_MRU = IntPreference.PPP_MRU.getValue(prefs)
-    internal val PPP_MTU = IntPreference.PPP_MTU.getValue(prefs)
-    internal val PPP_PAP_ENABLED = BoolPreference.PPP_PAP_ENABLED.getValue(prefs)
-    internal val PPP_MSCHAPv2_ENABLED = BoolPreference.PPP_MSCHAPv2_ENABLED.getValue(prefs)
-    internal val PPP_IPv4_ENABLED = BoolPreference.PPP_IPv4_ENABLED.getValue(prefs)
-    internal val PPP_IPv6_ENABLED = BoolPreference.PPP_IPv6_ENABLED.getValue(prefs)
-    internal val IP_PREFIX = IntPreference.IP_PREFIX.getValue(prefs)
-    internal val IP_ONLY_LAN = BoolPreference.IP_ONLY_LAN.getValue(prefs)
-    internal val IP_ONLY_ULA = BoolPreference.IP_ONLY_ULA.getValue(prefs)
-    internal val BUFFER_INCOMING = IntPreference.BUFFER_INCOMING.getValue(prefs)
-    internal val BUFFER_OUTGOING = IntPreference.BUFFER_OUTGOING.getValue(prefs)
-    internal val LOG_DO_SAVE_LOG = BoolPreference.LOG_DO_SAVE_LOG.getValue(prefs)
-    internal val LOG_DIR = DirPreference.LOG_DIR.getValue(prefs)
+    internal val HOME_HOSTNAME = getStringPrefValue(OscPreference.HOME_HOSTNAME, prefs)
+    internal val HOME_USERNAME = getStringPrefValue(OscPreference.HOME_USERNAME, prefs)
+    internal val HOME_PASSWORD = getStringPrefValue(OscPreference.HOME_PASSWORD, prefs)
+    internal val SSL_PORT = getIntPrefValue(OscPreference.SSL_PORT, prefs)
+    internal val SSL_VERSION = getStringPrefValue(OscPreference.SSL_VERSION, prefs)
+    internal val SSL_DO_VERIFY = getBooleanPrefValue(OscPreference.SSL_DO_VERIFY, prefs)
+    internal val SSL_DO_ADD_CERT = getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, prefs)
+    internal val SSL_CERT_DIR = getStringPrefValue(OscPreference.SSL_CERT_DIR, prefs)
+    internal val SSL_DO_SELECT_SUITES = getBooleanPrefValue(OscPreference.SSL_DO_SELECT_SUITES, prefs)
+    internal val SSL_SUITES = getSetPrefValue(OscPreference.SSL_SUITES, prefs)
+    internal val PPP_MRU = getIntPrefValue(OscPreference.PPP_MRU, prefs)
+    internal val PPP_MTU = getIntPrefValue(OscPreference.PPP_MTU, prefs)
+    internal val PPP_PAP_ENABLED = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
+    internal val PPP_MSCHAPv2_ENABLED = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
+    internal val PPP_IPv4_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
+    internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
+    internal val IP_PREFIX = getIntPrefValue(OscPreference.IP_PREFIX, prefs)
+    internal val IP_ONLY_LAN = getBooleanPrefValue(OscPreference.IP_ONLY_LAN, prefs)
+    internal val IP_ONLY_ULA = getBooleanPrefValue(OscPreference.IP_ONLY_ULA, prefs)
+    internal val BUFFER_INCOMING = getIntPrefValue(OscPreference.BUFFER_INCOMING, prefs)
+    internal val BUFFER_OUTGOING = getIntPrefValue(OscPreference.BUFFER_OUTGOING, prefs)
+    internal val LOG_DO_SAVE_LOG = getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, prefs)
+    internal val LOG_DIR = getStringPrefValue(OscPreference.LOG_DIR, prefs)
 
     internal lateinit var serverCertificate: Certificate
     internal lateinit var hashProtocol: HashProtocol

@@ -7,10 +7,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
-import kittoku.osc.fragment.BoolPreference
-import kittoku.osc.fragment.IntPreference
 import kittoku.osc.layer.*
 import kittoku.osc.misc.*
+import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.setBooleanPrefValue
 import kittoku.osc.unit.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -24,10 +26,10 @@ import java.util.concurrent.LinkedBlockingQueue
 
 
 internal class ReconnectionSettings(prefs: SharedPreferences) {
-    internal val isEnabled = BoolPreference.RECONNECTION_ENABLED.getValue(prefs)
-    private val initialCount = if (isEnabled) IntPreference.RECONNECTION_COUNT.getValue(prefs) else 0
+    internal val isEnabled = getBooleanPrefValue(OscPreference.RECONNECTION_ENABLED, prefs)
+    private val initialCount = if (isEnabled) getIntPrefValue(OscPreference.RECONNECTION_COUNT, prefs) else 0
     private var currentCount = initialCount
-    private val interval = IntPreference.RECONNECTION_INTERVAL.getValue(prefs)
+    private val interval = getIntPrefValue(OscPreference.RECONNECTION_INTERVAL, prefs)
     internal val intervalMillis = (interval * 1000).toLong()
     internal val isRetryable: Boolean
         get() = currentCount > 0
@@ -159,7 +161,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
     private fun bye() {
         inform("Terminate VPN connection", null)
         logStream?.close()
-        prefs.edit().putBoolean(BoolPreference.HOME_CONNECTOR.name, false).apply()
+        setBooleanPrefValue(false, OscPreference.HOME_CONNECTOR, prefs)
         vpnService.stopForeground(true)
         vpnService.stopSelf()
     }

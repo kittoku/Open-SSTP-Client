@@ -57,7 +57,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         }
 
         socket = socketFactory.createSocket(
-            parent.networkSetting.HOME_HOST,
+            parent.networkSetting.HOME_HOSTNAME,
             parent.networkSetting.SSL_PORT
         ) as SSLSocket
 
@@ -78,7 +78,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         if (parent.networkSetting.SSL_DO_VERIFY) {
             HttpsURLConnection.getDefaultHostnameVerifier().also {
                 if (!it.verify(
-                        parent.networkSetting.HOME_HOST,
+                        parent.networkSetting.HOME_HOSTNAME,
                         socket.session
                     )
                 ) {
@@ -97,7 +97,7 @@ internal class SslTerminal(parent: ControlClient) : Terminal(parent) {
         val HTTP_REQUEST = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
-            "Host: ${parent.networkSetting.HOME_HOST}",
+            "Host: ${parent.networkSetting.HOME_HOSTNAME}",
             "SSTPCORRELATIONID: {${parent.networkSetting.guid}}"
         ).joinToString(separator = "\r\n", postfix = "\r\n\r\n")
 

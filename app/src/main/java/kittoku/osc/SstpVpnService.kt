@@ -11,17 +11,15 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 
 
-internal enum class VpnAction(val value: String) {
-    ACTION_CONNECT("kittoku.osc.CONNECT"),
-    ACTION_DISCONNECT("kittoku.osc.DISCONNECT"),
-}
+internal const val ACTION_VPN_CONNECT = "kittoku.osc.connect"
+internal const val ACTION_VPN_DISCONNECT = "kittoku.osc.disconnect"
 
 internal class SstpVpnService : VpnService() {
     internal val CHANNEL_ID = "OpenSSTPClient"
     private var controlClient: ControlClient?  = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return if (VpnAction.ACTION_DISCONNECT.value == intent?.action ?: false) {
+        return if (ACTION_VPN_DISCONNECT == intent?.action ?: false) {
             controlClient?.kill(null)
             controlClient = null
 
@@ -47,7 +45,7 @@ internal class SstpVpnService : VpnService() {
         val intent = Intent(
             applicationContext,
             SstpVpnService::class.java
-        ).setAction(VpnAction.ACTION_DISCONNECT.value)
+        ).setAction(ACTION_VPN_DISCONNECT)
         val pendingIntent = PendingIntent.getService(applicationContext, 0, intent, 0)
         val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID).also {
             it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)

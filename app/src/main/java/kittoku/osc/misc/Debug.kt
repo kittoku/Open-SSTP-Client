@@ -28,7 +28,7 @@ internal class Ticker(private val key:String, private val logStream: BufferedOut
 }
 
 internal fun ControlClient.inform(message: String, cause: Throwable?) {
-    val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(Date())
     var printing = "[$currentTime] $message"
     cause?.also {
         printing += ":\n"

@@ -72,19 +72,18 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (!hasIncoming) return
 
-        if  (PppProtocol.resolve(incomingBuffer.getShort()) != PppProtocol.LCP) readAsDiscarded()
+        if  (incomingBuffer.getShort() != PPP_PROTOCOL_LCP) readAsDiscarded()
         else {
-            val code = incomingBuffer.getByte()
-            when (LcpCode.resolve(code)) {
-                LcpCode.CONFIGURE_REQUEST -> receiveLcpConfigureRequest()
+            when (incomingBuffer.getByte()) {
+                LCP_CODE_CONFIGURE_REQUEST -> receiveLcpConfigureRequest()
 
-                LcpCode.CONFIGURE_ACK -> receiveLcpConfigureAck()
+                LCP_CODE_CONFIGURE_ACK -> receiveLcpConfigureAck()
 
-                LcpCode.CONFIGURE_NAK -> receiveLcpConfigureNak()
+                LCP_CODE_CONFIGURE_NAK -> receiveLcpConfigureNak()
 
-                LcpCode.CONFIGURE_REJECT -> receiveLcpConfigureReject()
+                LCP_CODE_CONFIGURE_REJECT -> receiveLcpConfigureReject()
 
-                LcpCode.TERMINATE_REQUEST, LcpCode.CODE_REJECT -> {
+                LCP_CODE_TERMINATE_REQUEST, LCP_CODE_CODE_REJECT -> {
                     parent.informInvalidUnit(::proceedLcp)
                     kill()
                     return
@@ -106,13 +105,12 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (!hasIncoming) return
 
-        if  (PppProtocol.resolve(incomingBuffer.getShort()) != PppProtocol.PAP) readAsDiscarded()
+        if  (incomingBuffer.getShort() != PPP_PROTOCOL_PAP) readAsDiscarded()
         else {
-            val code = incomingBuffer.getByte()
-            when (PapCode.resolve(code)) {
-                PapCode.AUTHENTICATE_ACK -> receivePapAuthenticateAck()
+            when (incomingBuffer.getByte()) {
+                PAP_CODE_AUTHENTICATE_ACK -> receivePapAuthenticateAck()
 
-                PapCode.AUTHENTICATE_NAK -> receivePapAuthenticateNak()
+                PAP_CODE_AUTHENTICATE_NAK -> receivePapAuthenticateNak()
 
                 else -> readAsDiscarded()
             }
@@ -130,15 +128,14 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (!hasIncoming) return
 
-        if (PppProtocol.resolve(incomingBuffer.getShort()) != PppProtocol.CHAP) readAsDiscarded()
+        if (incomingBuffer.getShort() != PPP_PROTOCOL_CHAP) readAsDiscarded()
         else {
-            val code = incomingBuffer.getByte()
-            when (ChapCode.resolve(code)) {
-                ChapCode.CHALLENGE -> receiveChapChallenge()
+            when (incomingBuffer.getByte()) {
+                CHAP_CODE_CHALLENGE -> receiveChapChallenge()
 
-                ChapCode.SUCCESS -> receiveChapSuccess()
+                CHAP_CODE_SUCCESS -> receiveChapSuccess()
 
-                ChapCode.FAILURE -> receiveChapFailure()
+                CHAP_CODE_FAILURE -> receiveChapFailure()
 
                 else -> readAsDiscarded()
             }
@@ -156,25 +153,24 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (!hasIncoming) return
 
-        when (PppProtocol.resolve(incomingBuffer.getShort())) {
-            PppProtocol.LCP -> {
-                if (LcpCode.resolve(incomingBuffer.getByte()) == LcpCode.PROTOCOL_REJECT) {
-                    receiveLcpProtocolReject(PppProtocol.IPCP)
+        when (incomingBuffer.getShort()) {
+            PPP_PROTOCOL_LCP -> {
+                if (incomingBuffer.getByte() == LCP_CODE_PROTOCOL_REJECT) {
+                    receiveLcpProtocolReject(PPP_PROTOCOL_IPCP)
                 } else readAsDiscarded()
             }
 
-            PppProtocol.IPCP -> {
-                val code = incomingBuffer.getByte()
-                when (IpcpCode.resolve(code)) {
-                    IpcpCode.CONFIGURE_REQUEST -> receiveIpcpConfigureRequest()
+            PPP_PROTOCOL_IPCP -> {
+                when (incomingBuffer.getByte()) {
+                    IPCP_CODE_CONFIGURE_REQUEST -> receiveIpcpConfigureRequest()
 
-                    IpcpCode.CONFIGURE_ACK -> receiveIpcpConfigureAck()
+                    IPCP_CODE_CONFIGURE_ACK -> receiveIpcpConfigureAck()
 
-                    IpcpCode.CONFIGURE_NAK -> receiveIpcpConfigureNak()
+                    IPCP_CODE_CONFIGURE_NAK -> receiveIpcpConfigureNak()
 
-                    IpcpCode.CONFIGURE_REJECT -> receiveIpcpConfigureReject()
+                    IPCP_CODE_CONFIGURE_REJECT -> receiveIpcpConfigureReject()
 
-                    IpcpCode.TERMINATE_REQUEST, IpcpCode.CODE_REJECT -> {
+                    IPCP_CODE_TERMINATE_REQUEST, IPCP_CODE_CODE_REJECT -> {
                         parent.informInvalidUnit(::proceedIpcp)
                         kill()
                         return
@@ -199,25 +195,24 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
 
         if (!hasIncoming) return
 
-        when (PppProtocol.resolve(incomingBuffer.getShort())) {
-            PppProtocol.LCP -> {
-                if (LcpCode.resolve(incomingBuffer.getByte()) == LcpCode.PROTOCOL_REJECT) {
-                    receiveLcpProtocolReject(PppProtocol.IPV6CP)
+        when (incomingBuffer.getShort()) {
+            PPP_PROTOCOL_LCP -> {
+                if (incomingBuffer.getByte() == LCP_CODE_PROTOCOL_REJECT) {
+                    receiveLcpProtocolReject(PPP_PROTOCOL_IPV6CP)
                 }
             }
 
-            PppProtocol.IPV6CP -> {
-                val code = incomingBuffer.getByte()
-                when (Ipv6cpCode.resolve(code)) {
-                    Ipv6cpCode.CONFIGURE_REQUEST -> receiveIpv6cpConfigureRequest()
+            PPP_PROTOCOL_IPV6CP -> {
+                when (incomingBuffer.getByte()) {
+                    IPv6CP_CODE_CONFIGURE_REQUEST -> receiveIpv6cpConfigureRequest()
 
-                    Ipv6cpCode.CONFIGURE_ACK -> receiveIpv6cpConfigureAck()
+                    IPv6CP_CODE_CONFIGURE_ACK -> receiveIpv6cpConfigureAck()
 
-                    Ipv6cpCode.CONFIGURE_NAK -> receiveIpv6cpConfigureNak()
+                    IPv6CP_CODE_CONFIGURE_NAK -> receiveIpv6cpConfigureNak()
 
-                    Ipv6cpCode.CONFIGURE_REJECT -> receiveIpv6cpConfigureReject()
+                    IPv6CP_CODE_CONFIGURE_REJECT -> receiveIpv6cpConfigureReject()
 
-                    Ipv6cpCode.TERMINATE_REQUEST, Ipv6cpCode.CODE_REJECT -> {
+                    IPv6CP_CODE_TERMINATE_REQUEST, IPv6CP_CODE_CODE_REJECT -> {
                         parent.informInvalidUnit(::proceedIpv6cp)
                         kill()
                         return
@@ -242,12 +237,12 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
             echoCounter.reset()
         }
 
-        when (PppProtocol.resolve(incomingBuffer.getShort())) {
-            PppProtocol.LCP -> {
-                when (LcpCode.resolve(incomingBuffer.getByte())) {
-                    LcpCode.ECHO_REQUEST -> receiveLcpEchoRequest()
+        when (incomingBuffer.getShort()) {
+            PPP_PROTOCOL_LCP -> {
+                when (incomingBuffer.getByte()) {
+                    LCP_CODE_ECHO_REQUEST -> receiveLcpEchoRequest()
 
-                    LcpCode.ECHO_REPLY -> receiveLcpEchoReply()
+                    LCP_CODE_ECHO_REPLY -> receiveLcpEchoReply()
 
                     else -> {
                         parent.informInvalidUnit(::proceedNetwork)
@@ -257,20 +252,19 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
                 }
             }
 
-            PppProtocol.CHAP -> {
-                val code = incomingBuffer.getByte()
-                when (ChapCode.resolve(code)) {
-                    ChapCode.CHALLENGE -> receiveChapChallenge()
+            PPP_PROTOCOL_CHAP -> {
+                when (incomingBuffer.getByte()) {
+                    CHAP_CODE_CHALLENGE -> receiveChapChallenge()
 
-                    ChapCode.SUCCESS -> receiveChapSuccess()
+                    CHAP_CODE_SUCCESS -> receiveChapSuccess()
 
-                    ChapCode.FAILURE -> receiveChapFailure()
+                    CHAP_CODE_FAILURE -> receiveChapFailure()
 
                     else -> readAsDiscarded()
                 }
             }
 
-            PppProtocol.IP, PppProtocol.IPV6 -> incomingBuffer.convey()
+            PPP_PROTOCOL_IP, PPP_PROTOCOL_IPV6 -> incomingBuffer.convey()
 
             else -> readAsDiscarded()
         }

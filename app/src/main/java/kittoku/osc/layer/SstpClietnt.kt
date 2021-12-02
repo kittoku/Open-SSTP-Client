@@ -3,9 +3,7 @@ package kittoku.osc.layer
 import kittoku.osc.ControlClient
 import kittoku.osc.misc.*
 import kittoku.osc.negotiator.*
-import kittoku.osc.unit.MessageType
-import kittoku.osc.unit.PPP_HEADER
-import kittoku.osc.unit.PacketType
+import kittoku.osc.unit.*
 
 
 internal class SstpClient(parent: ControlClient) : Client(parent) {
@@ -22,7 +20,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
         if (!challengeWholePacket()) return
 
-        if (PacketType.resolve(incomingBuffer.getShort()) != PacketType.CONTROL) {
+        if (incomingBuffer.getShort() != SSTP_PACKET_TYPE_CONTROL) {
             parent.informInvalidUnit(::proceedRequestSent)
             status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
             return
@@ -30,21 +28,21 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
         incomingBuffer.move(2)
 
-        when (MessageType.resolve(incomingBuffer.getShort())) {
-            MessageType.CALL_CONNECT_ACK -> receiveCallConnectAck()
+        when (incomingBuffer.getShort()) {
+            SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK -> receiveCallConnectAck()
 
-            MessageType.CALL_CONNECT_NAK -> {
-                parent.inform("Received Call Connect Ack", null)
+            SSTP_MESSAGE_TYPE_CALL_CONNECT_NAK -> {
+                parent.inform("Received Call Connect Nak", null)
                 status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
                 return
             }
 
-            MessageType.CALL_DISCONNECT -> {
+            SSTP_MESSAGE_TYPE_CALL_DISCONNECT -> {
                 parent.informReceivedCallDisconnect(::proceedRequestSent)
                 status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
             }
 
-            MessageType.CALL_ABORT -> {
+            SSTP_MESSAGE_TYPE_CALL_ABORT -> {
                 parent.informReceivedCallAbort(::proceedRequestSent)
                 status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
             }
@@ -74,21 +72,19 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
 
         if (!challengeWholePacket()) return
 
-        when (PacketType.resolve(incomingBuffer.getShort())) {
-            PacketType.DATA ->{
-                readAsData()
-            }
+        when (incomingBuffer.getShort()) {
+            SSTP_PACKET_TYPE_DATA -> readAsData()
 
-            PacketType.CONTROL -> {
+            SSTP_PACKET_TYPE_CONTROL -> {
                 incomingBuffer.move(2)
 
-                when (MessageType.resolve(incomingBuffer.getShort())) {
-                    MessageType.CALL_DISCONNECT -> {
+                when (incomingBuffer.getShort()) {
+                    SSTP_MESSAGE_TYPE_CALL_DISCONNECT -> {
                         parent.informReceivedCallDisconnect(::proceedAckReceived)
                         status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
                     }
 
-                    MessageType.CALL_ABORT -> {
+                    SSTP_MESSAGE_TYPE_CALL_ABORT -> {
                         parent.informReceivedCallAbort(::proceedAckReceived)
                         status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
                     }
@@ -103,7 +99,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
                 incomingBuffer.forget()
             }
 
-            null -> {
+            else -> {
                 parent.informInvalidUnit(::proceedAckReceived)
                 status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
             }
@@ -120,28 +116,26 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
         echoTimer.reset()
         echoCounter.reset()
 
-        when (PacketType.resolve(incomingBuffer.getShort())) {
-            PacketType.DATA ->{
-                readAsData()
-            }
+        when (incomingBuffer.getShort()) {
+            SSTP_PACKET_TYPE_DATA-> readAsData()
 
-            PacketType.CONTROL -> {
+            SSTP_PACKET_TYPE_CONTROL -> {
                 incomingBuffer.move(2)
 
-                when (MessageType.resolve(incomingBuffer.getShort())) {
-                    MessageType.CALL_DISCONNECT -> {
+                when (incomingBuffer.getShort()) {
+                    SSTP_MESSAGE_TYPE_CALL_DISCONNECT -> {
                         parent.informReceivedCallDisconnect(::proceedConnected)
                         status.sstp = SstpStatus.CALL_DISCONNECT_IN_PROGRESS_2
                     }
 
-                    MessageType.CALL_ABORT -> {
+                    SSTP_MESSAGE_TYPE_CALL_ABORT -> {
                         parent.informReceivedCallAbort(::proceedConnected)
                         status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_2
                     }
 
-                    MessageType.ECHO_REQUEST -> receiveEchoRequest()
+                    SSTP_MESSAGE_TYPE_ECHO_REQUEST -> receiveEchoRequest()
 
-                    MessageType.ECHO_RESPONSE -> receiveEchoResponse()
+                    SSTP_MESSAGE_TYPE_ECHO_RESPONSE -> receiveEchoResponse()
 
                     else -> {
                         parent.informInvalidUnit(::proceedConnected)
@@ -153,7 +147,7 @@ internal class SstpClient(parent: ControlClient) : Client(parent) {
                 incomingBuffer.forget()
             }
 
-            null -> {
+            else -> {
                 parent.informInvalidUnit(::proceedConnected)
                 status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
             }

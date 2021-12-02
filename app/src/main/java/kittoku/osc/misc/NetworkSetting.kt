@@ -52,8 +52,8 @@ internal class NetworkSetting(prefs: SharedPreferences) {
     internal val LOG_DIR = getStringPrefValue(OscPreference.LOG_DIR, prefs)
 
     internal lateinit var serverCertificate: Certificate
-    internal lateinit var hashProtocol: HashProtocol
     internal lateinit var nonce: ByteArray
+    internal var hashProtocol: Byte = 0
     lateinit var chapSetting: ChapSetting
     internal val guid = UUID.randomUUID().toString()
     internal var currentMru = PPP_MRU
@@ -82,14 +82,14 @@ internal class NetworkSetting(prefs: SharedPreferences) {
     internal val mgAuth = object : OptionManager<LcpAuthOption>() {
         override fun create() = LcpAuthOption().also {
             if (currentAuth == AuthSuite.MSCHAPv2) {
-                it.protocol = AuthProtocol.CHAP.value
-                it.holder = ByteArray(1) { ChapAlgorithm.MSCHAPv2.value }
+                it.protocol = AUTH_PROTOCOL_CHAP
+                it.holder = ByteArray(1) { CHAP_ALGORITHM_MSCHAPv2 }
             }
         }
 
         override fun compromiseReq(option: LcpAuthOption): Boolean {
-            when (AuthProtocol.resolve(option.protocol)) {
-                AuthProtocol.PAP -> {
+            when (option.protocol) {
+                AUTH_PROTOCOL_PAP -> {
                     return if (PPP_PAP_ENABLED) {
                         currentAuth = AuthSuite.PAP
                         true
@@ -99,8 +99,8 @@ internal class NetworkSetting(prefs: SharedPreferences) {
                     }
                 }
 
-                AuthProtocol.CHAP -> {
-                    if (option._length == 5 && option.holder[0] == ChapAlgorithm.MSCHAPv2.value) {
+                AUTH_PROTOCOL_CHAP -> {
+                    if (option._length == 5 && option.holder[0] == CHAP_ALGORITHM_MSCHAPv2) {
                         return if (PPP_MSCHAPv2_ENABLED) {
                             currentAuth = AuthSuite.MSCHAPv2
                             true

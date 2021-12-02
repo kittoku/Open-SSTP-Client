@@ -2,32 +2,19 @@ package kittoku.osc.unit
 
 import kittoku.osc.misc.DataUnitParsingError
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 import kotlin.properties.Delegates
 
 
-internal enum class Ipv6cpCode(val value: Byte) {
-    CONFIGURE_REQUEST(1),
-    CONFIGURE_ACK(2),
-    CONFIGURE_NAK(3),
-    CONFIGURE_REJECT(4),
-    TERMINATE_REQUEST(5),
-    TERMINATE_ACK(6),
-    CODE_REJECT(7);
+internal const val IPv6CP_CODE_CONFIGURE_REQUEST: Byte = 1
+internal const val IPv6CP_CODE_CONFIGURE_ACK: Byte = 2
+internal const val IPv6CP_CODE_CONFIGURE_NAK: Byte = 3
+internal const val IPv6CP_CODE_CONFIGURE_REJECT: Byte = 4
+internal const val IPv6CP_CODE_TERMINATE_REQUEST: Byte = 5
+internal const val IPv6CP_CODE_TERMINATE_ACK: Byte = 6
+internal const val IPv6CP_CODE_CODE_REJECT: Byte = 7
 
-    companion object {
-        internal val resolve = generateResolver(values(), Ipv6cpCode::value)
-    }
-}
-
-internal enum class Ipv6cpOptionType(val value: Byte) {
-    IDENTIFIER(0x01);
-
-    companion object {
-        internal val resolve = generateResolver(values(), Ipv6cpOptionType::value)
-    }
-}
+internal const val IPv6CP_OPTION_TYPE_IDENTIFIER: Byte = 0x01
 
 internal abstract class Ipv6cpOption : ByteLengthDataUnit() {
     internal abstract val type: Byte
@@ -41,7 +28,7 @@ internal abstract class Ipv6cpOption : ByteLengthDataUnit() {
 }
 
 internal class Ipv6cpIdentifierOption : Ipv6cpOption() {
-    override val type = Ipv6cpOptionType.IDENTIFIER.value
+    override val type = IPv6CP_OPTION_TYPE_IDENTIFIER
 
     override val validLengthRange = 10..10
 
@@ -83,7 +70,7 @@ internal class Ipv6cpUnknownOption(unknownType: Byte) : Ipv6cpOption() {
 }
 
 internal abstract class Ipv6cpFrame : PppFrame() {
-    override val protocol = PppProtocol.IPV6CP.value
+    override val protocol = PPP_PROTOCOL_IPV6CP
 }
 
 internal abstract class Ipv6cpConfigureFrame : Ipv6cpFrame() {
@@ -140,8 +127,8 @@ internal abstract class Ipv6cpConfigureFrame : Ipv6cpFrame() {
             }
 
             val type = bytes.getByte()
-            val option: Ipv6cpOption = when (Ipv6cpOptionType.resolve(type)) {
-                Ipv6cpOptionType.IDENTIFIER -> Ipv6cpIdentifierOption().also {
+            val option: Ipv6cpOption = when (type) {
+                IPv6CP_OPTION_TYPE_IDENTIFIER -> Ipv6cpIdentifierOption().also {
                     optionIdentifier = it
                 }
                 else -> Ipv6cpUnknownOption(type).also { options.add(it) }
@@ -167,17 +154,17 @@ internal abstract class Ipv6cpConfigureFrame : Ipv6cpFrame() {
 }
 
 internal class Ipv6cpConfigureRequest : Ipv6cpConfigureFrame() {
-    override val code = Ipv6cpCode.CONFIGURE_REQUEST.value
+    override val code = IPv6CP_CODE_CONFIGURE_REQUEST
 }
 
 internal class Ipv6cpConfigureAck : Ipv6cpConfigureFrame() {
-    override val code = Ipv6cpCode.CONFIGURE_ACK.value
+    override val code = IPv6CP_CODE_CONFIGURE_ACK
 }
 
 internal class Ipv6cpConfigureNak : Ipv6cpConfigureFrame() {
-    override val code = Ipv6cpCode.CONFIGURE_NAK.value
+    override val code = IPv6CP_CODE_CONFIGURE_NAK
 }
 
 internal class Ipv6cpConfigureReject : Ipv6cpConfigureFrame() {
-    override val code = Ipv6cpCode.CONFIGURE_REJECT.value
+    override val code = IPv6CP_CODE_CONFIGURE_REJECT
 }

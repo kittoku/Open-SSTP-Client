@@ -3,54 +3,29 @@ package kittoku.osc.unit
 import kittoku.osc.DEFAULT_MRU
 import kittoku.osc.misc.DataUnitParsingError
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 import kotlin.properties.Delegates
 
 
-internal enum class LcpCode(val value: Byte) {
-    CONFIGURE_REQUEST(1),
-    CONFIGURE_ACK(2),
-    CONFIGURE_NAK(3),
-    CONFIGURE_REJECT(4),
-    TERMINATE_REQUEST(5),
-    TERMINATE_ACK(6),
-    CODE_REJECT(7),
-    PROTOCOL_REJECT(8),
-    ECHO_REQUEST(9),
-    ECHO_REPLY(10),
-    DISCARD_REQUEST(11);
+internal const val LCP_CODE_CONFIGURE_REQUEST: Byte = 1
+internal const val LCP_CODE_CONFIGURE_ACK: Byte = 2
+internal const val LCP_CODE_CONFIGURE_NAK: Byte = 3
+internal const val LCP_CODE_CONFIGURE_REJECT: Byte = 4
+internal const val LCP_CODE_TERMINATE_REQUEST: Byte = 5
+internal const val LCP_CODE_TERMINATE_ACK: Byte = 6
+internal const val LCP_CODE_CODE_REJECT: Byte = 7
+internal const val LCP_CODE_PROTOCOL_REJECT: Byte = 8
+internal const val LCP_CODE_ECHO_REQUEST: Byte = 9
+internal const val LCP_CODE_ECHO_REPLY: Byte = 10
+internal const val LCP_CODE_DISCARD_REQUEST: Byte = 11
 
-    companion object {
-        internal val resolve = generateResolver(values(), LcpCode::value)
-    }
-}
+internal const val LCP_OPTION_TYPE_MRU: Byte = 1
+internal const val LCP_OPTION_TYPE_AUTH: Byte = 3
 
-internal enum class LcpOptionType(val value: Byte) {
-    MRU(1),
-    AUTH(3);
+internal const val AUTH_PROTOCOL_PAP = 0xC023.toShort()
+internal const val AUTH_PROTOCOL_CHAP = 0xC223.toShort()
 
-    companion object {
-        internal val resolve = generateResolver(values(), LcpOptionType::value)
-    }
-}
-
-internal enum class AuthProtocol(val value: Short) {
-    PAP(0xC023.toShort()),
-    CHAP(0xC223.toShort());
-
-    companion object {
-        internal val resolve = generateResolver(values(), AuthProtocol::value)
-    }
-}
-
-internal enum class ChapAlgorithm(val value: Byte) {
-    MSCHAPv2(0x81.toByte());
-
-    companion object {
-        internal val resolve = generateResolver(values(), ChapAlgorithm::value)
-    }
-}
+internal const val CHAP_ALGORITHM_MSCHAPv2 = 0x81.toByte()
 
 internal abstract class LcpOption : ByteLengthDataUnit() {
     internal abstract val type: Byte
@@ -64,7 +39,7 @@ internal abstract class LcpOption : ByteLengthDataUnit() {
 }
 
 internal class LcpMruOption : LcpOption() {
-    override val type = LcpOptionType.MRU.value
+    override val type = LCP_OPTION_TYPE_MRU
 
     override val validLengthRange = 4..4
 
@@ -88,11 +63,11 @@ internal class LcpMruOption : LcpOption() {
 }
 
 internal class LcpAuthOption : LcpOption() {
-    override val type = LcpOptionType.AUTH.value
+    override val type = LCP_OPTION_TYPE_AUTH
 
     override val validLengthRange = 4..Byte.MAX_VALUE
 
-    internal var protocol: Short = AuthProtocol.PAP.value
+    internal var protocol: Short = AUTH_PROTOCOL_PAP
 
     internal var holder = ByteArray(0)
 
@@ -134,7 +109,7 @@ internal class LcpUnknownOption(unknownType: Byte) : LcpOption() {
 }
 
 internal abstract class LcpFrame : PppFrame() {
-    override val protocol = PppProtocol.LCP.value
+    override val protocol = PPP_PROTOCOL_LCP
 }
 
 internal abstract class LcpConfigureFrame : LcpFrame() {
@@ -192,9 +167,9 @@ internal abstract class LcpConfigureFrame : LcpFrame() {
             }
 
             val type = bytes.getByte()
-            val option: LcpOption = when (LcpOptionType.resolve(type)) {
-                LcpOptionType.MRU -> LcpMruOption().also { optionMru = it }
-                LcpOptionType.AUTH -> LcpAuthOption().also { optionAuth = it }
+            val option: LcpOption = when (type) {
+                LCP_OPTION_TYPE_MRU -> LcpMruOption().also { optionMru = it }
+                LCP_OPTION_TYPE_AUTH -> LcpAuthOption().also { optionAuth = it }
                 else -> LcpUnknownOption(type).also { options.add(it) }
             }
 
@@ -218,19 +193,19 @@ internal abstract class LcpConfigureFrame : LcpFrame() {
 }
 
 internal class LcpConfigureRequest : LcpConfigureFrame() {
-    override val code = LcpCode.CONFIGURE_REQUEST.value
+    override val code = LCP_CODE_CONFIGURE_REQUEST
 }
 
 internal class LcpConfigureAck : LcpConfigureFrame() {
-    override val code = LcpCode.CONFIGURE_ACK.value
+    override val code = LCP_CODE_CONFIGURE_ACK
 }
 
 internal class LcpConfigureNak : LcpConfigureFrame() {
-    override val code = LcpCode.CONFIGURE_NAK.value
+    override val code = LCP_CODE_CONFIGURE_NAK
 }
 
 internal class LcpConfigureReject : LcpConfigureFrame() {
-    override val code = LcpCode.CONFIGURE_REJECT.value
+    override val code = LCP_CODE_CONFIGURE_REJECT
 }
 
 internal abstract class LcpMagicNumberFrame : LcpFrame() {
@@ -258,11 +233,11 @@ internal abstract class LcpMagicNumberFrame : LcpFrame() {
 }
 
 internal class LcpEchoRequest : LcpMagicNumberFrame() {
-    override val code = LcpCode.ECHO_REQUEST.value
+    override val code = LCP_CODE_ECHO_REQUEST
 }
 
 internal class LcpEchoReply : LcpMagicNumberFrame() {
-    override val code = LcpCode.ECHO_REPLY.value
+    override val code = LCP_CODE_ECHO_REPLY
 }
 
 internal class LcpProtocolReject : LcpFrame() {
@@ -270,7 +245,7 @@ internal class LcpProtocolReject : LcpFrame() {
 
     internal var holder = ByteArray(0)
 
-    override val code = LcpCode.PROTOCOL_REJECT.value
+    override val code = LCP_CODE_PROTOCOL_REJECT
 
     override val validLengthRange = 6..Short.MAX_VALUE
 

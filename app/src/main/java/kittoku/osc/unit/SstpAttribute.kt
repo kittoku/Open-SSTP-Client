@@ -1,31 +1,18 @@
 package kittoku.osc.unit
 
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 import kotlin.math.min
 
 
-internal enum class AttributeId(val value: Byte) {
-    NO_ERROR(0),
-    ENCAPSULATED_PROTOCOL_ID(1),
-    STATUS_INFO(2),
-    CRYPTO_BINDING(3),
-    CRYPTO_BINDING_REQ(4);
+internal const val SSTP_ATTRIBUTE_ID_NO_ERROR: Byte = 0
+internal const val SSTP_ATTRIBUTE_ID_ENCAPSULATED_PROTOCOL_ID: Byte = 1
+internal const val SSTP_ATTRIBUTE_ID_STATUS_INFO: Byte = 2
+internal const val SSTP_ATTRIBUTE_ID_CRYPTO_BINDING: Byte = 3
+internal const val SSTP_ATTRIBUTE_ID_CRYPTO_BINDING_REQ: Byte = 4
 
-    companion object {
-        internal val resolve = generateResolver(values(), AttributeId::value)
-    }
-}
-
-internal enum class HashProtocol(val value: Byte) {
-    CERT_HASH_PROTOCOL_SHA1(1),
-    CERT_HASH_PROTOCOL_SHA256(2);
-
-    companion object {
-        internal val resolve = generateResolver(values(), HashProtocol::value)
-    }
-}
+internal const val CERT_HASH_PROTOCOL_SHA1: Byte = 1
+internal const val CERT_HASH_PROTOCOL_SHA256: Byte = 2
 
 internal abstract class Attribute : ShortLengthDataUnit() {
     internal abstract val id: Byte
@@ -42,7 +29,7 @@ internal abstract class Attribute : ShortLengthDataUnit() {
 }
 
 internal class EncapsulatedProtocolId : Attribute() {
-    override val id = AttributeId.ENCAPSULATED_PROTOCOL_ID.value
+    override val id = SSTP_ATTRIBUTE_ID_ENCAPSULATED_PROTOCOL_ID
 
     override val validLengthRange = 6..6
 
@@ -62,7 +49,7 @@ internal class EncapsulatedProtocolId : Attribute() {
 }
 
 internal class StatusInfo : Attribute() {
-    override val id = AttributeId.STATUS_INFO.value
+    override val id = SSTP_ATTRIBUTE_ID_STATUS_INFO
 
     override val validLengthRange = 12..Short.MAX_VALUE
 
@@ -94,7 +81,7 @@ internal class StatusInfo : Attribute() {
 }
 
 internal class CryptoBinding : Attribute() {
-    override val id = AttributeId.CRYPTO_BINDING.value
+    override val id = SSTP_ATTRIBUTE_ID_CRYPTO_BINDING
 
     override val validLengthRange = 104..104
 
@@ -128,7 +115,7 @@ internal class CryptoBinding : Attribute() {
 }
 
 internal class CryptoBindingRequest : Attribute() {
-    override val id = AttributeId.CRYPTO_BINDING_REQ.value
+    override val id = SSTP_ATTRIBUTE_ID_CRYPTO_BINDING_REQ
 
     override val validLengthRange = 40..40
 

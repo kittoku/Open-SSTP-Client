@@ -2,33 +2,20 @@ package kittoku.osc.unit
 
 import kittoku.osc.misc.DataUnitParsingError
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 import kotlin.properties.Delegates
 
 
-internal enum class IpcpCode(val value: Byte) {
-    CONFIGURE_REQUEST(1),
-    CONFIGURE_ACK(2),
-    CONFIGURE_NAK(3),
-    CONFIGURE_REJECT(4),
-    TERMINATE_REQUEST(5),
-    TERMINATE_ACK(6),
-    CODE_REJECT(7);
+internal const val IPCP_CODE_CONFIGURE_REQUEST: Byte = 1
+internal const val IPCP_CODE_CONFIGURE_ACK: Byte = 2
+internal const val IPCP_CODE_CONFIGURE_NAK: Byte = 3
+internal const val IPCP_CODE_CONFIGURE_REJECT: Byte = 4
+internal const val IPCP_CODE_TERMINATE_REQUEST: Byte = 5
+internal const val IPCP_CODE_TERMINATE_ACK: Byte = 6
+internal const val IPCP_CODE_CODE_REJECT: Byte = 7
 
-    companion object {
-        internal val resolve = generateResolver(values(), IpcpCode::value)
-    }
-}
-
-internal enum class IpcpOptionType(val value: Byte) {
-    IP(0x03),
-    DNS(0x81.toByte());
-
-    companion object {
-        internal val resolve = generateResolver(values(), IpcpOptionType::value)
-    }
-}
+internal const val IPCP_OPTION_TYPE_IP: Byte = 0x03
+internal const val IPCP_OPTION_TYPE_DNS = 0x81.toByte()
 
 internal abstract class IpcpOption : ByteLengthDataUnit() {
     internal abstract val type: Byte
@@ -42,7 +29,7 @@ internal abstract class IpcpOption : ByteLengthDataUnit() {
 }
 
 internal class IpcpIpOption : IpcpOption() {
-    override val type = IpcpOptionType.IP.value
+    override val type = IPCP_OPTION_TYPE_IP
 
     override val validLengthRange = 6..6
 
@@ -64,7 +51,7 @@ internal class IpcpIpOption : IpcpOption() {
 }
 
 internal class IpcpDnsOption : IpcpOption() {
-    override val type = IpcpOptionType.DNS.value
+    override val type = IPCP_OPTION_TYPE_DNS
 
     override val validLengthRange = 6..6
 
@@ -106,7 +93,7 @@ internal class IpcpUnknownOption(unknownType: Byte) : IpcpOption() {
 }
 
 internal abstract class IpcpFrame : PppFrame() {
-    override val protocol = PppProtocol.IPCP.value
+    override val protocol = PPP_PROTOCOL_IPCP
 }
 
 internal abstract class IpcpConfigureFrame : IpcpFrame() {
@@ -164,9 +151,9 @@ internal abstract class IpcpConfigureFrame : IpcpFrame() {
             }
 
             val type = bytes.getByte()
-            val option: IpcpOption = when (IpcpOptionType.resolve(type)) {
-                IpcpOptionType.IP -> IpcpIpOption().also { optionIp = it }
-                IpcpOptionType.DNS -> IpcpDnsOption().also { optionDns = it }
+            val option: IpcpOption = when (type) {
+                IPCP_OPTION_TYPE_IP -> IpcpIpOption().also { optionIp = it }
+                IPCP_OPTION_TYPE_DNS -> IpcpDnsOption().also { optionDns = it }
                 else -> IpcpUnknownOption(type).also { options.add(it) }
             }
 
@@ -190,17 +177,17 @@ internal abstract class IpcpConfigureFrame : IpcpFrame() {
 }
 
 internal class IpcpConfigureRequest : IpcpConfigureFrame() {
-    override val code = IpcpCode.CONFIGURE_REQUEST.value
+    override val code = IPCP_CODE_CONFIGURE_REQUEST
 }
 
 internal class IpcpConfigureAck : IpcpConfigureFrame() {
-    override val code = IpcpCode.CONFIGURE_ACK.value
+    override val code = IPCP_CODE_CONFIGURE_ACK
 }
 
 internal class IpcpConfigureNak : IpcpConfigureFrame() {
-    override val code = IpcpCode.CONFIGURE_NAK.value
+    override val code = IPCP_CODE_CONFIGURE_NAK
 }
 
 internal class IpcpConfigureReject : IpcpConfigureFrame() {
-    override val code = IpcpCode.CONFIGURE_REJECT.value
+    override val code = IPCP_CODE_CONFIGURE_REJECT
 }

@@ -2,27 +2,20 @@ package kittoku.osc.unit
 
 import kittoku.osc.misc.DataUnitParsingError
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 import kotlin.properties.Delegates
 
 
-internal enum class PapCode(val value: Byte) {
-    AUTHENTICATE_REQUEST(1),
-    AUTHENTICATE_ACK(2),
-    AUTHENTICATE_NAK(3);
-
-    companion object {
-        internal val resolve = generateResolver(values(), PapCode::value)
-    }
-}
+internal const val PAP_CODE_AUTHENTICATE_REQUEST: Byte = 1
+internal const val PAP_CODE_AUTHENTICATE_ACK: Byte = 2
+internal const val PAP_CODE_AUTHENTICATE_NAK: Byte = 3
 
 internal abstract class PapFrame : PppFrame() {
-    override val protocol = PppProtocol.PAP.value
+    override val protocol = PPP_PROTOCOL_PAP
 }
 
 internal class PapAuthenticateRequest : PapFrame() {
-    override val code = PapCode.AUTHENTICATE_REQUEST.value
+    override val code = PAP_CODE_AUTHENTICATE_REQUEST
 
     override val validLengthRange = 6..Short.MAX_VALUE
 
@@ -93,9 +86,9 @@ internal abstract class PapAuthenticateAcknowledgement : PapFrame() {
 }
 
 internal class PapAuthenticateAck : PapAuthenticateAcknowledgement() {
-    override val code = PapCode.AUTHENTICATE_ACK.value
+    override val code = PAP_CODE_AUTHENTICATE_ACK
 }
 
 internal class PapAuthenticateNak : PapAuthenticateAcknowledgement() {
-    override val code = PapCode.AUTHENTICATE_NAK.value
+    override val code = PAP_CODE_AUTHENTICATE_NAK
 }

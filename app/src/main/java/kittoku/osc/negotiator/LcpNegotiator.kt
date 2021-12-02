@@ -220,12 +220,12 @@ internal fun PppClient.receiveLcpEchoReply() {
 }
 
 
-internal fun PppClient.receiveLcpProtocolReject(assumed: PppProtocol) {
+internal fun PppClient.receiveLcpProtocolReject(assumed: Short) {
     val received = LcpProtocolReject()
     if (!tryReadingLcp(received)) return
 
-    if (PppProtocol.resolve(received.rejectedProtocol) == assumed) {
-        parent.inform("${assumed.name} protocol was rejected", null)
+    if (received.rejectedProtocol == assumed) {
+        parent.inform("$assumed protocol was rejected", null)
         kill()
         return
     }

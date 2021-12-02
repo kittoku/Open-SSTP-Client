@@ -73,7 +73,7 @@ internal fun SstpClient.sendCallConnected() {
         it.digest(networkSetting.serverCertificate.encoded).copyInto(sending.binding.certHash)
     }
 
-    sending.binding.hashProtocol = networkSetting.hashProtocol.value
+    sending.binding.hashProtocol = networkSetting.hashProtocol
     sending.update()
     sending.write(cmacInputBuffer)
 
@@ -138,8 +138,8 @@ internal fun SstpClient.receiveCallConnectAck() {
     if (!tryReadingPacket(received)) return
 
     networkSetting.hashProtocol = when (received.request.bitmask.toInt()) {
-        in 2..3 -> HashProtocol.CERT_HASH_PROTOCOL_SHA256
-        1 -> HashProtocol.CERT_HASH_PROTOCOL_SHA1
+        in 2..3 -> CERT_HASH_PROTOCOL_SHA256
+        1 -> CERT_HASH_PROTOCOL_SHA1
         else -> {
             parent.informInvalidUnit(::receiveCallConnectAck)
             status.sstp = SstpStatus.CALL_ABORT_IN_PROGRESS_1
@@ -166,26 +166,27 @@ internal fun SstpClient.receiveEchoResponse() {
     if (!tryReadingPacket(received)) return
 }
 
-private class HashSetting(hashProtocol: HashProtocol) {
+private class HashSetting(hashProtocol: Byte) {
     val cmacSize: Short // little endian
     val digestProtocol: String
     val macProtocol: String
 
     init {
         when (hashProtocol) {
-            HashProtocol.CERT_HASH_PROTOCOL_SHA1 -> {
+            CERT_HASH_PROTOCOL_SHA1 -> {
                 cmacSize = 0x1400.toShort()
                 digestProtocol = "SHA-1"
                 macProtocol = "HmacSHA1"
 
             }
 
-            HashProtocol.CERT_HASH_PROTOCOL_SHA256 -> {
+            CERT_HASH_PROTOCOL_SHA256 -> {
                 cmacSize = 0x2000.toShort()
                 digestProtocol = "SHA-256"
                 macProtocol = "HmacSHA256"
             }
 
+            else -> throw NotImplementedError()
         }
     }
 

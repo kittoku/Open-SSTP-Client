@@ -2,12 +2,6 @@ package kittoku.osc.misc
 
 import java.nio.ByteBuffer
 
-internal fun <K, V> generateResolver(array: Array<K>, map: (K) -> V): (V) -> K? {
-    return fun(value: V): K? {
-        return array.firstOrNull { map(it) == value }
-    }
-}
-
 internal fun ByteArray.isSame(other: ByteArray): Boolean {
     if (this.size != other.size) return false
 

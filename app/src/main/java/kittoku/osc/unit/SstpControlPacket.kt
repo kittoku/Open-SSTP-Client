@@ -2,34 +2,21 @@ package kittoku.osc.unit
 
 import kittoku.osc.misc.DataUnitParsingError
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 
 
-internal enum class PacketType(val value: Short) {
-    DATA(0x1000),
-    CONTROL(0x1001);
+internal const val SSTP_PACKET_TYPE_DATA: Short = 0x1000
+internal const val SSTP_PACKET_TYPE_CONTROL: Short = 0x1001
 
-    companion object {
-        internal val resolve = generateResolver(values(), PacketType::value)
-    }
-}
-
-internal enum class MessageType(val value: Short) {
-    CALL_CONNECT_REQUEST(1),
-    CALL_CONNECT_ACK(2),
-    CALL_CONNECT_NAK(3),
-    CALL_CONNECTED(4),
-    CALL_ABORT(5),
-    CALL_DISCONNECT(6),
-    CALL_DISCONNECT_ACK(7),
-    ECHO_REQUEST(8),
-    ECHO_RESPONSE(9);
-
-    companion object {
-        internal val resolve = generateResolver(values(), MessageType::value)
-    }
-}
+internal const val SSTP_MESSAGE_TYPE_CALL_CONNECT_REQUEST: Short = 1
+internal const val SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK: Short = 2
+internal const val SSTP_MESSAGE_TYPE_CALL_CONNECT_NAK: Short = 3
+internal const val SSTP_MESSAGE_TYPE_CALL_CONNECTED: Short = 4
+internal const val SSTP_MESSAGE_TYPE_CALL_ABORT: Short = 5
+internal const val SSTP_MESSAGE_TYPE_CALL_DISCONNECT: Short = 6
+internal const val SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK: Short = 7
+internal const val SSTP_MESSAGE_TYPE_ECHO_REQUEST: Short = 8
+internal const val SSTP_MESSAGE_TYPE_ECHO_RESPONSE: Short = 9
 
 internal abstract class ControlPacket : ShortLengthDataUnit() {
     internal abstract val type: Short
@@ -43,14 +30,14 @@ internal abstract class ControlPacket : ShortLengthDataUnit() {
     }
 
     internal fun writeHeader(bytes: ByteBuffer) {
-        bytes.putShort(PacketType.CONTROL.value)
+        bytes.putShort(SSTP_PACKET_TYPE_CONTROL)
         bytes.putShort(getTypedLength())
         bytes.putShort(type)
     }
 }
 
 internal class SstpCallConnectRequest : ControlPacket() {
-    override val type = MessageType.CALL_CONNECT_REQUEST.value
+    override val type = SSTP_MESSAGE_TYPE_CALL_CONNECT_REQUEST
 
     override val validLengthRange = 14..14
 
@@ -60,7 +47,7 @@ internal class SstpCallConnectRequest : ControlPacket() {
         readHeader(bytes)
         if (bytes.getShort().toInt() == 1) throw DataUnitParsingError()
         bytes.move(1)
-        if (AttributeId.resolve(bytes.getByte()) != AttributeId.ENCAPSULATED_PROTOCOL_ID) throw DataUnitParsingError()
+        if (bytes.getByte() != SSTP_ATTRIBUTE_ID_ENCAPSULATED_PROTOCOL_ID) throw DataUnitParsingError()
         EncapsulatedProtocolId().also {
             it.read(bytes)
             protocol = it
@@ -79,7 +66,7 @@ internal class SstpCallConnectRequest : ControlPacket() {
     }
 }
 internal class SstpCallConnectAck : ControlPacket() {
-    override val type = MessageType.CALL_CONNECT_ACK.value
+    override val type = SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK
 
     override val validLengthRange = 48..48
 
@@ -89,7 +76,7 @@ internal class SstpCallConnectAck : ControlPacket() {
         readHeader(bytes)
         if (bytes.getShort().toInt() != 1) throw DataUnitParsingError()
         bytes.move(1)
-        if (AttributeId.resolve(bytes.getByte()) != AttributeId.CRYPTO_BINDING_REQ) throw DataUnitParsingError()
+        if (bytes.getByte() != SSTP_ATTRIBUTE_ID_CRYPTO_BINDING_REQ) throw DataUnitParsingError()
         CryptoBindingRequest().also {
             it.read(bytes)
             request = it
@@ -110,7 +97,7 @@ internal class SstpCallConnectAck : ControlPacket() {
 }
 
 internal class SstpCallConnected : ControlPacket() {
-    override val type = MessageType.CALL_CONNECTED.value
+    override val type = SSTP_MESSAGE_TYPE_CALL_CONNECTED
 
     override val validLengthRange = 112..112
 
@@ -120,7 +107,7 @@ internal class SstpCallConnected : ControlPacket() {
         readHeader(bytes)
         if (bytes.getShort().toInt() != 1) throw DataUnitParsingError()
         bytes.move(1)
-        if (AttributeId.resolve(bytes.getByte()) != AttributeId.CRYPTO_BINDING) throw DataUnitParsingError()
+        if (bytes.getByte() != SSTP_ATTRIBUTE_ID_CRYPTO_BINDING) throw DataUnitParsingError()
         CryptoBinding().also {
             it.read(bytes)
             binding = it
@@ -150,7 +137,7 @@ internal abstract class TerminatePacket : ControlPacket() {
             0 -> null
             1 -> {
                 bytes.move(1)
-                if (AttributeId.resolve(bytes.getByte()) != AttributeId.STATUS_INFO) throw DataUnitParsingError()
+                if (bytes.getByte() != SSTP_ATTRIBUTE_ID_STATUS_INFO) throw DataUnitParsingError()
                 StatusInfo().also { it.read(bytes) }
             }
 
@@ -177,11 +164,11 @@ internal abstract class TerminatePacket : ControlPacket() {
 }
 
 internal class SstpCallAbort : TerminatePacket() {
-    override val type = MessageType.CALL_ABORT.value
+    override val type = SSTP_MESSAGE_TYPE_CALL_ABORT
 }
 
 internal class SstpCallDisconnect : TerminatePacket() {
-    override val type = MessageType.CALL_DISCONNECT.value
+    override val type = SSTP_MESSAGE_TYPE_CALL_DISCONNECT
 }
 
 internal abstract class NoAttributePacket : ControlPacket() {
@@ -203,13 +190,13 @@ internal abstract class NoAttributePacket : ControlPacket() {
 }
 
 internal class SstpCallDisconnectAck : NoAttributePacket() {
-    override val type = MessageType.CALL_DISCONNECT_ACK.value
+    override val type = SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
 }
 
 internal class SstpEchoRequest : NoAttributePacket() {
-    override val type = MessageType.ECHO_REQUEST.value
+    override val type = SSTP_MESSAGE_TYPE_ECHO_REQUEST
 }
 
 internal class SstpEchoResponse : NoAttributePacket() {
-    override val type = MessageType.ECHO_RESPONSE.value
+    override val type = SSTP_MESSAGE_TYPE_ECHO_RESPONSE
 }

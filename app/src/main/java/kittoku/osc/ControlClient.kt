@@ -232,7 +232,7 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                     }
 
                     is PppFrame -> {
-                        controlBuffer.putShort(PacketType.DATA.value)
+                        controlBuffer.putShort(SSTP_PACKET_TYPE_DATA)
                         controlBuffer.putShort((candidate._length + 8).toShort())
                         candidate.write(controlBuffer)
                     }
@@ -263,18 +263,18 @@ internal class ControlClient(internal val vpnService: SstpVpnService) :
                 val version = when (header and versionMask) {
                     ipv4Version -> {
                         if (!networkSetting.PPP_IPv4_ENABLED) return false
-                        PppProtocol.IP.value
+                        PPP_PROTOCOL_IP
                     }
 
                     ipv6Version -> {
                         if (!networkSetting.PPP_IPv6_ENABLED) return false
-                        PppProtocol.IPV6.value
+                        PPP_PROTOCOL_IPV6
                     }
 
                     else -> throw Exception("Invalid data protocol was detected")
                 }
 
-                dataBuffer.putShort(PacketType.DATA.value)
+                dataBuffer.putShort(SSTP_PACKET_TYPE_DATA)
                 dataBuffer.putShort((src.limit() + 8).toShort())
                 dataBuffer.putShort(PPP_HEADER)
                 dataBuffer.putShort(version)

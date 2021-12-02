@@ -2,28 +2,21 @@ package kittoku.osc.unit
 
 import kittoku.osc.misc.DataUnitParsingError
 import kittoku.osc.misc.IncomingBuffer
-import kittoku.osc.misc.generateResolver
 import java.nio.ByteBuffer
 import kotlin.properties.Delegates
 
 
-internal enum class ChapCode(val value: Byte) {
-    CHALLENGE(1),
-    RESPONSE(2),
-    SUCCESS(3),
-    FAILURE(4);
-
-    companion object {
-        internal val resolve = generateResolver(values(), ChapCode::value)
-    }
-}
+internal const val CHAP_CODE_CHALLENGE: Byte = 1
+internal const val CHAP_CODE_RESPONSE: Byte = 2
+internal const val CHAP_CODE_SUCCESS: Byte = 3
+internal const val CHAP_CODE_FAILURE: Byte = 4
 
 internal abstract class ChapFrame : PppFrame() {
-    override val protocol = PppProtocol.CHAP.value
+    override val protocol = PPP_PROTOCOL_CHAP
 }
 
 internal class ChapChallenge : ChapFrame() {
-    override val code = ChapCode.CHALLENGE.value
+    override val code = CHAP_CODE_CHALLENGE
 
     override val validLengthRange = 21..Short.MAX_VALUE
 
@@ -55,7 +48,7 @@ internal class ChapChallenge : ChapFrame() {
 }
 
 internal class ChapResponse : ChapFrame() {
-    override val code = ChapCode.RESPONSE.value
+    override val code = CHAP_CODE_RESPONSE
 
     override val validLengthRange = 54..Short.MAX_VALUE
 
@@ -97,7 +90,7 @@ internal class ChapResponse : ChapFrame() {
 }
 
 internal class ChapSuccess : ChapFrame() {
-    override val code = ChapCode.SUCCESS.value
+    override val code = CHAP_CODE_SUCCESS
 
     override val validLengthRange = 46..Short.MAX_VALUE
 
@@ -139,7 +132,7 @@ internal class ChapSuccess : ChapFrame() {
 }
 
 internal class ChapFailure : ChapFrame() {
-    override val code = ChapCode.FAILURE.value
+    override val code = CHAP_CODE_FAILURE
 
     override val validLengthRange = 4..Short.MAX_VALUE
 

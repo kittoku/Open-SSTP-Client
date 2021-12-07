@@ -6,6 +6,7 @@ import kittoku.osc.preference.OscPreference
 
 internal fun getBooleanPrefValue(key: OscPreference, prefs: SharedPreferences): Boolean {
     val defaultValue = when (key) {
+        OscPreference.ROOT_STATE -> false
         OscPreference.HOME_CONNECTOR -> false
         OscPreference.SSL_DO_VERIFY -> true
         OscPreference.SSL_DO_ADD_CERT -> false

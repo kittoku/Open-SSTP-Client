@@ -25,8 +25,14 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
         }
     }
 
+    private fun initialize() {
+        text = getStringPrefValue(oscPreference, sharedPreferences)
+    }
+
     override fun onAttached() {
         super.onAttached()
+
+        initialize()
 
         title = preferenceTitle
         summaryProvider = provider

@@ -18,8 +18,14 @@ internal abstract class IntPreference(context: Context, attrs: AttributeSet) : E
         getIntPrefValue(oscPreference, it.sharedPreferences).toString()
     }
 
+    private fun initialize() {
+        text = getIntPrefValue(oscPreference, sharedPreferences).toString()
+    }
+
     override fun onAttached() {
         super.onAttached()
+
+        initialize()
 
         title = preferenceTitle
         summaryProvider = provider

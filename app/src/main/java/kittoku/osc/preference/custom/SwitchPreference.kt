@@ -4,14 +4,21 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.SwitchPreferenceCompat
 import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getBooleanPrefValue
 
 
 internal abstract class SwitchPreference(context: Context, attrs: AttributeSet) : SwitchPreferenceCompat(context, attrs) {
     abstract val oscPreference: OscPreference
     abstract val preferenceTitle: String
 
+    private fun initialize() {
+        isChecked = getBooleanPrefValue(oscPreference, sharedPreferences)
+    }
+
     override fun onAttached() {
         super.onAttached()
+
+        initialize()
 
         title = preferenceTitle
         isSingleLineTitle = false

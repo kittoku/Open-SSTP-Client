@@ -13,6 +13,7 @@ the connection, turn the switch off in the home tab or tap the notification.
 <br>
 <img src="images/example_home.png" width=25%>
 <img src="images/example_setting.png" width=25%>
+<img src="images/example_tile.png" width=25%>
 
 ## Setting tab
 Some settings to be noted are written below:

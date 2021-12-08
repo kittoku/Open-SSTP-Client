@@ -31,4 +31,5 @@ internal enum class OscPreference {
     BUFFER_OUTGOING,
     LOG_DO_SAVE_LOG,
     LOG_DIR,
+    LINK_OSC,
 }

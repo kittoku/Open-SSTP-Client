@@ -46,4 +46,8 @@
         <kittoku.osc.preference.custom.LogDoSaveLogPreference android:key="LOG_DO_SAVE_LOG"/>
         <kittoku.osc.preference.custom.LogDirPreference android:key="LOG_DIR"/>
     </PreferenceCategory>
+
+    <PreferenceCategory>
+        <kittoku.osc.preference.custom.LinkOscPreference android:key="LINK_OSC"/>
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -53,6 +53,10 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
     val isMschapv2Enabled = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
     if (!isPapEnabled && !isMschapv2Enabled) return "No authentication protocol was enabled"
 
+    getIntPrefValue(OscPreference.PPP_AUTH_TIMEOUT, prefs).also {
+        if (it < 1) return "PPP authentication timeout period must be >=1 second"
+    }
+
     getIntPrefValue(OscPreference.IP_PREFIX, prefs).also {
         if (it !in 0..32) return "The given address prefix length is out of 0-32"
     }

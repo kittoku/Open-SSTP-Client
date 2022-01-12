@@ -30,7 +30,7 @@ internal class PppClient(parent: ControlClient) : Client(parent) {
     internal var lcpState = LcpState.REQ_SENT
     private var isInitialLcp = true
 
-    internal val authTimer = Timer(3_000L)
+    internal val authTimer = Timer(parent.networkSetting.PPP_AUTH_TIMEOUT * 1000L)
     internal var isAuthFinished = false
     private var isInitialAuth = true
 

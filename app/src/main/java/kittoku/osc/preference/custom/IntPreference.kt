@@ -54,6 +54,11 @@ internal class PPPMtuPreference(context: Context, attrs: AttributeSet) : IntPref
     override val preferenceTitle = "MTU"
 }
 
+internal class PPPAuthTimeoutPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
+    override val oscPreference = OscPreference.PPP_AUTH_TIMEOUT
+    override val preferenceTitle = "Timeout Period (second)"
+}
+
 internal class IPPrefixPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
     override val oscPreference = OscPreference.IP_PREFIX
     override val preferenceTitle = "Address Prefix Length"

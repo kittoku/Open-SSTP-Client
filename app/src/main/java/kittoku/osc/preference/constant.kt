@@ -19,6 +19,7 @@ internal enum class OscPreference {
     PPP_MTU,
     PPP_PAP_ENABLED,
     PPP_MSCHAPv2_ENABLED,
+    PPP_AUTH_TIMEOUT,
     PPP_IPv4_ENABLED,
     PPP_IPv6_ENABLED,
     IP_PREFIX,

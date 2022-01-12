@@ -41,6 +41,7 @@ internal class NetworkSetting(prefs: SharedPreferences) {
     internal val PPP_MTU = getIntPrefValue(OscPreference.PPP_MTU, prefs)
     internal val PPP_PAP_ENABLED = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
     internal val PPP_MSCHAPv2_ENABLED = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
+    internal val PPP_AUTH_TIMEOUT = getIntPrefValue(OscPreference.PPP_AUTH_TIMEOUT, prefs)
     internal val PPP_IPv4_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
     internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
     internal val IP_PREFIX = getIntPrefValue(OscPreference.IP_PREFIX, prefs)

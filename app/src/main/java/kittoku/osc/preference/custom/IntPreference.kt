@@ -93,6 +93,6 @@ internal class BufferIncomingPreference(context: Context, attrs: AttributeSet) :
 }
 
 internal class BufferOutgoingPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.BUFFER_INCOMING
-    override val preferenceTitle = "Incoming Buffer Size"
+    override val oscPreference = OscPreference.BUFFER_OUTGOING
+    override val preferenceTitle = "Outgoing Buffer Size"
 }

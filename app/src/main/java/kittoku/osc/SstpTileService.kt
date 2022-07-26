@@ -16,7 +16,7 @@ import kittoku.osc.preference.checkPreferences
 @RequiresApi(Build.VERSION_CODES.N)
 internal class SstpTileService : TileService() {
     private val prefs by lazy {
-        PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        PreferenceManager.getDefaultSharedPreferences(this)
     }
 
     private val listener by lazy {
@@ -31,7 +31,7 @@ internal class SstpTileService : TileService() {
         get() = getBooleanPrefValue(OscPreference.ROOT_STATE, prefs)
 
     private val isVpnPrepared: Boolean
-        get() = VpnService.prepare(applicationContext) == null
+        get() = VpnService.prepare(this) == null
 
     private fun invalidateTileState() {
         qsTile.state = Tile.STATE_UNAVAILABLE
@@ -81,7 +81,7 @@ internal class SstpTileService : TileService() {
     }
 
     private fun startVpnService(action: String) {
-        val intent = Intent(applicationContext, SstpVpnService::class.java).setAction(action)
+        val intent = Intent(this, SstpVpnService::class.java).setAction(action)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)

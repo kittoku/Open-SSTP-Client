@@ -7,7 +7,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kittoku.osc.R
 import kittoku.osc.preference.OscPreference
-import kittoku.osc.preference.accessor.setStringPrefValue
+import kittoku.osc.preference.accessor.setURIPrefValue
 import kittoku.osc.preference.custom.DirectoryPreference
 
 
@@ -53,11 +53,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
                     )
                 } else null
 
-                setStringPrefValue(
-                    uri?.toString() ?: "",
-                    OscPreference.SSL_CERT_DIR,
-                    preferenceManager.sharedPreferences
-                )
+                setURIPrefValue(uri, OscPreference.SSL_CERT_DIR, preferenceManager.sharedPreferences)
             }
 
             LOG_DIR_REQUEST_CODE -> {
@@ -67,11 +63,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
                     )
                 } else null
 
-                setStringPrefValue(
-                    uri?.toString() ?: "",
-                    OscPreference.LOG_DIR,
-                    preferenceManager.sharedPreferences
-                )
+                setURIPrefValue(uri, OscPreference.LOG_DIR, preferenceManager.sharedPreferences)
             }
         }
     }

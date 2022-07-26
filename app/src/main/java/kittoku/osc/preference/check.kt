@@ -45,13 +45,13 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
         if (it !in MIN_MTU..MAX_MTU) return "The given MRU is out of $MIN_MTU-$MAX_MTU"
     }
 
-    val isIpv4Enabled = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
-    val isIpv6Enabled = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
-    if (!isIpv4Enabled && !isIpv6Enabled) return "No network protocol was enabled"
+    val isIPv4Enabled = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
+    val isIPv6Enabled = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
+    if (!isIPv4Enabled && !isIPv6Enabled) return "No network protocol was enabled"
 
-    val isPapEnabled = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
-    val isMschapv2Enabled = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
-    if (!isPapEnabled && !isMschapv2Enabled) return "No authentication protocol was enabled"
+    val isPAPEnabled = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
+    val isMSChapv2Enabled = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
+    if (!isPAPEnabled && !isMSChapv2Enabled) return "No authentication protocol was enabled"
 
     getIntPrefValue(OscPreference.PPP_AUTH_TIMEOUT, prefs).also {
         if (it < 1) return "PPP authentication timeout period must be >=1 second"

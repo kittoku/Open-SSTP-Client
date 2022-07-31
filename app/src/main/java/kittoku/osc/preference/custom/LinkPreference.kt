@@ -24,10 +24,10 @@ internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : 
         intent = Intent(Intent.ACTION_VIEW).also { it.data = Uri.parse(url) }
     }
 
-    override fun onBindViewHolder(holder: PreferenceViewHolder?) {
+    override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
 
-        holder?.findViewById(android.R.id.summary)?.also {
+        holder.findViewById(android.R.id.summary)?.also {
             it as TextView
             it.maxLines = Int.MAX_VALUE
         }

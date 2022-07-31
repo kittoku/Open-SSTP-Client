@@ -12,7 +12,7 @@ internal abstract class SwitchPreference(context: Context, attrs: AttributeSet) 
     abstract val preferenceTitle: String
 
     private fun initialize() {
-        isChecked = getBooleanPrefValue(oscPreference, sharedPreferences)
+        isChecked = getBooleanPrefValue(oscPreference, sharedPreferences!!)
     }
 
     override fun onAttached() {

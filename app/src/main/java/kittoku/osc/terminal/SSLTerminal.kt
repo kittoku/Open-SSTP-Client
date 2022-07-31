@@ -100,14 +100,14 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     private fun establishHttpLayer() {
         val input = InputStreamReader(socket!!.inputStream, "US-ASCII")
         val output = OutputStreamWriter(socket!!.outputStream, "US-ASCII")
-        val HTTP_REQUEST = arrayOf(
+        val request = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
             "Host: ${bridge.HOME_HOSTNAME}",
             "SSTPCORRELATIONID: {${bridge.guid}}"
         ).joinToString(separator = "\r\n", postfix = "\r\n\r\n")
 
-        output.write(HTTP_REQUEST)
+        output.write(request)
         output.flush()
 
         val received = mutableListOf<Byte>(0, 0, 0)

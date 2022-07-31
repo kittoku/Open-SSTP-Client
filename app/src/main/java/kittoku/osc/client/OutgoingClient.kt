@@ -34,7 +34,6 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
             launchJobRetrieve()
 
             val minCapacity = PREFIX_SIZE + bridge.PPP_MTU
-            var polled: ByteBuffer?
 
             while (isActive) {
                 mainBuffer.clear()
@@ -42,13 +41,11 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
                 if (!load(channel.receive())) continue
 
                 while (isActive) {
-                    polled = channel.poll()
-                    if (polled != null) {
-                        load(polled)
-                        if (mainBuffer.remaining() < minCapacity) break
-                    } else {
-                        break
-                    }
+                    channel.tryReceive().getOrNull()?.also {
+                        load(it)
+                    } ?: break
+
+                    if (mainBuffer.remaining() < minCapacity) break
                 }
 
                 mainBuffer.flip()

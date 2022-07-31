@@ -43,13 +43,13 @@ internal class NetworkObserver(val bridge: ClientBridge) {
 
         summary.add("[Assigned IP Address]")
         properties.linkAddresses.forEach {
-            summary.add(it.address.hostAddress)
+            summary.add(it.address.hostAddress ?: "")
         }
         summary.add("")
 
         summary.add("[DNS server]")
         properties.dnsServers.forEach {
-            summary.add(it.hostAddress)
+            summary.add(it.hostAddress ?: "")
         }
         summary.add("")
 

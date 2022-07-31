@@ -1,3 +1,5 @@
+@file:Suppress("BlockingMethodInNonBlockingContext")
+
 package kittoku.osc.terminal
 
 import android.os.ParcelFileDescriptor

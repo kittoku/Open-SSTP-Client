@@ -20,7 +20,7 @@ internal abstract class ModifiedMultiSelectListPreference(context: Context, attr
     protected open val pluralForm = "Values"
 
     private val provider = SummaryProvider<Preference> {
-        val currentValue = getSetPrefValue(oscPreference, it.sharedPreferences)
+        val currentValue = getSetPrefValue(oscPreference, it.sharedPreferences!!)
 
         when (currentValue.size) {
             0 -> "[No $singularForm Entered]"

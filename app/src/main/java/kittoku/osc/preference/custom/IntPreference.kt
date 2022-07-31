@@ -15,11 +15,11 @@ internal abstract class IntPreference(context: Context, attrs: AttributeSet) : E
     abstract val preferenceTitle: String
     protected open val dependingPreference: OscPreference? = null
     protected open val provider = SummaryProvider<Preference> {
-        getIntPrefValue(oscPreference, it.sharedPreferences).toString()
+        getIntPrefValue(oscPreference, it.sharedPreferences!!).toString()
     }
 
     private fun initialize() {
-        text = getIntPrefValue(oscPreference, sharedPreferences).toString()
+        text = getIntPrefValue(oscPreference, sharedPreferences!!).toString()
     }
 
     override fun onAttached() {
@@ -63,7 +63,7 @@ internal class IPPrefixPreference(context: Context, attrs: AttributeSet) : IntPr
     override val oscPreference = OscPreference.IP_PREFIX
     override val preferenceTitle = "Address Prefix Length"
     override val provider = SummaryProvider<Preference> {
-        getIntPrefValue(oscPreference, it.sharedPreferences).let { length ->
+        getIntPrefValue(oscPreference, it.sharedPreferences!!).let { length ->
             if (length == 0) "DEFAULT" else length.toString()
         }
     }

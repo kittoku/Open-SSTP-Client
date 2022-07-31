@@ -16,17 +16,15 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
     protected open val emptyNotice = "[No Value Entered]"
     protected open val textType = InputType.TYPE_CLASS_TEXT
     open val provider = SummaryProvider<Preference> {
-        val currentValue = getStringPrefValue(oscPreference, it.sharedPreferences)
+        val currentValue = getStringPrefValue(oscPreference, it.sharedPreferences!!)
 
-        if (currentValue.isEmpty()) {
+        currentValue.ifEmpty {
             emptyNotice
-        } else {
-            currentValue
         }
     }
 
     private fun initialize() {
-        text = getStringPrefValue(oscPreference, sharedPreferences)
+        text = getStringPrefValue(oscPreference, sharedPreferences!!)
     }
 
     override fun onAttached() {
@@ -59,7 +57,7 @@ internal class HomePasswordPreference(context: Context, attrs: AttributeSet) : S
     override val textType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
 
     override val provider = SummaryProvider<Preference> {
-        val currentValue = getStringPrefValue(oscPreference, it.sharedPreferences)
+        val currentValue = getStringPrefValue(oscPreference, it.sharedPreferences!!)
 
         if (currentValue.isEmpty()) {
             emptyNotice

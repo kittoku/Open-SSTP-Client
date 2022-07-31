@@ -20,7 +20,7 @@ internal abstract class SummaryPreference(context: Context, attrs: AttributeSet)
     }
 
     protected open val summaryValue: String
-        get() = getStringPrefValue(oscPreference, sharedPreferences)
+        get() = getStringPrefValue(oscPreference, sharedPreferences!!)
 
     private fun updateSummary() {
         summary = summaryValue
@@ -32,19 +32,19 @@ internal abstract class SummaryPreference(context: Context, attrs: AttributeSet)
         title = preferenceTitle
         updateSummary()
 
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+        sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
     }
 
     override fun onDetached() {
         super.onDetached()
 
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
+        sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
-    override fun onBindViewHolder(holder: PreferenceViewHolder?) {
+    override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
 
-        holder?.findViewById(android.R.id.summary)?.also {
+        holder.findViewById(android.R.id.summary)?.also {
             it as TextView
             it.maxLines = Int.MAX_VALUE
         }
@@ -56,12 +56,10 @@ internal class HomeStatusPreference(context: Context, attrs: AttributeSet) : Sum
     override val preferenceTitle = "Current Status"
     override val summaryValue: String
         get() {
-            val status = getStringPrefValue(oscPreference, sharedPreferences)
+            val status = getStringPrefValue(oscPreference, sharedPreferences!!)
 
-            return if (status.isEmpty()) {
+            return status.ifEmpty {
                 "[No Connection Established]"
-            } else {
-                status
             }
         }
 }

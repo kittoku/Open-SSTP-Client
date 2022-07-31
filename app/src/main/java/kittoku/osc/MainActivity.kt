@@ -13,7 +13,7 @@ import kittoku.osc.fragment.SettingFragment
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        title = "Open SSTP Client: ${BuildConfig.VERSION_NAME}"
+        title = "${getString(R.string.app_name)}: ${BuildConfig.VERSION_NAME}"
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

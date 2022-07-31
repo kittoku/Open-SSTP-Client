@@ -146,14 +146,18 @@ internal class SstpVpnService : VpnService() {
             }
         }
 
-        val intent = Intent(this, SstpVpnService::class.java).setAction(ACTION_VPN_DISCONNECT)
-        val pendingIntent = PendingIntent.getService(this, 0, intent, 0)
+        val pendingIntent = PendingIntent.getService(
+            this,
+            0,
+            Intent(this, SstpVpnService::class.java).setAction(ACTION_VPN_DISCONNECT),
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_NAME).also {
-            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
-            it.setContentText("Disconnect SSTP connection")
             it.priority = NotificationCompat.PRIORITY_DEFAULT
-            it.setContentIntent(pendingIntent)
             it.setAutoCancel(true)
+            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+            it.addAction(R.drawable.ic_baseline_close_24, "DISCONNECT", pendingIntent)
         }
 
         startForeground(NOTIFICATION_DISCONNECT_ID, builder.build())

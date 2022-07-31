@@ -12,7 +12,7 @@ internal abstract class ModifiedCheckBoxPreference(context: Context, attrs: Attr
     abstract val preferenceTitle: String
 
     private fun initialize() {
-        isChecked = getBooleanPrefValue(oscPreference, sharedPreferences)
+        isChecked = getBooleanPrefValue(oscPreference, sharedPreferences!!)
     }
 
     override fun onAttached() {

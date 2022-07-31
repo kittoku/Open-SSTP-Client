@@ -19,12 +19,12 @@ internal class HomeConnectorPreference(context: Context, attrs: AttributeSet) : 
     override fun onAttached() {
         super.onAttached()
 
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+        sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
     }
 
     override fun onDetached() {
         super.onDetached()
 
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
+        sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(listener)
     }
 }

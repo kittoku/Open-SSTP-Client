@@ -27,7 +27,6 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
     private val bufferSize = getIntPrefValue(OscPreference.BUFFER_INCOMING, bridge.prefs)
 
     private var jobMain: Job? = null
-    private var jobTimeout: Job? = null
 
     internal var lcpMailbox: Channel<LCPConfigureFrame>? = null
     internal var papMailbox: Channel<PAPFrame>? = null
@@ -218,6 +217,5 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
 
     internal fun cancel() {
         jobMain?.cancel()
-        jobTimeout?.cancel()
     }
 }

@@ -21,7 +21,7 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
 
     private val summaryValue: String
         get() {
-            val currentValue = getStringPrefValue(oscPreference, sharedPreferences)
+            val currentValue = getStringPrefValue(oscPreference, sharedPreferences!!)
 
             return if (currentValue.isEmpty()) {
                 "[No Directory Selected]"
@@ -44,13 +44,13 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
 
         updateSummary()
 
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+        sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
     }
 
     override fun onDetached() {
         super.onDetached()
 
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
+        sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(listener)
     }
 }
 

@@ -7,10 +7,7 @@ import kittoku.osc.MAX_MRU
 import kittoku.osc.MAX_MTU
 import kittoku.osc.MIN_MRU
 import kittoku.osc.MIN_MTU
-import kittoku.osc.preference.accessor.getBooleanPrefValue
-import kittoku.osc.preference.accessor.getIntPrefValue
-import kittoku.osc.preference.accessor.getSetPrefValue
-import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.accessor.*
 
 
 internal fun toastInvalidSetting(message: String, context: Context?) {
@@ -28,10 +25,10 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
 
     val doAddCerts = getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, prefs)
     val version = getStringPrefValue(OscPreference.SSL_VERSION, prefs)
-    val certDir = getStringPrefValue(OscPreference.SSL_CERT_DIR, prefs)
+    val certDir = getURIPrefValue(OscPreference.SSL_CERT_DIR, prefs)
     if (doAddCerts && version == "DEFAULT") return "Adding trusted certificates needs SSL version to be specified"
 
-    if (doAddCerts && certDir.isEmpty()) return "No certificates directory was selected"
+    if (doAddCerts && certDir == null) return "No certificates directory was selected"
 
     val doSelectSuites = getBooleanPrefValue(OscPreference.SSL_DO_SELECT_SUITES, prefs)
     val suites = getSetPrefValue(OscPreference.SSL_SUITES, prefs)
@@ -74,8 +71,8 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
     }
 
     val doSaveLog = getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, prefs)
-    val logDir = getStringPrefValue(OscPreference.LOG_DIR, prefs)
-    if (doSaveLog && logDir.isEmpty()) return "No log directory was selected"
+    val logDir = getURIPrefValue(OscPreference.LOG_DIR, prefs)
+    if (doSaveLog && logDir == null) return "No log directory was selected"
 
 
     return null

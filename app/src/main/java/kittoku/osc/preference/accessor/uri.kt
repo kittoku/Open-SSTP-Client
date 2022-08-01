@@ -17,7 +17,7 @@ internal fun getURIPrefValue(key: OscPreference, prefs: SharedPreferences): Uri?
 
 internal fun setURIPrefValue(value: Uri?, key: OscPreference, prefs: SharedPreferences) {
     prefs.edit().also {
-        it.putString(key.name, value.toString())
+        it.putString(key.name, value?.toString() ?: "")
         it.apply()
     }
 }

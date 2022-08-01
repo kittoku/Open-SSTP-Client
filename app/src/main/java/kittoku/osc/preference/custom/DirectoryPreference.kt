@@ -2,11 +2,10 @@ package kittoku.osc.preference.custom
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.Uri
 import android.util.AttributeSet
 import androidx.preference.Preference
 import kittoku.osc.preference.OscPreference
-import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.accessor.getURIPrefValue
 
 
 internal abstract class DirectoryPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
@@ -21,13 +20,9 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
 
     private val summaryValue: String
         get() {
-            val currentValue = getStringPrefValue(oscPreference, sharedPreferences!!)
+            val currentValue = getURIPrefValue(oscPreference, sharedPreferences!!)
 
-            return if (currentValue.isEmpty()) {
-                "[No Directory Selected]"
-            } else {
-                Uri.parse(currentValue).path!!
-            }
+            return currentValue?.path ?: "[No Directory Selected]"
         }
 
     private fun updateSummary() {

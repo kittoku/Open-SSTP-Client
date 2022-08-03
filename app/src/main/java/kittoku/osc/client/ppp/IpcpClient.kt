@@ -52,12 +52,12 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
         val request = IpcpConfigureRequest()
 
         request.options.ipOption = IpcpAddressOption(OPTION_TYPE_IPCP_IP).also {
-            bridge.currentIp.copyInto(it.address)
+            bridge.currentIPv4.copyInto(it.address)
         }
 
         if (bridge.DNS_DO_REQUEST_ADDRESS && !isDNSRejected) {
             request.options.dnsOption = IpcpAddressOption(OPTION_TYPE_IPCP_DNS).also {
-                bridge.currentDns.copyInto(it.address)
+                bridge.currentProposedDNS.copyInto(it.address)
             }
         }
 
@@ -66,11 +66,11 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
 
     override fun tryAcceptClientNak(nak: IpcpConfigureFrame) {
         nak.options.ipOption?.also {
-            it.address.copyInto(bridge.currentIp)
+            it.address.copyInto(bridge.currentIPv4)
         }
 
         nak.options.dnsOption?.also {
-            it.address.copyInto(bridge.currentDns)
+            it.address.copyInto(bridge.currentProposedDNS)
         }
     }
 

@@ -53,7 +53,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
 
     internal suspend fun initializeTun(): Boolean {
         if (bridge.PPP_IPv4_ENABLED) {
-            if (bridge.currentIp.isSame(ByteArray(4))) {
+            if (bridge.currentIPv4.isSame(ByteArray(4))) {
                 bridge.controlMailbox.send(ControlMessage(Where.IPv4, Result.ERR_INVALID_ADDRESS))
                 return false
             }
@@ -68,7 +68,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 bridge.builder.addRoute("192.168.0.0", 16)
             }
 
-            InetAddress.getByAddress(bridge.currentIp).also {
+            InetAddress.getByAddress(bridge.currentIPv4).also {
                 bridge.builder.addAddress(it, 32)
             }
 
@@ -76,15 +76,15 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 bridge.builder.addDnsServer(getStringPrefValue(OscPreference.DNS_CUSTOM_ADDRESS, bridge.prefs))
             }
 
-            if (!bridge.currentDns.isSame(ByteArray(4))) {
-                InetAddress.getByAddress(bridge.currentDns).also {
+            if (!bridge.currentProposedDNS.isSame(ByteArray(4))) {
+                InetAddress.getByAddress(bridge.currentProposedDNS).also {
                     bridge.builder.addDnsServer(it)
                 }
             }
         }
 
         if (bridge.PPP_IPv6_ENABLED) {
-            if (bridge.currentIpv6.isSame(ByteArray(8))) {
+            if (bridge.currentIPv6.isSame(ByteArray(8))) {
                 bridge.controlMailbox.send(ControlMessage(Where.IPv6, Result.ERR_INVALID_ADDRESS))
                 return false
             }
@@ -100,7 +100,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
             ByteArray(16).also { // for link local addresses
                 "FE80".toHexByteArray().copyInto(it)
                 ByteArray(6).copyInto(it, destinationOffset = 2)
-                bridge.currentIpv6.copyInto(it, destinationOffset = 8)
+                bridge.currentIPv6.copyInto(it, destinationOffset = 8)
                 bridge.builder.addAddress(InetAddress.getByAddress(it), 64)
             }
         }

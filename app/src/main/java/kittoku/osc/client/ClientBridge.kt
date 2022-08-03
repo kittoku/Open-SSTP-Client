@@ -115,11 +115,11 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     private val mutex = Mutex()
     private var frameID = -1
 
-    internal var currentMru = PPP_MRU
+    internal var currentMRU = PPP_MRU
     internal var currentAuth = getPreferredAuthOption()
-    internal val currentIp = ByteArray(4)
-    internal val currentDns = ByteArray(4)
-    internal val currentIpv6 = ByteArray(8)
+    internal val currentIPv4 = ByteArray(4)
+    internal val currentIPv6 = ByteArray(8)
+    internal val currentProposedDNS = ByteArray(4)
 
     internal fun getPreferredAuthOption(): AuthOption {
         return if (PPP_MSCHAPv2_ENABLED) AuthOptionMSChapv2() else AuthOptionPAP()

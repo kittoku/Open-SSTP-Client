@@ -85,7 +85,7 @@ internal class LCPClient(bridge: ClientBridge) : ConfigClient<LCPConfigureFrame>
         val request = LCPConfigureRequest()
 
         if (!isMruRejected) {
-            request.options.mruOption = MRUOption().also { it.unitSize = bridge.currentMru }
+            request.options.mruOption = MRUOption().also { it.unitSize = bridge.currentMRU }
         }
 
         return request
@@ -93,7 +93,7 @@ internal class LCPClient(bridge: ClientBridge) : ConfigClient<LCPConfigureFrame>
 
     override fun tryAcceptClientNak(nak: LCPConfigureFrame) {
         nak.options.mruOption?.also {
-            bridge.currentMru = max(min(it.unitSize, bridge.PPP_MRU), MIN_MRU)
+            bridge.currentMRU = max(min(it.unitSize, bridge.PPP_MRU), MIN_MRU)
         }
     }
 

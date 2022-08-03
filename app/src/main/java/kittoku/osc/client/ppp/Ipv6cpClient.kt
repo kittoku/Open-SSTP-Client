@@ -44,7 +44,7 @@ internal class Ipv6cpClient(bridge: ClientBridge) : ConfigClient<Ipv6cpConfigure
         val request = Ipv6cpConfigureRequest()
 
         request.options.identifierOption = Ipv6cpIdentifierOption().also {
-            bridge.currentIpv6.copyInto(it.identifier)
+            bridge.currentIPv6.copyInto(it.identifier)
         }
 
         return request
@@ -52,7 +52,7 @@ internal class Ipv6cpClient(bridge: ClientBridge) : ConfigClient<Ipv6cpConfigure
 
     override fun tryAcceptClientNak(nak: Ipv6cpConfigureFrame) {
         nak.options.identifierOption?.also {
-            it.identifier.copyInto(bridge.currentIpv6)
+            it.identifier.copyInto(bridge.currentIPv6)
         }
     }
 

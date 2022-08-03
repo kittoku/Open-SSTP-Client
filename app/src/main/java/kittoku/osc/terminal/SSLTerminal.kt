@@ -137,7 +137,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
         try {
             val readSize = socket!!.inputStream.read(buffer.array(), buffer.limit(), maxRead)
             buffer.limit(buffer.limit() + readSize)
-        } catch (e: SocketTimeoutException) { }
+        } catch (_: SocketTimeoutException) { }
     }
 
     internal suspend fun send(buffer: ByteBuffer) {

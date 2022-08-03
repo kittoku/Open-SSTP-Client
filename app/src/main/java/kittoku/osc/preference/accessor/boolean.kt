@@ -15,11 +15,11 @@ internal fun getBooleanPrefValue(key: OscPreference, prefs: SharedPreferences): 
         OscPreference.PPP_MSCHAPv2_ENABLED -> true
         OscPreference.PPP_IPv4_ENABLED -> true
         OscPreference.PPP_IPv6_ENABLED -> false
-        OscPreference.IP_ONLY_LAN -> false
-        OscPreference.IP_ONLY_ULA -> false
+        OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE -> true
+        OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES -> false
+        OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES -> false
         OscPreference.RECONNECTION_ENABLED -> false
         OscPreference.LOG_DO_SAVE_LOG -> false
-
         else -> throw NotImplementedError()
     }
 

@@ -35,6 +35,11 @@ internal class SSLDoSelectSuitesPreference(context: Context, attrs: AttributeSet
     override val preferenceTitle = "Enable Only Selected Cipher Suites"
 }
 
+internal class RouteDoAddCustomRoutes(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPreference = OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES
+    override val preferenceTitle = "Add Custom Routes"
+}
+
 internal class ReconnectionEnabledPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPreference = OscPreference.RECONNECTION_ENABLED
     override val preferenceTitle = "Enable Reconnection"

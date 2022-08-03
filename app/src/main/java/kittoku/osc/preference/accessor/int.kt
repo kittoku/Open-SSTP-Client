@@ -12,7 +12,6 @@ internal fun getIntPrefValue(key: OscPreference, prefs: SharedPreferences): Int 
         OscPreference.PPP_MRU -> DEFAULT_MRU
         OscPreference.PPP_MTU -> DEFAULT_MTU
         OscPreference.PPP_AUTH_TIMEOUT -> 3
-        OscPreference.IP_PREFIX -> 0
         OscPreference.RECONNECTION_COUNT -> 3
         OscPreference.RECONNECTION_INTERVAL -> 10
         OscPreference.RECONNECTION_LIFE -> 0

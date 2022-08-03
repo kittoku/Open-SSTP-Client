@@ -26,10 +26,11 @@
         <kittoku.osc.preference.custom.PPPIPv6EnabledPreference android:key="PPP_IPv6_ENABLED"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="IP Layer">
-        <kittoku.osc.preference.custom.IPPrefixPreference android:key="IP_PREFIX"/>
-        <kittoku.osc.preference.custom.IPOnlyLanPreference android:key="IP_ONLY_LAN"/>
-        <kittoku.osc.preference.custom.IPOnlyUlaPreference android:key="IP_ONLY_ULA"/>
+    <PreferenceCategory android:title="Routeing">
+        <kittoku.osc.preference.custom.RouteDoAddDefaultRoutePreference android:key="ROUTE_DO_ADD_DEFAULT_ROUTE"/>
+        <kittoku.osc.preference.custom.RouteDoRoutePrivateAddresses android:key="ROUTE_DO_ROUTE_PRIVATE_ADDRESSES"/>
+        <kittoku.osc.preference.custom.RouteDoAddCustomRoutes android:key="ROUTE_DO_ADD_CUSTOM_ROUTES"/>
+        <kittoku.osc.preference.custom.RouteCustomRoutesPreference android:key="ROUTE_CUSTOM_ROUTES"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Reconnection">

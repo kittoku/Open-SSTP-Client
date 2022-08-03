@@ -11,7 +11,7 @@ import kittoku.osc.extension.isSame
 import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.getBooleanPrefValue
-import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetAddress
@@ -24,25 +24,33 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     private lateinit var inputStream: FileInputStream
     private lateinit var outputStream: FileOutputStream
 
-    private fun getPrefixLength(array: ByteArray): Int {
-        if (array[0] == 10.toByte()) return 8
+    private val isDefaultRouteAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
+    private val isPrivateAddressesRouted = getBooleanPrefValue(OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
 
-        if (array[0] == 172.toByte() && array[1] in 16..31) return 20
+    private suspend fun addCustomRoutes(table: String): Boolean {
+        table.split("\n").filter { it.isNotEmpty() }.forEach {
+            val parsed = it.split("/")
+            if (parsed.size != 2) {
+                bridge.controlMailbox.send(ControlMessage(Where.ROUTE, Result.ERR_PARSING_FAILED))
+                return false
+            }
 
-        return 16
-    }
+            val address = parsed[0]
+            val prefix = parsed[1].toIntOrNull()
+            if (prefix == null){
+                bridge.controlMailbox.send(ControlMessage(Where.ROUTE, Result.ERR_PARSING_FAILED))
+                return false
+            }
 
-    private fun getNetworkAddress(array: ByteArray, prefixLength: Int): InetAddress {
-        val buffer = ByteBuffer.allocate(4)
-        buffer.put(array)
+            try {
+                bridge.builder.addRoute(address, prefix)
+            } catch (_: IllegalArgumentException) {
+                bridge.controlMailbox.send(ControlMessage(Where.ROUTE, Result.ERR_PARSING_FAILED))
+                return false
+            }
+        }
 
-        var num = buffer.getInt(0)
-        var mask: Int = -1
-        mask = mask.shl(32 - prefixLength)
-        num = num and mask
-        buffer.putInt(0, num)
-
-        return InetAddress.getByAddress(buffer.array())
+        return true
     }
 
     internal suspend fun initializeTun(): Boolean {
@@ -52,21 +60,24 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 return false
             }
 
-            val givenPrefix = getIntPrefValue(OscPreference.IP_PREFIX, bridge.prefs)
-            val prefix = if (givenPrefix == 0) getPrefixLength(bridge.currentIp) else givenPrefix
-            val hostAddress = InetAddress.getByAddress(bridge.currentIp)
-            val networkAddress = getNetworkAddress(bridge.currentIp, prefix)
-
-            bridge.builder.addAddress(hostAddress, prefix)
-            bridge.builder.addRoute(networkAddress, prefix)
-
-            if (!bridge.currentDns.isSame(ByteArray(4))) {
-                val dnsAddress = InetAddress.getByAddress(bridge.currentDns)
-                bridge.builder.addDnsServer(dnsAddress)
+            if (isDefaultRouteAdded) {
+                bridge.builder.addRoute("0.0.0.0", 0)
             }
 
-            if (!getBooleanPrefValue(OscPreference.IP_ONLY_LAN, bridge.prefs)) {
-                bridge.builder.addRoute("0.0.0.0", 0)
+            if (isPrivateAddressesRouted) {
+                bridge.builder.addRoute("10.0.0.0", 8)
+                bridge.builder.addRoute("172.16.0.0", 12)
+                bridge.builder.addRoute("192.168.0.0", 16)
+            }
+
+            InetAddress.getByAddress(bridge.currentIp).also {
+                bridge.builder.addAddress(it, 32)
+            }
+
+            if (!bridge.currentDns.isSame(ByteArray(4))) {
+                InetAddress.getByAddress(bridge.currentDns).also {
+                    bridge.builder.addDnsServer(it)
+                }
             }
         }
 
@@ -76,17 +87,24 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 return false
             }
 
-            val address = ByteArray(16)
-            "FE80".toHexByteArray().copyInto(address)
-            ByteArray(6).copyInto(address, destinationOffset = 2)
-            bridge.currentIpv6.copyInto(address, destinationOffset = 8)
-
-            bridge.builder.addAddress(InetAddress.getByAddress(address), 64)
-            bridge.builder.addRoute("fc00::", 7)
-
-            if (!getBooleanPrefValue(OscPreference.IP_ONLY_ULA, bridge.prefs)) {
+            if (isDefaultRouteAdded) {
                 bridge.builder.addRoute("::", 0)
             }
+
+            if (isPrivateAddressesRouted) {
+                bridge.builder.addRoute("fc00::", 7)
+            }
+
+            ByteArray(16).also { // for link local addresses
+                "FE80".toHexByteArray().copyInto(it)
+                ByteArray(6).copyInto(it, destinationOffset = 2)
+                bridge.currentIpv6.copyInto(it, destinationOffset = 8)
+                bridge.builder.addAddress(InetAddress.getByAddress(it), 64)
+            }
+        }
+
+        if (getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)) {
+            addCustomRoutes(getStringPrefValue(OscPreference.ROUTE_CUSTOM_ROUTES, bridge.prefs))
         }
 
         bridge.builder.setMtu(bridge.PPP_MTU)

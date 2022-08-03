@@ -45,6 +45,7 @@ internal enum class Where {
     IPV6CP_IDENTIFIER,
     IPv4,
     IPv6,
+    ROUTE,
     INCOMING,
     OUTGOING,
 }
@@ -61,6 +62,7 @@ internal enum class Result {
     ERR_COUNT_EXHAUSTED,
     ERR_UNKNOWN_TYPE, // the data cannot be parsed
     ERR_UNEXPECTED_MESSAGE, // the data can be parsed, but it's received in the wrong time
+    ERR_PARSING_FAILED,
 
     // for SSTP
     ERR_NEGATIVE_ACKNOWLEDGED,
@@ -80,7 +82,6 @@ internal enum class Result {
 
     // for INCOMING
     ERR_INVALID_PACKET_SIZE,
-    ERR_PARSING_FAILED,
 }
 
 internal class ClientBridge(internal val service: SstpVpnService) {

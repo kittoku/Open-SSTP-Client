@@ -9,7 +9,8 @@ internal fun getStringPrefValue(key: OscPreference, prefs: SharedPreferences): S
         OscPreference.HOME_HOSTNAME,
         OscPreference.HOME_USERNAME,
         OscPreference.HOME_PASSWORD,
-        OscPreference.HOME_STATUS -> ""
+        OscPreference.HOME_STATUS,
+        OscPreference.ROUTE_CUSTOM_ROUTES -> ""
         OscPreference.SSL_VERSION -> "DEFAULT"
         else -> throw NotImplementedError()
     }

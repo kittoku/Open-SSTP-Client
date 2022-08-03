@@ -54,10 +54,6 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
         if (it < 1) return "PPP authentication timeout period must be >=1 second"
     }
 
-    getIntPrefValue(OscPreference.IP_PREFIX, prefs).also {
-        if (it !in 0..32) return "The given address prefix length is out of 0-32"
-    }
-
     getIntPrefValue(OscPreference.RECONNECTION_COUNT, prefs).also {
         if (it < 1) return "Retry Count must be a positive integer"
     }

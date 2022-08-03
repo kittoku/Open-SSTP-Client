@@ -59,22 +59,6 @@ internal class PPPAuthTimeoutPreference(context: Context, attrs: AttributeSet) :
     override val preferenceTitle = "Timeout Period (second)"
 }
 
-internal class IPPrefixPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.IP_PREFIX
-    override val preferenceTitle = "Address Prefix Length"
-    override val provider = SummaryProvider<Preference> {
-        getIntPrefValue(oscPreference, it.sharedPreferences!!).let { length ->
-            if (length == 0) "DEFAULT" else length.toString()
-        }
-    }
-
-    override fun onAttached() {
-        super.onAttached()
-
-        dialogMessage = "0 means prefix length will be inferred"
-    }
-}
-
 internal class ReconnectionCountPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
     override val oscPreference = OscPreference.RECONNECTION_COUNT
     override val preferenceTitle = "Retry Count"

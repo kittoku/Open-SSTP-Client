@@ -50,12 +50,12 @@ internal class PPPIPv6EnabledPreference(context: Context, attrs: AttributeSet) :
     override val preferenceTitle = "Enable IPv6"
 }
 
-internal class IPOnlyLanPreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
-    override val oscPreference = OscPreference.IP_ONLY_LAN
-    override val preferenceTitle = "Route Only Packets to LAN (IPv4)"
+internal class RouteDoAddDefaultRoutePreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
+    override val oscPreference = OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE
+    override val preferenceTitle = "Add Default Route"
 }
 
-internal class IPOnlyUlaPreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
-    override val oscPreference = OscPreference.IP_ONLY_ULA
-    override val preferenceTitle = "Route Only Packets to ULA (IPv6)"
+internal class RouteDoRoutePrivateAddresses(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
+    override val oscPreference = OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES
+    override val preferenceTitle = "Route Private/Unique-Local Addresses"
 }

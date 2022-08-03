@@ -35,6 +35,16 @@ internal class SSLDoSelectSuitesPreference(context: Context, attrs: AttributeSet
     override val preferenceTitle = "Enable Only Selected Cipher Suites"
 }
 
+internal class DNSDoRequestAddressPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPreference = OscPreference.DNS_DO_REQUEST_ADDRESS
+    override val preferenceTitle = "Request DNS Server Address"
+}
+
+internal class DNSDoUseCustomServerPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPreference = OscPreference.DNS_DO_USE_CUSTOM_SERVER
+    override val preferenceTitle = "Use Custom DNS Server"
+}
+
 internal class RouteDoAddCustomRoutes(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPreference = OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES
     override val preferenceTitle = "Add Custom Routes"

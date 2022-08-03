@@ -54,6 +54,12 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
         if (it < 1) return "PPP authentication timeout period must be >=1 second"
     }
 
+    val isCustomDNSServerUsed = getBooleanPrefValue(OscPreference.DNS_DO_USE_CUSTOM_SERVER, prefs)
+    val isCustomAddressEmpty = getStringPrefValue(OscPreference.DNS_CUSTOM_ADDRESS, prefs).isEmpty()
+    if (isCustomDNSServerUsed && isCustomAddressEmpty) {
+        return "No custom DNS server address was given"
+    }
+
     getIntPrefValue(OscPreference.RECONNECTION_COUNT, prefs).also {
         if (it < 1) return "Retry Count must be a positive integer"
     }

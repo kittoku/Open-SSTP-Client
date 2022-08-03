@@ -55,7 +55,7 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
             bridge.currentIp.copyInto(it.address)
         }
 
-        if (!isDNSRejected) {
+        if (bridge.DNS_DO_REQUEST_ADDRESS && !isDNSRejected) {
             request.options.dnsOption = IpcpAddressOption(OPTION_TYPE_IPCP_DNS).also {
                 bridge.currentDns.copyInto(it.address)
             }

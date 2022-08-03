@@ -15,6 +15,8 @@ internal fun getBooleanPrefValue(key: OscPreference, prefs: SharedPreferences): 
         OscPreference.PPP_MSCHAPv2_ENABLED -> true
         OscPreference.PPP_IPv4_ENABLED -> true
         OscPreference.PPP_IPv6_ENABLED -> false
+        OscPreference.DNS_DO_REQUEST_ADDRESS -> true
+        OscPreference.DNS_DO_USE_CUSTOM_SERVER -> false
         OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE -> true
         OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES -> false
         OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES -> false

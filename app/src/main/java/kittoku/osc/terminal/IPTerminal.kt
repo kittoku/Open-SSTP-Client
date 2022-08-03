@@ -72,6 +72,10 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 bridge.builder.addAddress(it, 32)
             }
 
+            if (bridge.DNS_DO_USE_CUSTOM_SERVER) {
+                bridge.builder.addDnsServer(getStringPrefValue(OscPreference.DNS_CUSTOM_ADDRESS, bridge.prefs))
+            }
+
             if (!bridge.currentDns.isSame(ByteArray(4))) {
                 InetAddress.getByAddress(bridge.currentDns).also {
                     bridge.builder.addDnsServer(it)

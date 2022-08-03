@@ -57,3 +57,15 @@ internal class HomePasswordPreference(context: Context, attrs: AttributeSet) : S
         }
     }
 }
+
+internal class DNSCustomAddressPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+    override val oscPreference = OscPreference.DNS_CUSTOM_ADDRESS
+    override val preferenceTitle = "Custom DNS server address (IPv4 only)"
+
+    override fun onAttached() {
+        super.onAttached()
+
+        dependency = OscPreference.DNS_DO_USE_CUSTOM_SERVER.name
+        dialogMessage = "NOTICE: packet to and from this address will be routed"
+    }
+}

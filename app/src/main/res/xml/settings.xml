@@ -26,6 +26,12 @@
         <kittoku.osc.preference.custom.PPPIPv6EnabledPreference android:key="PPP_IPv6_ENABLED"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="DNS Server">
+        <kittoku.osc.preference.custom.DNSDoRequestAddressPreference android:key="DNS_DO_REQUEST_ADDRESS"/>
+        <kittoku.osc.preference.custom.DNSDoUseCustomServerPreference android:key="DNS_DO_USE_CUSTOM_SERVER"/>
+        <kittoku.osc.preference.custom.DNSCustomAddressPreference android:key="DNS_CUSTOM_ADDRESS"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Routeing">
         <kittoku.osc.preference.custom.RouteDoAddDefaultRoutePreference android:key="ROUTE_DO_ADD_DEFAULT_ROUTE"/>
         <kittoku.osc.preference.custom.RouteDoRoutePrivateAddresses android:key="ROUTE_DO_ROUTE_PRIVATE_ADDRESSES"/>

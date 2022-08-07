@@ -20,6 +20,7 @@ internal fun getBooleanPrefValue(key: OscPreference, prefs: SharedPreferences): 
         OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE -> true
         OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES -> false
         OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES -> false
+        OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE -> false
         OscPreference.RECONNECTION_ENABLED -> false
         OscPreference.LOG_DO_SAVE_LOG -> false
         else -> throw NotImplementedError()

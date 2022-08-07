@@ -45,9 +45,14 @@ internal class DNSDoUseCustomServerPreference(context: Context, attrs: Attribute
     override val preferenceTitle = "Use Custom DNS Server"
 }
 
-internal class RouteDoAddCustomRoutes(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+internal class RouteDoAddCustomRoutesPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPreference = OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES
     override val preferenceTitle = "Add Custom Routes"
+}
+
+internal class RouteDoEnableAppBasedRulePreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPreference = OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE
+    override val preferenceTitle = "Enable App-Based Rule"
 }
 
 internal class ReconnectionEnabledPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {

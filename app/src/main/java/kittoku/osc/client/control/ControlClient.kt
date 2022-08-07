@@ -1,10 +1,6 @@
 package kittoku.osc.client.control
 
 import android.content.Intent
-import kittoku.osc.ACTION_VPN_RECONNECT
-import kittoku.osc.NOTIFICATION_ERROR_ID
-import kittoku.osc.NOTIFICATION_RECONNECT_ID
-import kittoku.osc.SstpVpnService
 import kittoku.osc.client.*
 import kittoku.osc.client.incoming.IncomingClient
 import kittoku.osc.client.ppp.*
@@ -14,6 +10,10 @@ import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.resetReconnectionLife
 import kittoku.osc.preference.accessor.setIntPrefValue
+import kittoku.osc.service.ACTION_VPN_RECONNECT
+import kittoku.osc.service.NOTIFICATION_ERROR_ID
+import kittoku.osc.service.NOTIFICATION_RECONNECT_ID
+import kittoku.osc.service.SstpVpnService
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT

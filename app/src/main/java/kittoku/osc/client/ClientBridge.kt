@@ -1,11 +1,11 @@
 package kittoku.osc.client
 
 import androidx.preference.PreferenceManager
-import kittoku.osc.SstpVpnService
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.service.SstpVpnService
 import kittoku.osc.terminal.IPTerminal
 import kittoku.osc.terminal.SSLTerminal
 import kittoku.osc.unit.ppp.option.AuthOption
@@ -106,6 +106,7 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
     internal val DNS_DO_REQUEST_ADDRESS = getBooleanPrefValue(OscPreference.DNS_DO_REQUEST_ADDRESS, prefs)
     internal val DNS_DO_USE_CUSTOM_SERVER = getBooleanPrefValue(OscPreference.DNS_DO_USE_CUSTOM_SERVER, prefs)
+    internal val ROUTE_DO_ENABLE_APP_BASED_RULE = getBooleanPrefValue(OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE, prefs)
 
     internal lateinit var chapMessage: ChapMessage
     internal val nonce = ByteArray(32)

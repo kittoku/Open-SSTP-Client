@@ -35,8 +35,10 @@
     <PreferenceCategory android:title="Routeing">
         <kittoku.osc.preference.custom.RouteDoAddDefaultRoutePreference android:key="ROUTE_DO_ADD_DEFAULT_ROUTE"/>
         <kittoku.osc.preference.custom.RouteDoRoutePrivateAddresses android:key="ROUTE_DO_ROUTE_PRIVATE_ADDRESSES"/>
-        <kittoku.osc.preference.custom.RouteDoAddCustomRoutes android:key="ROUTE_DO_ADD_CUSTOM_ROUTES"/>
+        <kittoku.osc.preference.custom.RouteDoAddCustomRoutesPreference android:key="ROUTE_DO_ADD_CUSTOM_ROUTES"/>
         <kittoku.osc.preference.custom.RouteCustomRoutesPreference android:key="ROUTE_CUSTOM_ROUTES"/>
+        <kittoku.osc.preference.custom.RouteDoEnableAppBasedRulePreference android:key="ROUTE_DO_ENABLE_APP_BASED_RULE"/>
+        <kittoku.osc.preference.custom.RouteAllowedAppsPreference android:key="ROUTE_ALLOWED_APPS"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Reconnection">

@@ -6,7 +6,8 @@ import kittoku.osc.preference.OscPreference
 
 internal fun getSetPrefValue(key: OscPreference, prefs: SharedPreferences): Set<String> {
     val defaultValue = when (key) {
-        OscPreference.SSL_SUITES -> setOf<String>()
+        OscPreference.SSL_SUITES,
+        OscPreference.ROUTE_ALLOWED_APPS -> setOf<String>()
         else -> throw NotImplementedError()
     }
 

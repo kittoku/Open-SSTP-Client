@@ -4,6 +4,7 @@ import android.net.*
 import android.os.Build
 import kittoku.osc.client.ClientBridge
 import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.setStringPrefValue
 
 
@@ -41,6 +42,13 @@ internal class NetworkObserver(val bridge: ClientBridge) {
     private fun updateSummary(properties: LinkProperties) {
         val summary = mutableListOf<String>()
 
+        bridge.sslTerminal!!.getSession().also {
+            summary.add("[SSL/TLS parameters]")
+            summary.add("PROTOCOL: ${it.protocol}")
+            summary.add("SUITE: ${it.cipherSuite}")
+        }
+        summary.add("")
+
         summary.add("[Assigned IP Address]")
         properties.linkAddresses.forEach {
             summary.add(it.address.hostAddress ?: "")
@@ -53,16 +61,20 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         }
         summary.add("")
 
-        summary.add("[Route]")
+        summary.add("[Routeing]")
         properties.routes.forEach {
             summary.add(it.toString())
         }
         summary.add("")
 
-        bridge.sslTerminal!!.getSession().also {
-            summary.add("[SSL/TLS parameters]")
-            summary.add("PROTOCOL: ${it.protocol}")
-            summary.add("SUITE: ${it.cipherSuite}")
+        summary.add("[Allowed Apps]")
+        if (bridge.ROUTE_DO_ENABLE_APP_BASED_RULE) {
+            val pm = bridge.service.applicationContext.packageManager
+            getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, bridge.prefs).forEach {
+                summary.add(pm.getApplicationLabel(pm.getApplicationInfo(it, 0)).toString())
+            }
+        } else {
+            summary.add("All Apps Allowed")
         }
 
         summary.reduce { acc, s ->

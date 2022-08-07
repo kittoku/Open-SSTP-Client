@@ -1,4 +1,4 @@
-package kittoku.osc
+package kittoku.osc.service
 
 import android.content.Intent
 import android.content.SharedPreferences

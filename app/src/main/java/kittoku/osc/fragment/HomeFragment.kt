@@ -8,18 +8,18 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import kittoku.osc.ACTION_VPN_CONNECT
-import kittoku.osc.ACTION_VPN_DISCONNECT
 import kittoku.osc.R
-import kittoku.osc.SstpVpnService
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.checkPreferences
 import kittoku.osc.preference.custom.HomeConnectorPreference
 import kittoku.osc.preference.toastInvalidSetting
+import kittoku.osc.service.ACTION_VPN_CONNECT
+import kittoku.osc.service.ACTION_VPN_DISCONNECT
+import kittoku.osc.service.SstpVpnService
 
 
 class HomeFragment : PreferenceFragmentCompat() {
-    private val authorizer = registerForActivityResult(StartActivityForResult()) { result ->
+    private val preparationLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             startVpnService(ACTION_VPN_CONNECT)
         }
@@ -49,7 +49,7 @@ class HomeFragment : PreferenceFragmentCompat() {
                     }
 
                     VpnService.prepare(context)?.also { intent ->
-                        authorizer.launch(intent)
+                        preparationLauncher.launch(intent)
                     } ?: startVpnService(ACTION_VPN_CONNECT)
                 } else {
                     startVpnService(ACTION_VPN_DISCONNECT)

@@ -29,6 +29,8 @@ internal enum class OscPreference {
     ROUTE_DO_ROUTE_PRIVATE_ADDRESSES,
     ROUTE_DO_ADD_CUSTOM_ROUTES,
     ROUTE_CUSTOM_ROUTES,
+    ROUTE_DO_ENABLE_APP_BASED_RULE,
+    ROUTE_ALLOWED_APPS,
     RECONNECTION_ENABLED,
     RECONNECTION_COUNT,
     RECONNECTION_INTERVAL,
@@ -39,3 +41,5 @@ internal enum class OscPreference {
     LOG_DIR,
     LINK_OSC,
 }
+
+internal const val APP_KEY_HEADER = "APP."

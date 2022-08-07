@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 
 
@@ -62,4 +63,23 @@ internal class HomeStatusPreference(context: Context, attrs: AttributeSet) : Sum
                 "[No Connection Established]"
             }
         }
+}
+
+internal class RouteAllowedAppsPreference(context: Context, attrs: AttributeSet) : SummaryPreference(context, attrs) {
+    override val oscPreference = OscPreference.ROUTE_ALLOWED_APPS
+    override val preferenceTitle = "Select Allowed Apps"
+    override val summaryValue: String
+        get() {
+            return when (val size = getSetPrefValue(oscPreference, sharedPreferences!!).size) {
+                0 -> "[No App Selected]"
+                1 -> "[1 App Selected]"
+                else -> "[$size Apps Selected]"
+            }
+        }
+
+    override fun onAttached() {
+        super.onAttached()
+
+        dependency = OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE.name
+    }
 }

@@ -1,4 +1,4 @@
-package kittoku.osc
+package kittoku.osc.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
+import kittoku.osc.R
 import kittoku.osc.client.ClientBridge
 import kittoku.osc.client.control.ControlClient
 import kittoku.osc.preference.OscPreference

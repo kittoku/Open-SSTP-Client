@@ -1,10 +1,12 @@
-package kittoku.osc
+package kittoku.osc.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
+import kittoku.osc.BuildConfig
+import kittoku.osc.R
 import kittoku.osc.databinding.ActivityMainBinding
 import kittoku.osc.fragment.HomeFragment
 import kittoku.osc.fragment.SettingFragment

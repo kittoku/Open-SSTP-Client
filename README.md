@@ -12,7 +12,8 @@ the right side of the status bar, establishing a VPN connection has been succeed
 the connection, turn the switch off in the home tab or tap the notification.  
 <br>
 <img src="images/example_home.png" width=25%>
-<img src="images/example_setting.png" width=25%>
+<img src="images/example_setting_1.png" width=25%>
+<img src="images/example_setting_2.png" width=25%>
 <img src="images/example_tile.png" width=25%>
 
 ## Setting tab

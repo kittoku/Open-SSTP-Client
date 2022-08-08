@@ -21,7 +21,6 @@ internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : 
 
         title = preferenceTitle
         summary = preferenceSummary
-        intent = Intent(Intent.ACTION_VIEW).also { it.data = Uri.parse(url) }
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
@@ -30,6 +29,14 @@ internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : 
         holder.findViewById(android.R.id.summary)?.also {
             it as TextView
             it.maxLines = Int.MAX_VALUE
+        }
+    }
+
+    override fun onClick() {
+        val intent = Intent(Intent.ACTION_VIEW).also { it.data = Uri.parse(url) }
+
+        intent.resolveActivity(context.packageManager)?.also {
+            context.startActivity(intent)
         }
     }
 }

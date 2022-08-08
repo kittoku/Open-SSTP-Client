@@ -56,8 +56,12 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         summary.add("")
 
         summary.add("[DNS server]")
-        properties.dnsServers.forEach {
-            summary.add(it.hostAddress ?: "")
+        if (properties.dnsServers.isNotEmpty()) {
+            properties.dnsServers.forEach {
+                summary.add(it.hostAddress ?: "")
+            }
+        } else {
+            summary.add("Not specified")
         }
         summary.add("")
 
@@ -74,7 +78,7 @@ internal class NetworkObserver(val bridge: ClientBridge) {
                 summary.add(pm.getApplicationLabel(pm.getApplicationInfo(it, 0)).toString())
             }
         } else {
-            summary.add("All Apps Allowed")
+            summary.add("All apps")
         }
 
         summary.reduce { acc, s ->

@@ -66,6 +66,6 @@ internal class DNSCustomAddressPreference(context: Context, attrs: AttributeSet)
         super.onAttached()
 
         dependency = OscPreference.DNS_DO_USE_CUSTOM_SERVER.name
-        dialogMessage = "NOTICE: packet to and from this address will be routed"
+        dialogMessage = "NOTICE: packets associated with this address is routed to the VPN tunnel"
     }
 }

@@ -15,6 +15,7 @@ the connection, turn the switch off in the home tab or tap the notification.
 <img src="images/example_setting_2.png" width=25%>
 <img src="images/example_tile.png" width=25%>
 
+
 ## Setting tab
 Some settings to be noted are written below:
 
@@ -25,6 +26,16 @@ certificate store. I made this option for debugging.
 ### PPP Network Protocol
 You can choose what network protocol PPP layer tries enabling. Remember, IPv6 option just gives the device 
 a link local address, never guarantees that you can communicate perfectly with IPv6 protocol.
+
+### Custom DNS Server Address
+You can specify DNS server to use in this option. Packets associated with this address is routed to 
+the VPN tunnel. If you specify a IPv4(v6) address and disable IPv4(v6) network,
+domain names possibly cannot be resolved.
+
+### Enable App-Based Rule
+With `Select Allowed Apps` option, you can specify the apps which use the VPN tunnel.
+Even allowed apps cannot use the VPN tunnel if their routes are not on the routeing table.
+So when you use this option, enabling `Add Default Route` option is recommended.
 
 
 ## Notice

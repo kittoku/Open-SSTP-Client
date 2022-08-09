@@ -60,7 +60,7 @@ internal class HomePasswordPreference(context: Context, attrs: AttributeSet) : S
 
 internal class DNSCustomAddressPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPreference = OscPreference.DNS_CUSTOM_ADDRESS
-    override val preferenceTitle = "Custom DNS server address"
+    override val preferenceTitle = "Custom DNS Server Address"
 
     override fun onAttached() {
         super.onAttached()

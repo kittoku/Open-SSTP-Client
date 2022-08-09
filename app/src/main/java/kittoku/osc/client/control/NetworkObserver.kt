@@ -43,7 +43,7 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         val summary = mutableListOf<String>()
 
         bridge.sslTerminal!!.getSession().also {
-            summary.add("[SSL/TLS parameters]")
+            summary.add("[SSL/TLS Parameters]")
             summary.add("PROTOCOL: ${it.protocol}")
             summary.add("SUITE: ${it.cipherSuite}")
         }
@@ -55,7 +55,7 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         }
         summary.add("")
 
-        summary.add("[DNS server]")
+        summary.add("[DNS Server Address]")
         if (properties.dnsServers.isNotEmpty()) {
             properties.dnsServers.forEach {
                 summary.add(it.hostAddress ?: "")

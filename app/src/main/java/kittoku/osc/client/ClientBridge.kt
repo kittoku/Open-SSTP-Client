@@ -29,6 +29,7 @@ internal class ChapMessage {
 }
 
 internal enum class Where {
+    SSL,
     SSTP_DATA,
     SSTP_CONTROL,
     SSTP_REQUEST,
@@ -63,6 +64,7 @@ internal enum class Result {
     ERR_UNKNOWN_TYPE, // the data cannot be parsed
     ERR_UNEXPECTED_MESSAGE, // the data can be parsed, but it's received in the wrong time
     ERR_PARSING_FAILED,
+    ERR_VERIFICATION_FAILED,
 
     // for SSTP
     ERR_NEGATIVE_ACKNOWLEDGED,
@@ -74,7 +76,6 @@ internal enum class Result {
     ERR_PROTOCOL_REJECTED,
     ERR_CODE_REJECTED,
     ERR_AUTHENTICATION_FAILED,
-    ERR_VERIFICATION_FAILED,
     ERR_OPTION_REJECTED,
 
     // for IP

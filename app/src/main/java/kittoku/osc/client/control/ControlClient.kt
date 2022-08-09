@@ -14,6 +14,7 @@ import kittoku.osc.service.ACTION_VPN_RECONNECT
 import kittoku.osc.service.NOTIFICATION_ERROR_ID
 import kittoku.osc.service.NOTIFICATION_RECONNECT_ID
 import kittoku.osc.service.SstpVpnService
+import kittoku.osc.terminal.SSL_REQUEST_INTERVAL
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
@@ -66,7 +67,13 @@ internal class ControlClient(internal val bridge: ClientBridge) {
 
             logWriter?.report("Establish VPN connection")
 
+
             bridge.attachSSLTerminal()
+            bridge.sslTerminal!!.initializeSocket()
+            if (!expectProceeded(Where.SSL, SSL_REQUEST_INTERVAL)) {
+                return@launch
+            }
+
 
             IncomingClient(bridge).also {
                 it.launchJobMain()

@@ -86,7 +86,7 @@ internal abstract class OptionPack(private val givenLength: Int) : DataUnit {
             }
 
             filterOption(buffer).also {
-                assertAlways(!currentOrder.containsKey(it.type))
+                // if the option type is duplicated, the last option is preferred now
                 currentOrder[it.type] = i
                 remaining -= it.length
 

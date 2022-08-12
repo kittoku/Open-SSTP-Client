@@ -12,7 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.*
+import java.io.BufferedInputStream
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
 import java.security.KeyStore
@@ -112,29 +112,32 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun establishHttpLayer(): Boolean {
-        val input = BufferedReader(InputStreamReader(socket!!.inputStream, "US-ASCII"))
-        val output = BufferedWriter(OutputStreamWriter(socket!!.outputStream, "US-ASCII"))
+        val httpDelimiter = "\r\n"
+        val httpSuffix = "\r\n\r\n"
+
         val request = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
             "Host: ${bridge.HOME_HOSTNAME}",
             "SSTPCORRELATIONID: {${bridge.guid}}"
-        ).joinToString(separator = "\r\n", postfix = "\r\n\r\n")
+        ).joinToString(separator = httpDelimiter, postfix = httpSuffix).toByteArray(Charsets.US_ASCII)
 
-        output.write(request)
-        output.flush()
+        socket!!.outputStream.write(request)
+        socket!!.outputStream.flush()
 
 
-        val statusLine = input.readLine()
-        if (!statusLine.contains("200")) {
-            bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_UNEXPECTED_MESSAGE))
-            return false
-        }
-
+        var response = ""
         while (true) {
-            if (input.readLine() == "") {
+            response += socket!!.inputStream.read().toChar() // don't use buffer. It could read too much.
+
+            if (response.endsWith(httpSuffix)) {
                 break
             }
+        }
+
+        if (!response.split(httpDelimiter)[0].contains("200")) {
+            bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_UNEXPECTED_MESSAGE))
+            return false
         }
 
 

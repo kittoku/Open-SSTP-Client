@@ -18,20 +18,20 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
     private var isDNSRejected = false
 
     override fun tryCreateServerReject(request: IpcpConfigureFrame): IpcpConfigureFrame? {
-        val rejected = IpcpOptionPack()
+        val reject = IpcpOptionPack()
 
         if (request.options.unknownOptions.isNotEmpty()) {
-            rejected.unknownOptions = request.options.unknownOptions
+            reject.unknownOptions = request.options.unknownOptions
         }
 
         request.options.dnsOption?.also { // client doesn't have dns server
-            rejected.dnsOption = request.options.dnsOption
+            reject.dnsOption = request.options.dnsOption
         }
 
-        return if (rejected.allOptions.isNotEmpty()) {
+        return if (reject.allOptions.isNotEmpty()) {
             IpcpConfigureReject().also {
                 it.id = request.id
-                it.options = rejected
+                it.options = reject
                 it.options.order = request.options.order
             }
         } else null

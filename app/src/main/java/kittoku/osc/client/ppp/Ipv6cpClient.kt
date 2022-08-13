@@ -14,16 +14,16 @@ import kittoku.osc.unit.ppp.option.Ipv6cpOptionPack
 
 internal class Ipv6cpClient(bridge: ClientBridge) : ConfigClient<Ipv6cpConfigureFrame>(Where.IPV6CP, bridge) {
     override fun tryCreateServerReject(request: Ipv6cpConfigureFrame): Ipv6cpConfigureFrame? {
-        val rejected = Ipv6cpOptionPack()
+        val reject = Ipv6cpOptionPack()
 
         if (request.options.unknownOptions.isNotEmpty()) {
-            rejected.unknownOptions = request.options.unknownOptions
+            reject.unknownOptions = request.options.unknownOptions
         }
 
-        return if (rejected.allOptions.isNotEmpty()) {
+        return if (reject.allOptions.isNotEmpty()) {
             Ipv6cpConfigureReject().also {
                 it.id = request.id
-                it.options = rejected
+                it.options = reject
                 it.options.order = request.options.order
             }
         } else null

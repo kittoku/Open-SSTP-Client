@@ -35,21 +35,17 @@ internal class IpcpOptionPack(givenLength: Int = 0) : OptionPack(givenLength) {
             dnsOption?.also { options.add(it) }
         }
 
-    override fun filterOption(buffer: ByteBuffer): Option {
-        return when (val type = buffer.probeByte(0)) {
-            OPTION_TYPE_IPCP_IP -> {
-                ipOption = IpcpAddressOption(type).also { it.read(buffer) }
-                ipOption
-            }
+    override fun retrieveOption(buffer: ByteBuffer): Option {
+        val option = when (val type = buffer.probeByte(0)) {
+            OPTION_TYPE_IPCP_IP -> IpcpAddressOption(type).also { ipOption = it }
 
-            OPTION_TYPE_IPCP_DNS -> {
-                dnsOption = IpcpAddressOption(type).also { it.read(buffer) }
-                dnsOption
-            }
+            OPTION_TYPE_IPCP_DNS -> IpcpAddressOption(type).also { dnsOption = it }
 
-            else -> {
-                UnknownOption(type)
-            }
-        }!!
+            else -> UnknownOption(type)
+        }
+
+        option.read(buffer)
+
+        return option
     }
 }

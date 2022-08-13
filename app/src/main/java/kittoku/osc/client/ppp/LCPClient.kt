@@ -16,16 +16,16 @@ internal class LCPClient(bridge: ClientBridge) : ConfigClient<LCPConfigureFrame>
     private var isMruRejected = false
 
     override fun tryCreateServerReject(request: LCPConfigureFrame): LCPConfigureFrame? {
-        val rejected = LCPOptionPack()
+        val reject = LCPOptionPack()
 
         if (request.options.unknownOptions.isNotEmpty()) {
-            rejected.unknownOptions = request.options.unknownOptions
+            reject.unknownOptions = request.options.unknownOptions
         }
 
-        return if (rejected.allOptions.isNotEmpty()) {
+        return if (reject.allOptions.isNotEmpty()) {
             LCPConfigureReject().also {
                 it.id = request.id
-                it.options = rejected
+                it.options = reject
                 it.options.order = request.options.order
             }
         } else null

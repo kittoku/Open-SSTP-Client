@@ -115,15 +115,12 @@ internal class LCPOptionPack(givenLength: Int = 0) : OptionPack(givenLength) {
             authOption?.also { options.add(it) }
         }
 
-    override fun filterOption(buffer: ByteBuffer): Option {
-        return when (val type = buffer.probeByte(0)) {
-            OPTION_TYPE_LCP_MRU -> {
-                mruOption = MRUOption().also { it.read(buffer) }
-                mruOption
-            }
+    override fun retrieveOption(buffer: ByteBuffer): Option {
+        val option = when (val type = buffer.probeByte(0)) {
+            OPTION_TYPE_LCP_MRU -> MRUOption().also { mruOption = it }
 
             OPTION_TYPE_LCP_AUTH -> {
-                authOption = when (val protocol = buffer.probeShort(2)) {
+                when (val protocol = buffer.probeShort(2)) {
                     AUTH_PROTOCOL_PAP -> AuthOptionPAP()
                     AUTH_PROTOCOL_CHAP -> {
                         if (buffer.probeByte(4) == CHAP_ALGORITHM_MSCHAPv2) {
@@ -134,15 +131,15 @@ internal class LCPOptionPack(givenLength: Int = 0) : OptionPack(givenLength) {
                     }
                     else -> AuthOptionUnknown(protocol)
                 }.also {
-                    it.read(buffer)
+                    authOption = it
                 }
-
-                authOption
             }
 
-            else -> {
-                UnknownOption(type)
-            }
-        }!!
+            else -> UnknownOption(type)
+        }
+
+        option.read(buffer)
+
+        return  option
     }
 }

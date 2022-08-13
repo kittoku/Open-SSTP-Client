@@ -59,7 +59,7 @@ internal abstract class OptionPack(private val givenLength: Int) : DataUnit {
     override val length: Int
         get() = allOptions.fold(0) {sum, option -> sum + option.length}
 
-    protected abstract fun filterOption(buffer: ByteBuffer): Option
+    protected abstract fun retrieveOption(buffer: ByteBuffer): Option
 
     private fun ensureValidOrder() {
         var nextIndex = order.values.maxOrNull() ?: 0
@@ -85,7 +85,7 @@ internal abstract class OptionPack(private val givenLength: Int) : DataUnit {
                 break
             }
 
-            filterOption(buffer).also {
+            retrieveOption(buffer).also {
                 // if the option type is duplicated, the last option is preferred now
                 currentOrder[it.type] = i
                 remaining -= it.length

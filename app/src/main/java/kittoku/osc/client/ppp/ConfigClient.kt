@@ -86,7 +86,7 @@ internal abstract class ConfigClient<T: Frame>(private val where: Where, protect
 
                     val reject = tryCreateServerReject(received)
                     if (reject != null) {
-                        bridge.sslTerminal!!.sendDataUnit(received)
+                        bridge.sslTerminal!!.sendDataUnit(reject)
                         continue
                     }
 

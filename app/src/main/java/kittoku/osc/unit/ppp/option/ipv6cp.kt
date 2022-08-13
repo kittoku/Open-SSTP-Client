@@ -32,16 +32,15 @@ internal class Ipv6cpOptionPack(givenLength: Int = 0) : OptionPack(givenLength) 
             identifierOption?.also { options.add(it) }
         }
 
-    override fun filterOption(buffer: ByteBuffer): Option {
-        return when (val type = buffer.probeByte(0)) {
-            OPTION_TYPE_IPv6CP_IDENTIFIER -> {
-                identifierOption = Ipv6cpIdentifierOption().also { it.read(buffer) }
-                identifierOption
-            }
+    override fun retrieveOption(buffer: ByteBuffer): Option {
+        val option = when (val type = buffer.probeByte(0)) {
+            OPTION_TYPE_IPv6CP_IDENTIFIER -> Ipv6cpIdentifierOption().also { identifierOption = it }
 
-            else -> {
-                UnknownOption(type)
-            }
-        }!!
+            else -> UnknownOption(type)
+        }
+
+        option.read(buffer)
+
+        return option
     }
 }

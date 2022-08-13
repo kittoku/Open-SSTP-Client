@@ -189,6 +189,22 @@ internal suspend fun IncomingClient.processIpv6cpFrame(code: Byte, buffer: ByteB
     return true
 }
 
+internal suspend fun IncomingClient.processUnknownProtocol(protocol: Short, packetSize: Int, buffer: ByteBuffer): Boolean {
+    LCPProtocolReject().also {
+        it.rejectedProtocol = protocol
+        it.id = bridge.allocateNewFrameID()
+        val infoStart = buffer.position() + 8
+        val infoStop = buffer.position() + packetSize
+        it.holder = buffer.array().sliceArray(infoStart until infoStop)
+
+        bridge.sslTerminal!!.sendDataUnit(it)
+    }
+
+    buffer.move(packetSize)
+
+    return true
+}
+
 internal fun IncomingClient.processIPPacket(isEnabledProtocol: Boolean, packetSize: Int, buffer: ByteBuffer) {
     if (isEnabledProtocol) {
         val start = buffer.position() + 8

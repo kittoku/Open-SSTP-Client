@@ -160,13 +160,7 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
                             PPP_PROTOCOL_CHAP -> processChapFrame(code, buffer)
                             PPP_PROTOCOL_IPCP -> processIpcpFrame(code, buffer)
                             PPP_PROTOCOL_IPv6CP -> processIpv6cpFrame(code, buffer)
-                            else -> {
-                                bridge.controlMailbox.send(
-                                    ControlMessage(Where.PPP, Result.ERR_UNKNOWN_TYPE)
-                                )
-
-                                return@launch
-                            }
+                            else -> processUnknownProtocol(protocol, size, buffer)
                         }
 
                         if (!isGo) {

@@ -18,8 +18,8 @@ import kittoku.osc.terminal.SSL_REQUEST_INTERVAL
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
-import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 
@@ -199,7 +199,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
         }
 
         val lastPacketType = if (received.result == Result.ERR_DISCONNECT_REQUESTED) {
-            SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK
+            SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
         } else {
             SSTP_MESSAGE_TYPE_CALL_ABORT
         }

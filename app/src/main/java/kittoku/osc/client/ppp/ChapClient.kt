@@ -46,6 +46,8 @@ internal class ChapClient(private val bridge: ClientBridge) {
                         received.response.copyInto(chapMessage.serverResponse)
 
                         if (authenticateChapServerResponse(bridge.HOME_USERNAME, bridge.HOME_PASSWORD, chapMessage)) {
+                            bridge.chapMessage = chapMessage
+
                             if (isInitialAuthentication) {
                                 bridge.controlMailbox.send(
                                     ControlMessage(Where.CHAP, Result.PROCEEDED)
@@ -53,8 +55,6 @@ internal class ChapClient(private val bridge: ClientBridge) {
 
                                 isInitialAuthentication = false
                             }
-
-                            bridge.chapMessage = chapMessage
                         } else {
                             bridge.controlMailbox.send(
                                 ControlMessage(Where.CHAP, Result.ERR_VERIFICATION_FAILED)

@@ -61,7 +61,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
         attachHandler()
 
         jobMain = bridge.scope.launch(bridge.handler) {
-            if (getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, bridge.prefs)) {
+            if (bridge.service.logUri != null) {
                 logWriter = LogWriter(bridge)
             }
 

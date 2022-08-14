@@ -104,6 +104,7 @@ internal class SstpVpnService : VpnService() {
             else -> {
                 controlClient?.disconnect()
                 controlClient = null
+                logUri = null
 
                 stopForeground(true)
                 stopSelf()
@@ -132,8 +133,25 @@ internal class SstpVpnService : VpnService() {
         val currentDateTime = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
         val filename = "log_osc_${currentDateTime}.txt"
 
-        val directoryUri = DocumentFile.fromTreeUri(this, getURIPrefValue(OscPreference.LOG_DIR, prefs)!!)!!
-        logUri = directoryUri.createFile("text/plain", filename)!!.uri
+        val prefURI = getURIPrefValue(OscPreference.LOG_DIR, prefs)
+        if (prefURI == null) {
+            makeNotification(NOTIFICATION_ERROR_ID, "LOG: ERR_NULL_PREFERENCE")
+            return
+        }
+
+        val dirURI = DocumentFile.fromTreeUri(this, prefURI)
+        if (dirURI == null) {
+            makeNotification(NOTIFICATION_ERROR_ID, "LOG: ERR_NULL_DIRECTORY")
+            return
+        }
+
+        val fileURI = dirURI.createFile("text/plain", filename)
+        if (fileURI == null) {
+            makeNotification(NOTIFICATION_ERROR_ID, "LOG: ERR_NULL_FILE")
+            return
+        }
+
+        logUri = fileURI.uri
     }
 
     private fun beForegrounded() {

@@ -10,8 +10,8 @@ android {
         applicationId "kittoku.osc"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 22
-        versionName "1.5.4"
+        versionCode 23
+        versionName "1.5.4.1"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }

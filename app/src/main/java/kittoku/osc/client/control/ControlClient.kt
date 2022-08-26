@@ -1,6 +1,5 @@
 package kittoku.osc.client.control
 
-import android.content.Intent
 import kittoku.osc.client.*
 import kittoku.osc.client.incoming.IncomingClient
 import kittoku.osc.client.ppp.*
@@ -10,10 +9,8 @@ import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.resetReconnectionLife
 import kittoku.osc.preference.accessor.setIntPrefValue
-import kittoku.osc.service.ACTION_VPN_RECONNECT
 import kittoku.osc.service.NOTIFICATION_ERROR_ID
 import kittoku.osc.service.NOTIFICATION_RECONNECT_ID
-import kittoku.osc.service.SstpVpnService
 import kittoku.osc.terminal.SSL_REQUEST_INTERVAL
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
@@ -235,11 +232,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
         delay(getIntPrefValue(OscPreference.RECONNECTION_INTERVAL, bridge.prefs) * 1000L)
 
         bridge.service.cancelNotification(NOTIFICATION_RECONNECT_ID)
-
-        Intent(bridge.service, SstpVpnService::class.java).also {
-            it.action = ACTION_VPN_RECONNECT
-            bridge.service.startService(it)
-        }
+        bridge.service.initializeClient()
     }
 
     internal fun kill(isReconnectionRequested: Boolean, cleanup: (suspend () -> Unit)?) {

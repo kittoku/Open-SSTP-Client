@@ -28,7 +28,6 @@ import java.util.*
 
 
 internal const val ACTION_VPN_CONNECT = "kittoku.osc.connect"
-internal const val ACTION_VPN_RECONNECT = "kittoku.osc.reconnect"
 internal const val ACTION_VPN_DISCONNECT = "kittoku.osc.disconnect"
 
 internal const val NOTIFICATION_CHANNEL_NAME = "kittoku.osc.notification.channel"
@@ -84,19 +83,9 @@ internal class SstpVpnService : VpnService() {
                     prepareLogFile()
                 }
 
-                controlClient = ControlClient(ClientBridge(this)).also {
-                    it.launchJobMain()
-                }
+                initializeClient()
 
                 setRootState(true)
-
-                Service.START_STICKY
-            }
-
-            ACTION_VPN_RECONNECT -> {
-                controlClient = ControlClient(ClientBridge(this)).also {
-                    it.launchJobMain()
-                }
 
                 Service.START_STICKY
             }
@@ -111,6 +100,12 @@ internal class SstpVpnService : VpnService() {
 
                 Service.START_NOT_STICKY
             }
+        }
+    }
+
+    internal fun initializeClient() {
+        controlClient = ControlClient(ClientBridge(this)).also {
+            it.launchJobMain()
         }
     }
 

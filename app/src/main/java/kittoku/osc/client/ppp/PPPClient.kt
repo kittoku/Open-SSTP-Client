@@ -17,7 +17,7 @@ internal class PPPClient(val bridge: ClientBridge) {
     private var jobControl: Job? = null
 
     internal suspend fun launchJobControl() {
-        jobControl = bridge.scope.launch(bridge.handler) {
+        jobControl = bridge.service.scope.launch(bridge.handler) {
             while (isActive) {
                 when (val received = mailbox.receive()) {
                     is LCPEchoRequest -> {

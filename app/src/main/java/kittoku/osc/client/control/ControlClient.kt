@@ -8,22 +8,22 @@ import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.resetReconnectionLife
-import kittoku.osc.preference.accessor.setIntPrefValue
 import kittoku.osc.service.NOTIFICATION_ERROR_ID
-import kittoku.osc.service.NOTIFICATION_RECONNECT_ID
 import kittoku.osc.terminal.SSL_REQUEST_INTERVAL
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 internal class ControlClient(internal val bridge: ClientBridge) {
     private var observer: NetworkObserver? = null
-    private var logWriter: LogWriter? = null
 
     private var sstpClient: SstpClient? = null
     private var pppClient: PPPClient? = null
@@ -36,7 +36,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
     private var ipcpClient: IpcpClient? = null
     private var ipv6cpClient: Ipv6cpClient? = null
 
-    private lateinit var jobMain: Job
+    private var jobMain: Job? = null
 
     private val mutex = Mutex()
 
@@ -48,7 +48,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
         bridge.handler = CoroutineExceptionHandler { _, throwable ->
             kill(isReconnectionEnabled) {
                 val header = "OSC: ERR_UNEXPECTED"
-                logWriter?.report(header + "\n" + throwable.stackTraceToString())
+                bridge.service.logWriter?.report(header + "\n" + throwable.stackTraceToString())
                 bridge.service.makeNotification(NOTIFICATION_ERROR_ID, header)
             }
         }
@@ -57,14 +57,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
     internal fun launchJobMain() {
         attachHandler()
 
-        jobMain = bridge.scope.launch(bridge.handler) {
-            if (bridge.service.logUri != null) {
-                logWriter = LogWriter(bridge)
-            }
-
-            logWriter?.report("Establish VPN connection")
-
-
+        jobMain = bridge.service.scope.launch(bridge.handler) {
             bridge.attachSSLTerminal()
             bridge.sslTerminal!!.initializeSocket()
             if (!expectProceeded(Where.SSL, SSL_REQUEST_INTERVAL)) {
@@ -205,7 +198,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
             sstpClient?.sendLastPacket(lastPacketType)
 
             val message = "${received.from.name}: ${received.result.name}"
-            logWriter?.report(message)
+            bridge.service.logWriter?.report(message)
             bridge.service.makeNotification(NOTIFICATION_ERROR_ID, message)
         }
 
@@ -218,28 +211,13 @@ internal class ControlClient(internal val bridge: ClientBridge) {
         }
     }
 
-    private suspend fun tryReconnect() {
-        getIntPrefValue(OscPreference.RECONNECTION_LIFE, bridge.prefs).also {
-            val life = it - 1
-            setIntPrefValue(life, OscPreference.RECONNECTION_LIFE, bridge.prefs)
-
-            val message = "Reconnection will be tried (LIFE = $life)"
-            bridge.service.makeNotification(NOTIFICATION_RECONNECT_ID, message)
-            logWriter?.report(message)
-            logWriter?.close()
-        }
-
-        delay(getIntPrefValue(OscPreference.RECONNECTION_INTERVAL, bridge.prefs) * 1000L)
-
-        bridge.service.cancelNotification(NOTIFICATION_RECONNECT_ID)
-        bridge.service.initializeClient()
-    }
-
     internal fun kill(isReconnectionRequested: Boolean, cleanup: (suspend () -> Unit)?) {
-        bridge.scope.launch { // don't suppress exceptions by handler for debugging
-            if (!mutex.tryLock()) return@launch // invoked only once
+        if (!mutex.tryLock()) return
+
+        bridge.service.scope.launch {
             observer?.close()
 
+            jobMain?.cancel()
             cancelClients()
 
             cleanup?.invoke()
@@ -247,9 +225,9 @@ internal class ControlClient(internal val bridge: ClientBridge) {
             closeTerminals()
 
             if (isReconnectionRequested && isReconnectionAvailable) {
-                tryReconnect()
+                bridge.service.launchJobReconnect()
             } else {
-                finalize()
+                bridge.service.close()
             }
         }
     }
@@ -269,13 +247,5 @@ internal class ControlClient(internal val bridge: ClientBridge) {
     private fun closeTerminals() {
         bridge.sslTerminal?.close()
         bridge.ipTerminal?.close()
-    }
-
-    private suspend fun finalize() {
-        logWriter?.report("Terminate VPN connection")
-        logWriter?.close()
-
-        bridge.service.stopForeground(true)
-        bridge.service.stopSelf()
     }
 }

@@ -12,9 +12,6 @@ import kittoku.osc.unit.ppp.option.AuthOption
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -87,7 +84,6 @@ internal enum class Result {
 
 internal class ClientBridge(internal val service: SstpVpnService) {
     internal val prefs = PreferenceManager.getDefaultSharedPreferences(service)
-    internal val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     internal val builder = service.Builder()
     internal lateinit var handler: CoroutineExceptionHandler
 

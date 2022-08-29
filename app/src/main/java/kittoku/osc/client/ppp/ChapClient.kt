@@ -21,7 +21,7 @@ internal class ChapClient(private val bridge: ClientBridge) {
     private var isInitialAuthentication = true
 
     internal fun launchJobAuth() {
-        jobAuth = bridge.scope.launch(bridge.handler) {
+        jobAuth = bridge.service.scope.launch(bridge.handler) {
             while (isActive) {
                 val received = mailbox.receive()
 

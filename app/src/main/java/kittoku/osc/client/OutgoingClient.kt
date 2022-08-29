@@ -27,7 +27,7 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
     private val channel = Channel<ByteBuffer>(0)
 
     internal fun launchJobMain() {
-        jobMain = bridge.scope.launch(bridge.handler) {
+        jobMain = bridge.service.scope.launch(bridge.handler) {
             bridge.attachIPTerminal()
             if (!bridge.ipTerminal!!.initializeTun()) return@launch
 
@@ -55,7 +55,7 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
     }
 
     private fun launchJobRetrieve() {
-        jobRetrieve = bridge.scope.launch(bridge.handler) {
+        jobRetrieve = bridge.service.scope.launch(bridge.handler) {
             val bufferAlpha = ByteBuffer.allocate(bridge.PPP_MTU)
             val bufferBeta = ByteBuffer.allocate(bridge.PPP_MTU)
             var isBlockingAlpha = true

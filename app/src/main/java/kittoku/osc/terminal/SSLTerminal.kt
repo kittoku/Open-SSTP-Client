@@ -32,7 +32,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     private val enabledSuites = getSetPrefValue(OscPreference.SSL_SUITES, bridge.prefs)
 
     internal suspend fun initializeSocket() {
-        jobInitialize = bridge.scope.launch(bridge.handler) {
+        jobInitialize = bridge.service.scope.launch(bridge.handler) {
             if (!createSocket()) return@launch
 
             if (!establishHttpLayer()) return@launch

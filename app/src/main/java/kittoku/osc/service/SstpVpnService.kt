@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.service.quicksettings.TileService
@@ -18,11 +17,10 @@ import androidx.preference.PreferenceManager
 import kittoku.osc.R
 import kittoku.osc.client.ClientBridge
 import kittoku.osc.client.control.ControlClient
+import kittoku.osc.client.control.LogWriter
 import kittoku.osc.preference.OscPreference
-import kittoku.osc.preference.accessor.getBooleanPrefValue
-import kittoku.osc.preference.accessor.getURIPrefValue
-import kittoku.osc.preference.accessor.resetReconnectionLife
-import kittoku.osc.preference.accessor.setBooleanPrefValue
+import kittoku.osc.preference.accessor.*
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -39,9 +37,12 @@ internal class SstpVpnService : VpnService() {
     private lateinit var prefs: SharedPreferences
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
     private lateinit var notificationManager: NotificationManagerCompat
+    internal lateinit var scope: CoroutineScope
 
-    internal var logUri: Uri? = null
+    internal var logWriter: LogWriter? = null
     private var controlClient: ControlClient?  = null
+
+    private var jobReconnect: Job? = null
 
     private fun setRootState(state: Boolean) {
         setBooleanPrefValue(state, OscPreference.ROOT_STATE, prefs)
@@ -70,6 +71,8 @@ internal class SstpVpnService : VpnService() {
         }
 
         prefs.registerOnSharedPreferenceChangeListener(listener)
+
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -80,8 +83,10 @@ internal class SstpVpnService : VpnService() {
                 beForegrounded()
                 resetReconnectionLife(prefs)
                 if (getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, prefs)) {
-                    prepareLogFile()
+                    prepareLogWriter()
                 }
+
+                logWriter?.write("Establish VPN connection")
 
                 initializeClient()
 
@@ -91,40 +96,26 @@ internal class SstpVpnService : VpnService() {
             }
 
             else -> {
+                // ensure that reconnection has been completely canceled or done
+                runBlocking { jobReconnect?.cancelAndJoin() }
+
                 controlClient?.disconnect()
                 controlClient = null
-                logUri = null
 
-                stopForeground(true)
-                stopSelf()
+                close()
 
                 Service.START_NOT_STICKY
             }
         }
     }
 
-    internal fun initializeClient() {
+    private fun initializeClient() {
         controlClient = ControlClient(ClientBridge(this)).also {
             it.launchJobMain()
         }
     }
 
-    internal fun makeNotification(id: Int, message: String) {
-        NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_NAME).also {
-            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
-            it.setContentText(message)
-            it.priority = NotificationCompat.PRIORITY_DEFAULT
-            it.setAutoCancel(true)
-
-            notificationManager.notify(id, it.build())
-        }
-    }
-
-    internal fun cancelNotification(id: Int) {
-        notificationManager.cancel(id)
-    }
-
-    private fun prepareLogFile() {
+    private fun prepareLogWriter() {
         val currentDateTime = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
         val filename = "log_osc_${currentDateTime}.txt"
 
@@ -146,12 +137,40 @@ internal class SstpVpnService : VpnService() {
             return
         }
 
-        logUri = fileURI.uri
+        val stream = contentResolver.openOutputStream(fileURI.uri, "wa")
+        if (stream == null) {
+            makeNotification(NOTIFICATION_ERROR_ID, "LOG: ERR_NULL_STREAM")
+            return
+        }
+
+        logWriter = LogWriter(stream)
+    }
+
+    internal fun launchJobReconnect() {
+        jobReconnect = scope.launch {
+            try {
+                getIntPrefValue(OscPreference.RECONNECTION_LIFE, prefs).also {
+                    val life = it - 1
+                    setIntPrefValue(life, OscPreference.RECONNECTION_LIFE, prefs)
+
+                    val message = "Reconnection will be tried (LIFE = $life)"
+                    makeNotification(NOTIFICATION_RECONNECT_ID, message)
+                    logWriter?.report(message)
+                }
+
+                delay(getIntPrefValue(OscPreference.RECONNECTION_INTERVAL, prefs) * 1000L)
+
+                initializeClient()
+            } catch (_: CancellationException) { }
+            finally {
+                cancelNotification(NOTIFICATION_RECONNECT_ID)
+            }
+        }
     }
 
     private fun beForegrounded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-             NotificationChannel(
+            NotificationChannel(
                 NOTIFICATION_CHANNEL_NAME,
                 NOTIFICATION_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_DEFAULT
@@ -177,7 +196,31 @@ internal class SstpVpnService : VpnService() {
         startForeground(NOTIFICATION_DISCONNECT_ID, builder.build())
     }
 
+    internal fun makeNotification(id: Int, message: String) {
+        NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_NAME).also {
+            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+            it.setContentText(message)
+            it.priority = NotificationCompat.PRIORITY_DEFAULT
+            it.setAutoCancel(true)
+
+            notificationManager.notify(id, it.build())
+        }
+    }
+
+    internal fun cancelNotification(id: Int) {
+        notificationManager.cancel(id)
+    }
+
+    internal fun close() {
+        stopForeground(true)
+        stopSelf()
+    }
+
     override fun onDestroy() {
+        logWriter?.write("Terminate VPN connection")
+        logWriter?.close()
+        logWriter = null
+
         controlClient?.kill(false, null)
         setRootState(false)
         prefs.unregisterOnSharedPreferenceChangeListener(listener)

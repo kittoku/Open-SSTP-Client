@@ -77,7 +77,7 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
     }
 
     internal fun launchJobMain() {
-        jobMain = bridge.scope.launch(bridge.handler) {
+        jobMain = bridge.service.scope.launch(bridge.handler) {
             val buffer = ByteBuffer.allocate(bufferSize).also { it.limit(0) }
 
             sstpTimer.tick()

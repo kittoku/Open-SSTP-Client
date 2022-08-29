@@ -62,7 +62,7 @@ internal abstract class ConfigClient<T: Frame>(private val where: Where, protect
     }
 
     internal fun launchJobNegotiation() {
-        jobNegotiation = bridge.scope.launch(bridge.handler) {
+        jobNegotiation = bridge.service.scope.launch(bridge.handler) {
             sendClientRequest()
 
             while (isActive) {

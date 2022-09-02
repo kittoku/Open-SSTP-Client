@@ -222,6 +222,10 @@ internal class SstpVpnService : VpnService() {
         logWriter = null
 
         controlClient?.kill(false, null)
+        controlClient = null
+
+        scope.cancel()
+
         setRootState(false)
         prefs.unregisterOnSharedPreferenceChangeListener(listener)
     }

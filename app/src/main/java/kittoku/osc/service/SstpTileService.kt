@@ -83,7 +83,7 @@ internal class SstpTileService : TileService() {
     private fun startVpnService(action: String) {
         val intent = Intent(this, SstpVpnService::class.java).setAction(action)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (action == ACTION_VPN_CONNECT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
         } else {
             startService(intent)

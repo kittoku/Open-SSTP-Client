@@ -3,6 +3,7 @@ package kittoku.osc.fragment
 import android.app.Activity
 import android.content.Intent
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -36,7 +37,13 @@ class HomeFragment : PreferenceFragmentCompat() {
     }
 
     private fun startVpnService(action: String) {
-        context?.startService(Intent(context, SstpVpnService::class.java).setAction(action))
+        val intent = Intent(context, SstpVpnService::class.java).setAction(action)
+
+        if (action == ACTION_VPN_CONNECT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context?.startForegroundService(intent)
+        } else {
+            context?.startService(intent)
+        }
     }
 
     private fun attachConnectorListener() {

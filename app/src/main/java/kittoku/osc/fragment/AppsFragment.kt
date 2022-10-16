@@ -1,7 +1,7 @@
 package kittoku.osc.fragment
 
-import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -13,6 +13,7 @@ import kittoku.osc.preference.APP_KEY_HEADER
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.setSetPrefValue
+import kittoku.osc.preference.getInstalledAppInfos
 
 
 internal class AppsFragment : PreferenceFragmentCompat() {
@@ -23,30 +24,7 @@ internal class AppsFragment : PreferenceFragmentCompat() {
         setHasOptionsMenu(true)
         prefs = preferenceManager.sharedPreferences!!
 
-        val pm = requireContext().applicationContext.packageManager
-        val intent = Intent(Intent.ACTION_MAIN).also {
-            it.addCategory(Intent.CATEGORY_LAUNCHER)
-        }
-
-        val addedPackage = mutableSetOf<String>()
-
-        retrieveEachAppPreference()
-
-        pm.queryIntentActivities(intent, 0).forEach { resolvedInfo ->
-            val appInfo = resolvedInfo.activityInfo.applicationInfo
-            val packageName = appInfo.packageName
-
-            if (!addedPackage.contains(packageName)) { // workaround for duplicated 'Google Quick Search Box'
-                val checkBox = CheckBoxPreference(requireContext()).also {
-                    it.key = APP_KEY_HEADER + packageName
-                    it.icon = pm.getApplicationIcon(appInfo)
-                    it.title = pm.getApplicationLabel(appInfo)
-                }
-
-                preferenceScreen.addPreference(checkBox)
-                addedPackage.add(packageName)
-            }
-        }
+        retrieveEachAppPreference(requireContext().applicationContext.packageManager)
     }
 
     private fun getAppsKeys(): List<String> {
@@ -63,13 +41,18 @@ internal class AppsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun retrieveEachAppPreference() {
-        prefs.edit().also {
-            getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, prefs).forEach { packageName ->
-                it.putBoolean(APP_KEY_HEADER + packageName, true)
+    private fun retrieveEachAppPreference(pm: PackageManager) {
+        val allowed = getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, prefs)
+
+        getInstalledAppInfos(pm).forEach { info ->
+            val checkBox = CheckBoxPreference(requireContext()).also {
+                it.key = APP_KEY_HEADER + info.packageName
+                it.icon = pm.getApplicationIcon(info)
+                it.title = pm.getApplicationLabel(info)
+                it.isChecked = allowed.contains(info.packageName)
             }
 
-            it.apply()
+            preferenceScreen.addPreference(checkBox)
         }
     }
 

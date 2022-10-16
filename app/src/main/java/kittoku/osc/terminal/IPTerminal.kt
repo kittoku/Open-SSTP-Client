@@ -9,7 +9,6 @@ import kittoku.osc.extension.isSame
 import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.getBooleanPrefValue
-import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -23,7 +22,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     private lateinit var inputStream: FileInputStream
     private lateinit var outputStream: FileOutputStream
 
-    private val isAppBasedRuleEnabled = getBooleanPrefValue(OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE, bridge.prefs)
+    private val isAppBasedRuleEnabled = bridge.allowedApps.isNotEmpty()
     private val isDefaultRouteAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
     private val isPrivateAddressesRouted = getBooleanPrefValue(OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
     private val isCustomRoutesAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
@@ -110,8 +109,8 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     }
 
     private fun addAppBasedRules() {
-        getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, bridge.prefs).forEach {
-            bridge.builder.addAllowedApplication(it)
+        bridge.allowedApps.forEach {
+            bridge.builder.addAllowedApplication(it.packageName)
         }
     }
 

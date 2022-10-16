@@ -1,10 +1,12 @@
 package kittoku.osc.client
 
 import androidx.preference.PreferenceManager
+import kittoku.osc.preference.AppString
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.getValidAllowedAppInfos
 import kittoku.osc.service.SstpVpnService
 import kittoku.osc.terminal.IPTerminal
 import kittoku.osc.terminal.SSLTerminal
@@ -103,7 +105,6 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
     internal val DNS_DO_REQUEST_ADDRESS = getBooleanPrefValue(OscPreference.DNS_DO_REQUEST_ADDRESS, prefs)
     internal val DNS_DO_USE_CUSTOM_SERVER = getBooleanPrefValue(OscPreference.DNS_DO_USE_CUSTOM_SERVER, prefs)
-    internal val ROUTE_DO_ENABLE_APP_BASED_RULE = getBooleanPrefValue(OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE, prefs)
 
     internal lateinit var chapMessage: ChapMessage
     internal val nonce = ByteArray(32)
@@ -118,6 +119,19 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal val currentIPv4 = ByteArray(4)
     internal val currentIPv6 = ByteArray(8)
     internal val currentProposedDNS = ByteArray(4)
+
+    internal val allowedApps: List<AppString> = mutableListOf<AppString>().also {
+        if (getBooleanPrefValue(OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE, prefs)) {
+            getValidAllowedAppInfos(prefs, service.packageManager).forEach { info ->
+                it.add(
+                    AppString(
+                        info.packageName,
+                        service.packageManager.getApplicationLabel(info).toString()
+                    )
+                )
+            }
+        }
+    }
 
     internal fun getPreferredAuthOption(): AuthOption {
         return if (PPP_MSCHAPv2_ENABLED) AuthOptionMSChapv2() else AuthOptionPAP()

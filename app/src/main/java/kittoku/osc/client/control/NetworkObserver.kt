@@ -4,7 +4,6 @@ import android.net.*
 import android.os.Build
 import kittoku.osc.client.ClientBridge
 import kittoku.osc.preference.OscPreference
-import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.setStringPrefValue
 
 
@@ -72,11 +71,8 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         summary.add("")
 
         summary.add("[Allowed Apps]")
-        if (bridge.ROUTE_DO_ENABLE_APP_BASED_RULE) {
-            val pm = bridge.service.applicationContext.packageManager
-            getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, bridge.prefs).forEach {
-                summary.add(pm.getApplicationLabel(pm.getApplicationInfo(it, 0)).toString())
-            }
+        if (bridge.allowedApps.isNotEmpty()) {
+            bridge.allowedApps.forEach { summary.add(it.label) }
         } else {
             summary.add("All apps")
         }

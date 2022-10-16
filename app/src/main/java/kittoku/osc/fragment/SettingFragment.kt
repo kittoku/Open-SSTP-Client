@@ -20,7 +20,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
 
     private val certDirLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         val uri = if (result.resultCode == Activity.RESULT_OK) result.data?.data?.also {
-            context?.contentResolver?.takePersistableUriPermission(
+            requireContext().contentResolver.takePersistableUriPermission(
                 it, Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
         } else null
@@ -30,7 +30,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
 
     private val logDirLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         val uri = if (result.resultCode == Activity.RESULT_OK) result.data?.data?.also {
-            context?.contentResolver?.takePersistableUriPermission(
+            requireContext().contentResolver.takePersistableUriPermission(
                 it, Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
         } else null
@@ -63,7 +63,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
     private fun setAllowedAppsListener() {
         findPreference<SummaryPreference>(OscPreference.ROUTE_ALLOWED_APPS.name)!!.also {
             it.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-                startActivity(Intent(context, AppsActivity::class.java))
+                startActivity(Intent(requireContext(), AppsActivity::class.java))
 
                 true
             }

@@ -10,7 +10,7 @@ import kittoku.osc.MIN_MTU
 import kittoku.osc.preference.accessor.*
 
 
-internal fun toastInvalidSetting(message: String, context: Context?) {
+internal fun toastInvalidSetting(message: String, context: Context) {
     Toast.makeText(context, "INVALID SETTING: $message", Toast.LENGTH_LONG).show()
 }
 

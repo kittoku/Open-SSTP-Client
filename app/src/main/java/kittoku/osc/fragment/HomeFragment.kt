@@ -37,12 +37,12 @@ class HomeFragment : PreferenceFragmentCompat() {
     }
 
     private fun startVpnService(action: String) {
-        val intent = Intent(context, SstpVpnService::class.java).setAction(action)
+        val intent = Intent(requireContext(), SstpVpnService::class.java).setAction(action)
 
         if (action == ACTION_VPN_CONNECT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context?.startForegroundService(intent)
+            requireContext().startForegroundService(intent)
         } else {
-            context?.startService(intent)
+            requireContext().startService(intent)
         }
     }
 
@@ -51,11 +51,11 @@ class HomeFragment : PreferenceFragmentCompat() {
             it.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newState ->
                 if (newState == true) {
                     checkPreferences(preferenceManager.sharedPreferences!!)?.also { message ->
-                        toastInvalidSetting(message, context)
+                        toastInvalidSetting(message, requireContext())
                         return@OnPreferenceChangeListener false
                     }
 
-                    VpnService.prepare(context)?.also { intent ->
+                    VpnService.prepare(requireContext())?.also { intent ->
                         preparationLauncher.launch(intent)
                     } ?: startVpnService(ACTION_VPN_CONNECT)
                 } else {

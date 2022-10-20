@@ -42,6 +42,8 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         val summary = mutableListOf<String>()
 
         bridge.sslTerminal!!.getSession().also {
+            if (!it.isValid) return
+
             summary.add("[SSL/TLS Parameters]")
             summary.add("PROTOCOL: ${it.protocol}")
             summary.add("SUITE: ${it.cipherSuite}")

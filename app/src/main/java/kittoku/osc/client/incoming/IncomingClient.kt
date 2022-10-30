@@ -1,13 +1,11 @@
 package kittoku.osc.client.incoming
 
+import kittoku.osc.MAX_MRU
 import kittoku.osc.client.*
 import kittoku.osc.client.ppp.*
-import kittoku.osc.extension.capacityAfterLimit
 import kittoku.osc.extension.probeByte
 import kittoku.osc.extension.probeShort
 import kittoku.osc.extension.toIntAsUShort
-import kittoku.osc.preference.OscPreference
-import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.unit.ppp.*
 import kittoku.osc.unit.sstp.ControlPacket
 import kittoku.osc.unit.sstp.SSTP_PACKET_TYPE_CONTROL
@@ -24,7 +22,7 @@ private const val SSTP_ECHO_INTERVAL = 20_000L
 private const val PPP_ECHO_INTERVAL = 20_000L
 
 internal class IncomingClient(internal val bridge: ClientBridge) {
-    private val bufferSize = getIntPrefValue(OscPreference.BUFFER_INCOMING, bridge.prefs)
+    private val bufferSize = bridge.sslTerminal!!.getApplicationBufferSize() + MAX_MRU + 8 // MAX_MRU + 8 for fragment
 
     private var jobMain: Job? = null
 
@@ -106,7 +104,7 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
                     in 4..bufferSize -> { }
 
                     -1 -> {
-                        load(4, buffer)
+                        bridge.sslTerminal!!.receive(buffer)
                         continue
                     }
 
@@ -118,9 +116,8 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
                     }
                 }
 
-                val lacked = size - buffer.remaining()
-                if (lacked > 0) {
-                    load(lacked, buffer)
+                if (size > buffer.remaining()) {
+                    bridge.sslTerminal!!.receive(buffer)
                     continue
                 }
 
@@ -192,21 +189,6 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
         } else {
             buffer.probeShort(2).toIntAsUShort()
         }
-    }
-
-    private fun load(minSize: Int, buffer: ByteBuffer) {
-        if (buffer.capacityAfterLimit < minSize) { // need to slide
-            val remaining = buffer.remaining()
-
-            buffer.array().also {
-                it.copyInto(it, 0, buffer.position(), buffer.limit())
-            }
-
-            buffer.position(0)
-            buffer.limit(remaining)
-        }
-
-        bridge.sslTerminal!!.receive(buffer.capacityAfterLimit, buffer)
     }
 
     internal fun cancel() {

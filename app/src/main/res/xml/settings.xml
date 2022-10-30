@@ -47,11 +47,6 @@
         <kittoku.osc.preference.custom.ReconnectionIntervalPreference android:key="RECONNECTION_INTERVAL"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Buffer Size">
-        <kittoku.osc.preference.custom.BufferIncomingPreference android:key="BUFFER_INCOMING"/>
-        <kittoku.osc.preference.custom.BufferOutgoingPreference android:key="BUFFER_OUTGOING"/>
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="Log">
         <kittoku.osc.preference.custom.LogDoSaveLogPreference android:key="LOG_DO_SAVE_LOG"/>
         <kittoku.osc.preference.custom.LogDirPreference android:key="LOG_DIR"/>

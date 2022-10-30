@@ -70,13 +70,3 @@ internal class ReconnectionIntervalPreference(context: Context, attrs: Attribute
     override val preferenceTitle = "Retry Interval (second)"
     override val dependingPreference = OscPreference.RECONNECTION_ENABLED
 }
-
-internal class BufferIncomingPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.BUFFER_INCOMING
-    override val preferenceTitle = "Incoming Buffer Size"
-}
-
-internal class BufferOutgoingPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.BUFFER_OUTGOING
-    override val preferenceTitle = "Outgoing Buffer Size"
-}

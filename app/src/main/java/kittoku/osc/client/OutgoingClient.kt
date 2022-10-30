@@ -1,7 +1,5 @@
 package kittoku.osc.client
 
-import kittoku.osc.preference.OscPreference
-import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.unit.ppp.PPP_HEADER
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPv6
@@ -23,7 +21,7 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
     private var jobMain: Job? = null
     private var jobRetrieve: Job? = null
 
-    private val mainBuffer = ByteBuffer.allocate(getIntPrefValue(OscPreference.BUFFER_OUTGOING, bridge.prefs))
+    private val mainBuffer = ByteBuffer.allocate(bridge.sslTerminal!!.getApplicationBufferSize())
     private val channel = Channel<ByteBuffer>(0)
 
     internal fun launchJobMain() {

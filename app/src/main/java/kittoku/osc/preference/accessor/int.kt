@@ -15,7 +15,6 @@ internal fun getIntPrefValue(key: OscPreference, prefs: SharedPreferences): Int 
         OscPreference.RECONNECTION_COUNT -> 3
         OscPreference.RECONNECTION_INTERVAL -> 10
         OscPreference.RECONNECTION_LIFE -> 0
-        OscPreference.BUFFER_INCOMING, OscPreference.BUFFER_OUTGOING -> 16384
         else -> throw NotImplementedError()
     }
 

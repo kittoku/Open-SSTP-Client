@@ -5,6 +5,9 @@ import kittoku.osc.client.ClientBridge
 import kittoku.osc.client.ControlMessage
 import kittoku.osc.client.Result
 import kittoku.osc.client.Where
+import kittoku.osc.extension.capacityAfterLimit
+import kittoku.osc.extension.slide
+import kittoku.osc.extension.toIntAsUByte
 import kittoku.osc.preference.OscPreference
 import kittoku.osc.preference.accessor.*
 import kittoku.osc.unit.DataUnit
@@ -12,7 +15,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import java.io.BufferedInputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
 import java.security.KeyStore
@@ -25,7 +32,15 @@ internal const val SSL_REQUEST_INTERVAL = 10_000L
 
 internal class SSLTerminal(private val bridge: ClientBridge) {
     private val mutex = Mutex()
-    private var socket: SSLSocket? = null
+
+    private var socket: Socket? = null
+    private lateinit var socketInputStream: InputStream
+    private lateinit var socketOutputStream: OutputStream
+    private lateinit var inboundBuffer: ByteBuffer
+    private lateinit var outboundBuffer: ByteBuffer
+
+    private lateinit var engine: SSLEngine
+
     private var jobInitialize: Job? = null
 
     private val selectedVersion = getStringPrefValue(OscPreference.SSL_VERSION, bridge.prefs)
@@ -72,41 +87,75 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun createSocket(): Boolean {
-        val socketFactory = if (getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, bridge.prefs)) {
-            val context = SSLContext.getInstance(selectedVersion) as SSLContext
-            context.init(null, createTrustManagers(), null)
-            context.socketFactory
+        val sslContext = if (getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, bridge.prefs)) {
+            SSLContext.getInstance(selectedVersion).also {
+                it.init(null, createTrustManagers(), null)
+            }
         } else {
-            SSLSocketFactory.getDefault()
+            SSLContext.getDefault()
         }
 
-        socket = socketFactory.createSocket(
+        engine = sslContext.createSSLEngine(
             bridge.HOME_HOSTNAME,
             getIntPrefValue(OscPreference.SSL_PORT, bridge.prefs)
-        ) as SSLSocket
+        )
+
+        engine.useClientMode = true
 
         if (selectedVersion != "DEFAULT") {
-            socket!!.enabledProtocols = arrayOf(selectedVersion)
+            engine.enabledProtocols = arrayOf(selectedVersion)
         }
 
         if (getBooleanPrefValue(OscPreference.SSL_DO_SELECT_SUITES, bridge.prefs)) {
-            val sortedSuites = socket!!.supportedCipherSuites.filter {
+            val sortedSuites = engine.supportedCipherSuites.filter {
                 enabledSuites.contains(it)
             }
 
-            socket!!.enabledCipherSuites = sortedSuites.toTypedArray()
+            engine.enabledCipherSuites = sortedSuites.toTypedArray()
+        }
+
+        socket = Socket(bridge.HOME_HOSTNAME, getIntPrefValue(OscPreference.SSL_PORT, bridge.prefs))
+        socketInputStream = socket!!.getInputStream()
+        socketOutputStream = socket!!.getOutputStream()
+
+        inboundBuffer = ByteBuffer.allocate(engine.session.packetBufferSize).also { it.limit(0) }
+        outboundBuffer = ByteBuffer.allocate(engine.session.packetBufferSize)
+        val tempBuffer = ByteBuffer.allocate(0)
+
+        engine.beginHandshake()
+
+        while (true) {
+            yield()
+
+            when (engine.handshakeStatus) {
+                SSLEngineResult.HandshakeStatus.NEED_WRAP -> {
+                    val result = send(tempBuffer)
+                    if (result.handshakeStatus == SSLEngineResult.HandshakeStatus.FINISHED) {
+                        break
+                    }
+                }
+
+                SSLEngineResult.HandshakeStatus.NEED_UNWRAP -> {
+                    val result = receive(tempBuffer)
+                    if (result.handshakeStatus == SSLEngineResult.HandshakeStatus.FINISHED) {
+                        break
+                    }
+                }
+
+                else -> {
+                    throw NotImplementedError()
+                }
+            }
         }
 
         if (getBooleanPrefValue(OscPreference.SSL_DO_VERIFY, bridge.prefs)) {
             HttpsURLConnection.getDefaultHostnameVerifier().also {
-                if (!it.verify(bridge.HOME_HOSTNAME, socket!!.session)) {
+                if (!it.verify(bridge.HOME_HOSTNAME, engine.session)) {
                     bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_VERIFICATION_FAILED))
                     return false
                 }
             }
         }
-
-        socket!!.startHandshake()
 
         return true
     }
@@ -115,6 +164,8 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
         val httpDelimiter = "\r\n"
         val httpSuffix = "\r\n\r\n"
 
+        val buffer = ByteBuffer.allocate(getApplicationBufferSize())
+
         val request = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
@@ -122,16 +173,24 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             "SSTPCORRELATIONID: {${bridge.guid}}"
         ).joinToString(separator = httpDelimiter, postfix = httpSuffix).toByteArray(Charsets.US_ASCII)
 
-        socket!!.outputStream.write(request)
-        socket!!.outputStream.flush()
+        buffer.put(request)
+        buffer.flip()
 
+        send(buffer)
+
+        buffer.position(0)
+        buffer.limit(0)
 
         var response = ""
-        while (true) {
-            response += socket!!.inputStream.read().toChar() // don't use buffer. It could read too much.
+        outer@ while (true) {
+            receive(buffer)
 
-            if (response.endsWith(httpSuffix)) {
-                break
+            for (i in 0 until buffer.remaining()) {
+                response += buffer.get().toIntAsUByte().toChar()
+
+                if (response.endsWith(httpSuffix)) {
+                    break@outer
+                }
             }
         }
 
@@ -147,24 +206,95 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     }
 
     internal fun getSession(): SSLSession {
-        return socket!!.session
+        return engine.session
     }
 
     internal fun getServerCertificate(): ByteArray {
-        return socket!!.session.peerCertificates[0].encoded
+        return engine.session.peerCertificates[0].encoded
     }
 
-    internal fun receive(maxRead: Int, buffer: ByteBuffer) {
-        try {
-            val readSize = socket!!.inputStream.read(buffer.array(), buffer.limit(), maxRead)
-            buffer.limit(buffer.limit() + readSize)
-        } catch (_: SocketTimeoutException) { }
+    internal fun getApplicationBufferSize(): Int {
+        return engine.session.applicationBufferSize
     }
 
-    internal suspend fun send(buffer: ByteBuffer) {
+    internal fun receive(buffer: ByteBuffer): SSLEngineResult {
+        var startPayload: Int
+        var result: SSLEngineResult
+
+        while (true) {
+            startPayload = buffer.position()
+            buffer.position(buffer.limit())
+            buffer.limit(buffer.capacity())
+
+            result = engine.unwrap(inboundBuffer, buffer)
+
+            when (result.status) {
+                SSLEngineResult.Status.OK -> {
+                    break
+                }
+
+                SSLEngineResult.Status.BUFFER_OVERFLOW -> {
+                    buffer.limit(buffer.position())
+                    buffer.position(startPayload)
+
+                    buffer.slide()
+                }
+
+                SSLEngineResult.Status.BUFFER_UNDERFLOW -> {
+                    buffer.limit(buffer.position())
+                    buffer.position(startPayload)
+
+                    inboundBuffer.slide()
+
+                    try {
+                        val readSize = socketInputStream.read(
+                            inboundBuffer.array(),
+                            inboundBuffer.limit(),
+                            inboundBuffer.capacityAfterLimit
+                        )
+
+                        inboundBuffer.limit(inboundBuffer.limit() + readSize)
+                    } catch (_: SocketTimeoutException) { }
+                }
+
+                else -> {
+                    throw NotImplementedError()
+                }
+            }
+        }
+
+        buffer.limit(buffer.position())
+        buffer.position(startPayload)
+
+        return result
+    }
+
+    internal suspend fun send(buffer: ByteBuffer): SSLEngineResult {
         mutex.withLock {
-            socket!!.outputStream.write(buffer.array(), 0, buffer.limit())
-            socket!!.outputStream.flush()
+            var result: SSLEngineResult
+
+            while (true) {
+                outboundBuffer.clear()
+
+                result = engine.wrap(buffer, outboundBuffer)
+                if (result.status != SSLEngineResult.Status.OK) {
+                    throw NotImplementedError()
+                }
+
+                socketOutputStream.write(
+                    outboundBuffer.array(),
+                    0,
+                    outboundBuffer.position()
+                )
+
+                socketOutputStream.flush()
+
+                if (!buffer.hasRemaining()) {
+                    break
+                }
+            }
+
+            return result
         }
     }
 

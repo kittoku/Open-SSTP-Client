@@ -34,11 +34,11 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
     val suites = getSetPrefValue(OscPreference.SSL_SUITES, prefs)
     if (doSelectSuites && suites.isEmpty()) return "No cipher suite was selected"
 
-    val mru = getIntPrefValue(OscPreference.PPP_MRU, prefs).also {
+    getIntPrefValue(OscPreference.PPP_MRU, prefs).also {
         if (it !in MIN_MRU..MAX_MRU) return "The given MRU is out of $MIN_MRU-$MAX_MRU"
     }
 
-    val mtu = getIntPrefValue(OscPreference.PPP_MTU, prefs).also {
+    getIntPrefValue(OscPreference.PPP_MTU, prefs).also {
         if (it !in MIN_MTU..MAX_MTU) return "The given MRU is out of $MIN_MTU-$MAX_MTU"
     }
 
@@ -62,14 +62,6 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
 
     getIntPrefValue(OscPreference.RECONNECTION_COUNT, prefs).also {
         if (it < 1) return "Retry Count must be a positive integer"
-    }
-
-    getIntPrefValue(OscPreference.BUFFER_INCOMING, prefs).also {
-        if (it < 2 * mru) return "Incoming Buffer Size must be >= 2 * MRU"
-    }
-
-    getIntPrefValue(OscPreference.BUFFER_OUTGOING, prefs).also {
-        if (it < 2 * mtu) return "Outgoing Buffer Size must be >= 2 * MTU"
     }
 
     val doSaveLog = getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, prefs)

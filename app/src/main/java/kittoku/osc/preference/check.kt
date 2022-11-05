@@ -16,7 +16,7 @@ internal fun toastInvalidSetting(message: String, context: Context) {
 
 internal fun checkPreferences(prefs: SharedPreferences): String? {
     getStringPrefValue(OscPreference.HOME_HOSTNAME, prefs).also {
-        if (it.isEmpty()) return "Host is missing"
+        if (it.isEmpty()) return "Hostname is missing"
     }
 
     getIntPrefValue(OscPreference.SSL_PORT, prefs).also {
@@ -33,6 +33,16 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
     val doSelectSuites = getBooleanPrefValue(OscPreference.SSL_DO_SELECT_SUITES, prefs)
     val suites = getSetPrefValue(OscPreference.SSL_SUITES, prefs)
     if (doSelectSuites && suites.isEmpty()) return "No cipher suite was selected"
+
+    if (getBooleanPrefValue(OscPreference.PROXY_DO_USE_PROXY, prefs)) {
+        getStringPrefValue(OscPreference.HOME_HOSTNAME, prefs).also {
+            if (it.isEmpty()) return "Proxy server hostname is missing"
+        }
+
+        getIntPrefValue(OscPreference.PROXY_PORT, prefs).also {
+            if (it !in 0..65535) return "The given proxy server port is out of 0-65535"
+        }
+    }
 
     getIntPrefValue(OscPreference.PPP_MRU, prefs).also {
         if (it !in MIN_MRU..MAX_MRU) return "The given MRU is out of $MIN_MRU-$MAX_MRU"

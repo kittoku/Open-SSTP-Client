@@ -15,12 +15,17 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
     abstract val preferenceTitle: String
     protected open val emptyNotice = "[No Value Entered]"
     protected open val textType = InputType.TYPE_CLASS_TEXT
+    protected open val dependingPreference: OscPreference? = null
     protected open val provider = SummaryProvider<Preference> {
         getStringPrefValue(oscPreference, it.sharedPreferences!!).ifEmpty { emptyNotice }
     }
 
     override fun onAttached() {
         super.onAttached()
+
+        dependingPreference?.also {
+            dependency = it.name
+        }
 
         setOnBindEditTextListener { editText ->
             editText.inputType = textType
@@ -58,14 +63,20 @@ internal class HomePasswordPreference(context: Context, attrs: AttributeSet) : S
     }
 }
 
+internal class ProxyHostnamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+    override val oscPreference = OscPreference.PROXY_HOSTNAME
+    override val preferenceTitle = "Proxy Server Hostname"
+    override val dependingPreference = OscPreference.PROXY_DO_USE_PROXY
+}
+
 internal class DNSCustomAddressPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPreference = OscPreference.DNS_CUSTOM_ADDRESS
     override val preferenceTitle = "Custom DNS Server Address"
+    override val dependingPreference = OscPreference.DNS_DO_USE_CUSTOM_SERVER
 
     override fun onAttached() {
         super.onAttached()
 
-        dependency = OscPreference.DNS_DO_USE_CUSTOM_SERVER.name
         dialogMessage = "NOTICE: packets associated with this address is routed to the VPN tunnel"
     }
 }

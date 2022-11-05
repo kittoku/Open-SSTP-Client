@@ -28,6 +28,9 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.*
 
 
+private const val HTTP_DELIMITER = "\r\n"
+private const val HTTP_SUFFIX = "\r\n\r\n"
+
 internal const val SSL_REQUEST_INTERVAL = 10_000L
 
 internal class SSLTerminal(private val bridge: ClientBridge) {
@@ -43,6 +46,9 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
 
     private var jobInitialize: Job? = null
 
+    private val doUseProxy = getBooleanPrefValue(OscPreference.PROXY_DO_USE_PROXY, bridge.prefs)
+    private val sslHostname = getStringPrefValue(OscPreference.HOME_HOSTNAME, bridge.prefs)
+    private val sslPort = getIntPrefValue(OscPreference.SSL_PORT, bridge.prefs)
     private val selectedVersion = getStringPrefValue(OscPreference.SSL_VERSION, bridge.prefs)
     private val enabledSuites = getSetPrefValue(OscPreference.SSL_SUITES, bridge.prefs)
 
@@ -50,7 +56,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
         jobInitialize = bridge.service.scope.launch(bridge.handler) {
             if (!startHandshake()) return@launch
 
-            if (!establishHttpsLayer()) return@launch
+            if (!establishHttps()) return@launch
 
             bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.PROCEEDED))
         }
@@ -95,11 +101,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             SSLContext.getDefault()
         }
 
-        engine = sslContext.createSSLEngine(
-            bridge.HOME_HOSTNAME,
-            getIntPrefValue(OscPreference.SSL_PORT, bridge.prefs)
-        )
-
+        engine = sslContext.createSSLEngine(sslHostname, sslPort)
         engine.useClientMode = true
 
         if (selectedVersion != "DEFAULT") {
@@ -114,9 +116,18 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             engine.enabledCipherSuites = sortedSuites.toTypedArray()
         }
 
-        socket = Socket(bridge.HOME_HOSTNAME, getIntPrefValue(OscPreference.SSL_PORT, bridge.prefs))
-        socketInputStream = socket!!.getInputStream()
-        socketOutputStream = socket!!.getOutputStream()
+        val socketHostname = if (doUseProxy) getStringPrefValue(OscPreference.PROXY_HOSTNAME, bridge.prefs) else sslHostname
+        val socketPort = if (doUseProxy) getIntPrefValue(OscPreference.PROXY_PORT, bridge.prefs) else sslPort
+        socket = Socket(socketHostname, socketPort).also {
+            socketInputStream = it.getInputStream()
+            socketOutputStream = it.getOutputStream()
+        }
+
+        if (doUseProxy) {
+            if (!establishProxy()) {
+                return false
+            }
+        }
 
         inboundBuffer = ByteBuffer.allocate(engine.session.packetBufferSize).also { it.limit(0) }
         outboundBuffer = ByteBuffer.allocate(engine.session.packetBufferSize)
@@ -150,7 +161,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
 
         if (getBooleanPrefValue(OscPreference.SSL_DO_VERIFY, bridge.prefs)) {
             HttpsURLConnection.getDefaultHostnameVerifier().also {
-                if (!it.verify(bridge.HOME_HOSTNAME, engine.session)) {
+                if (!it.verify(sslHostname, engine.session)) {
                     bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_VERIFICATION_FAILED))
                     return false
                 }
@@ -160,18 +171,42 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
         return true
     }
 
-    private suspend fun establishHttpsLayer(): Boolean {
-        val httpDelimiter = "\r\n"
-        val httpSuffix = "\r\n\r\n"
+    private suspend fun establishProxy(): Boolean {
+        val request = arrayOf(
+            "CONNECT ${sslHostname}:${sslPort} HTTP/1.1",
+            "Host: ${sslHostname}:${sslPort}",
+            "SSTPVERSION: 1.0"
+        ).joinToString(separator = HTTP_DELIMITER, postfix = HTTP_SUFFIX).toByteArray(Charsets.US_ASCII)
 
+        socketOutputStream.write(request)
+        socketOutputStream.flush()
+
+        var response = ""
+        while (true) {
+            response += socketInputStream.read().toChar()
+
+            if (response.endsWith(HTTP_SUFFIX)) {
+                break
+            }
+        }
+
+        if (!response.split(HTTP_DELIMITER)[0].contains("200")) {
+            bridge.controlMailbox.send(ControlMessage(Where.PROXY, Result.ERR_UNEXPECTED_MESSAGE))
+            return false
+        }
+
+        return true
+    }
+
+    private suspend fun establishHttps(): Boolean {
         val buffer = ByteBuffer.allocate(getApplicationBufferSize())
 
         val request = arrayOf(
             "SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1",
             "Content-Length: 18446744073709551615",
-            "Host: ${bridge.HOME_HOSTNAME}",
+            "Host: $sslHostname",
             "SSTPCORRELATIONID: {${bridge.guid}}"
-        ).joinToString(separator = httpDelimiter, postfix = httpSuffix).toByteArray(Charsets.US_ASCII)
+        ).joinToString(separator = HTTP_DELIMITER, postfix = HTTP_SUFFIX).toByteArray(Charsets.US_ASCII)
 
         buffer.put(request)
         buffer.flip()
@@ -188,13 +223,13 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             for (i in 0 until buffer.remaining()) {
                 response += buffer.get().toIntAsUByte().toChar()
 
-                if (response.endsWith(httpSuffix)) {
+                if (response.endsWith(HTTP_SUFFIX)) {
                     break@outer
                 }
             }
         }
 
-        if (!response.split(httpDelimiter)[0].contains("200")) {
+        if (!response.split(HTTP_DELIMITER)[0].contains("200")) {
             bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_UNEXPECTED_MESSAGE))
             return false
         }

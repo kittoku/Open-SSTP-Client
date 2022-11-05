@@ -11,6 +11,7 @@ internal fun getBooleanPrefValue(key: OscPreference, prefs: SharedPreferences): 
         OscPreference.SSL_DO_VERIFY -> true
         OscPreference.SSL_DO_ADD_CERT -> false
         OscPreference.SSL_DO_SELECT_SUITES -> false
+        OscPreference.PROXY_DO_USE_PROXY -> false
         OscPreference.PPP_PAP_ENABLED -> true
         OscPreference.PPP_MSCHAPv2_ENABLED -> true
         OscPreference.PPP_IPv4_ENABLED -> true

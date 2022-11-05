@@ -9,6 +9,7 @@ import kittoku.osc.preference.OscPreference
 internal fun getIntPrefValue(key: OscPreference, prefs: SharedPreferences): Int {
     val defaultValue = when (key) {
         OscPreference.SSL_PORT -> 443
+        OscPreference.PROXY_PORT -> 8080
         OscPreference.PPP_MRU -> DEFAULT_MRU
         OscPreference.PPP_MTU -> DEFAULT_MTU
         OscPreference.PPP_AUTH_TIMEOUT -> 3

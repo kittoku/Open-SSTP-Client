@@ -29,6 +29,7 @@ internal class ChapMessage {
 
 internal enum class Where {
     SSL,
+    PROXY,
     SSTP_DATA,
     SSTP_CONTROL,
     SSTP_REQUEST,
@@ -94,7 +95,6 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal var sslTerminal: SSLTerminal? = null
     internal var ipTerminal: IPTerminal? = null
 
-    internal val HOME_HOSTNAME = getStringPrefValue(OscPreference.HOME_HOSTNAME, prefs)
     internal val HOME_USERNAME = getStringPrefValue(OscPreference.HOME_USERNAME, prefs)
     internal val HOME_PASSWORD = getStringPrefValue(OscPreference.HOME_PASSWORD, prefs)
     internal val PPP_MRU = getIntPrefValue(OscPreference.PPP_MRU, prefs)

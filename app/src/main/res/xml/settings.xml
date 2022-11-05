@@ -10,6 +10,12 @@
         <kittoku.osc.preference.custom.SSLSuitesPreference android:key="SSL_SUITES"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="HTTP Proxy">
+        <kittoku.osc.preference.custom.ProxyDoUseProxyPreference android:key="PROXY_DO_USE_PROXY"/>
+        <kittoku.osc.preference.custom.ProxyHostnamePreference android:key="PROXY_HOSTNAME"/>
+        <kittoku.osc.preference.custom.ProxyPortPreference android:key="PROXY_PORT"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="PPP Layer">
         <kittoku.osc.preference.custom.PPPMruPreference android:key="PPP_MRU"/>
         <kittoku.osc.preference.custom.PPPMtuPreference android:key="PPP_MTU"/>

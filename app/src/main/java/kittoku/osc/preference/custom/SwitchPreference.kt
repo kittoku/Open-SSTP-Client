@@ -35,6 +35,11 @@ internal class SSLDoSelectSuitesPreference(context: Context, attrs: AttributeSet
     override val preferenceTitle = "Enable Only Selected Cipher Suites"
 }
 
+internal class ProxyDoUseProxyPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPreference = OscPreference.PROXY_DO_USE_PROXY
+    override val preferenceTitle = "Use HTTP Proxy"
+}
+
 internal class DNSDoRequestAddressPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPreference = OscPreference.DNS_DO_REQUEST_ADDRESS
     override val preferenceTitle = "Request DNS Server Address"

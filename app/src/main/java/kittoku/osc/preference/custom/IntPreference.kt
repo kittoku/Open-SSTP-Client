@@ -44,6 +44,12 @@ internal class SSLPortPreference(context: Context, attrs: AttributeSet) : IntPre
     override val preferenceTitle = "Port Number"
 }
 
+internal class ProxyPortPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
+    override val oscPreference = OscPreference.PROXY_PORT
+    override val preferenceTitle = "Proxy Server Port Number"
+    override val dependingPreference: OscPreference = OscPreference.PROXY_DO_USE_PROXY
+}
+
 internal class PPPMruPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
     override val oscPreference = OscPreference.PPP_MRU
     override val preferenceTitle = "MRU"

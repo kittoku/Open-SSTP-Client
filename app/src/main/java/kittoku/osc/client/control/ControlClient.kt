@@ -59,7 +59,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
 
         jobMain = bridge.service.scope.launch(bridge.handler) {
             bridge.attachSSLTerminal()
-            bridge.sslTerminal!!.initializeSocket()
+            bridge.sslTerminal!!.initialize()
             if (!expectProceeded(Where.SSL, SSL_REQUEST_INTERVAL)) {
                 return@launch
             }

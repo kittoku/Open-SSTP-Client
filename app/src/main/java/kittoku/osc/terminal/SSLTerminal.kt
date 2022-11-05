@@ -46,11 +46,11 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     private val selectedVersion = getStringPrefValue(OscPreference.SSL_VERSION, bridge.prefs)
     private val enabledSuites = getSetPrefValue(OscPreference.SSL_SUITES, bridge.prefs)
 
-    internal suspend fun initializeSocket() {
+    internal suspend fun initialize() {
         jobInitialize = bridge.service.scope.launch(bridge.handler) {
-            if (!createSocket()) return@launch
+            if (!startHandshake()) return@launch
 
-            if (!establishHttpLayer()) return@launch
+            if (!establishHttpsLayer()) return@launch
 
             bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.PROCEEDED))
         }
@@ -86,7 +86,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
         return tmFactory.trustManagers
     }
 
-    private suspend fun createSocket(): Boolean {
+    private suspend fun startHandshake(): Boolean {
         val sslContext = if (getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, bridge.prefs)) {
             SSLContext.getInstance(selectedVersion).also {
                 it.init(null, createTrustManagers(), null)
@@ -160,7 +160,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
         return true
     }
 
-    private suspend fun establishHttpLayer(): Boolean {
+    private suspend fun establishHttpsLayer(): Boolean {
         val httpDelimiter = "\r\n"
         val httpSuffix = "\r\n\r\n"
 

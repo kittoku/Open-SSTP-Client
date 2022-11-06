@@ -1,5 +1,6 @@
 package kittoku.osc.terminal
 
+import android.util.Base64
 import androidx.documentfile.provider.DocumentFile
 import kittoku.osc.client.ClientBridge
 import kittoku.osc.client.ControlMessage
@@ -172,11 +173,23 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun establishProxy(): Boolean {
-        val request = arrayOf(
+        val username = getStringPrefValue(OscPreference.PROXY_USERNAME, bridge.prefs)
+        val password = getStringPrefValue(OscPreference.PROXY_PASSWORD, bridge.prefs)
+
+        val request = mutableListOf(
             "CONNECT ${sslHostname}:${sslPort} HTTP/1.1",
             "Host: ${sslHostname}:${sslPort}",
             "SSTPVERSION: 1.0"
-        ).joinToString(separator = HTTP_DELIMITER, postfix = HTTP_SUFFIX).toByteArray(Charsets.US_ASCII)
+        ).also {
+            if (username.isNotEmpty() || password.isNotEmpty()) {
+                val encoded = Base64.encode(
+                    "$username:$password".toByteArray(Charsets.US_ASCII),
+                    Base64.NO_WRAP
+                ).toString(Charsets.US_ASCII)
+
+                it.add("Proxy-Authorization: Basic $encoded")
+            }
+        }.joinToString(separator = HTTP_DELIMITER, postfix = HTTP_SUFFIX).toByteArray(Charsets.US_ASCII)
 
         socketOutputStream.write(request)
         socketOutputStream.flush()
@@ -190,7 +203,14 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             }
         }
 
-        if (!response.split(HTTP_DELIMITER)[0].contains("200")) {
+        val responseHeader = response.split(HTTP_DELIMITER)[0]
+
+        if (responseHeader.contains("403")) {
+            bridge.controlMailbox.send(ControlMessage(Where.PROXY, Result.ERR_AUTHENTICATION_FAILED))
+            return false
+        }
+
+        if (!responseHeader.contains("200")) {
             bridge.controlMailbox.send(ControlMessage(Where.PROXY, Result.ERR_UNEXPECTED_MESSAGE))
             return false
         }

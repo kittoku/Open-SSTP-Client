@@ -14,6 +14,8 @@
         <kittoku.osc.preference.custom.ProxyDoUseProxyPreference android:key="PROXY_DO_USE_PROXY"/>
         <kittoku.osc.preference.custom.ProxyHostnamePreference android:key="PROXY_HOSTNAME"/>
         <kittoku.osc.preference.custom.ProxyPortPreference android:key="PROXY_PORT"/>
+        <kittoku.osc.preference.custom.ProxyUsernamePreference android:key="PROXY_USERNAME"/>
+        <kittoku.osc.preference.custom.ProxyPasswordPreference android:key="PROXY_PASSWORD"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="PPP Layer">

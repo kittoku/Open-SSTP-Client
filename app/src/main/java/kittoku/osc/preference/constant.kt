@@ -18,6 +18,8 @@ internal enum class OscPreference {
     PROXY_DO_USE_PROXY,
     PROXY_HOSTNAME,
     PROXY_PORT,
+    PROXY_USERNAME,
+    PROXY_PASSWORD,
     PPP_MRU,
     PPP_MTU,
     PPP_PAP_ENABLED,

@@ -13,11 +13,10 @@ import kittoku.osc.preference.accessor.getStringPrefValue
 internal abstract class StringPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs) {
     abstract val oscPreference: OscPreference
     abstract val preferenceTitle: String
-    protected open val emptyNotice = "[No Value Entered]"
     protected open val textType = InputType.TYPE_CLASS_TEXT
     protected open val dependingPreference: OscPreference? = null
     protected open val provider = SummaryProvider<Preference> {
-        getStringPrefValue(oscPreference, it.sharedPreferences!!).ifEmpty { emptyNotice }
+        getStringPrefValue(oscPreference, it.sharedPreferences!!).ifEmpty { "[No Value Entered]" }
     }
 
     override fun onAttached() {
@@ -47,25 +46,15 @@ internal class HomeUsernamePreference(context: Context, attrs: AttributeSet) : S
     override val preferenceTitle = "Username"
 }
 
-internal class HomePasswordPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
-    override val oscPreference = OscPreference.HOME_PASSWORD
-    override val preferenceTitle = "Password"
-    override val textType = super.textType or InputType.TYPE_TEXT_VARIATION_PASSWORD
-
-    override val provider = SummaryProvider<Preference> {
-        val currentValue = getStringPrefValue(oscPreference, it.sharedPreferences!!)
-
-        if (currentValue.isEmpty()) {
-            emptyNotice
-        } else {
-            "[Password Entered]"
-        }
-    }
-}
-
 internal class ProxyHostnamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPreference = OscPreference.PROXY_HOSTNAME
     override val preferenceTitle = "Proxy Server Hostname"
+    override val dependingPreference = OscPreference.PROXY_DO_USE_PROXY
+}
+
+internal class ProxyUsernamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+    override val oscPreference = OscPreference.PROXY_USERNAME
+    override val preferenceTitle = "Proxy Username (optional)"
     override val dependingPreference = OscPreference.PROXY_DO_USE_PROXY
 }
 

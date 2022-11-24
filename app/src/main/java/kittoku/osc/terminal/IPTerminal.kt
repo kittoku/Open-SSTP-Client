@@ -25,6 +25,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     private val isAppBasedRuleEnabled = bridge.allowedApps.isNotEmpty()
     private val isDefaultRouteAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
     private val isPrivateAddressesRouted = getBooleanPrefValue(OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
+    private val isCustomDNSServerUsed = getBooleanPrefValue(OscPreference.DNS_DO_USE_CUSTOM_SERVER, bridge.prefs)
     private val isCustomRoutesAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
 
     internal suspend fun initializeTun(): Boolean {
@@ -38,7 +39,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 bridge.builder.addAddress(it, 32)
             }
 
-            if (bridge.DNS_DO_USE_CUSTOM_SERVER) {
+            if (isCustomDNSServerUsed) {
                 bridge.builder.addDnsServer(getStringPrefValue(OscPreference.DNS_CUSTOM_ADDRESS, bridge.prefs))
             }
 

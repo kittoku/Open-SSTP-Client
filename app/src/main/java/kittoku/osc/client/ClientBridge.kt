@@ -104,8 +104,6 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal val PPP_MSCHAPv2_ENABLED = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
     internal val PPP_IPv4_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
     internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
-    internal val DNS_DO_REQUEST_ADDRESS = getBooleanPrefValue(OscPreference.DNS_DO_REQUEST_ADDRESS, prefs)
-    internal val DNS_DO_USE_CUSTOM_SERVER = getBooleanPrefValue(OscPreference.DNS_DO_USE_CUSTOM_SERVER, prefs)
 
     internal lateinit var chapMessage: ChapMessage
     internal val nonce = ByteArray(32)

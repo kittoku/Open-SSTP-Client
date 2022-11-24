@@ -19,6 +19,7 @@ import java.net.Inet4Address
 
 
 internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFrame>(Where.IPCP, bridge) {
+    private val isDNSRequested = getBooleanPrefValue(OscPreference.DNS_DO_REQUEST_ADDRESS, bridge.prefs)
     private var isDNSRejected = false
     private val requestedAddress = if (getBooleanPrefValue(OscPreference.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS, bridge.prefs)) {
         Inet4Address.getByName(getStringPrefValue(OscPreference.PPP_STATIC_IPv4_ADDRESS, bridge.prefs)).address
@@ -68,7 +69,7 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
             bridge.currentIPv4.copyInto(it.address)
         }
 
-        if (bridge.DNS_DO_REQUEST_ADDRESS && !isDNSRejected) {
+        if (isDNSRequested && !isDNSRejected) {
             request.options.dnsOption = IpcpAddressOption(OPTION_TYPE_IPCP_DNS).also {
                 bridge.currentProposedDNS.copyInto(it.address)
             }

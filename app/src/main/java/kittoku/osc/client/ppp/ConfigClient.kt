@@ -49,7 +49,7 @@ internal abstract class ConfigClient<T: Frame>(private val where: Where, protect
 
     protected abstract suspend fun tryAcceptClientReject(reject: T)
 
-    protected abstract fun tryAcceptClientNak(nak: T)
+    protected abstract suspend fun tryAcceptClientNak(nak: T)
 
     private suspend fun sendClientRequest() {
         consumeRequestCounter()

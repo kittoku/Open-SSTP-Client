@@ -15,6 +15,7 @@ internal fun getBooleanPrefValue(key: OscPreference, prefs: SharedPreferences): 
         OscPreference.PPP_PAP_ENABLED -> true
         OscPreference.PPP_MSCHAPv2_ENABLED -> true
         OscPreference.PPP_IPv4_ENABLED -> true
+        OscPreference.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS -> false
         OscPreference.PPP_IPv6_ENABLED -> false
         OscPreference.DNS_DO_REQUEST_ADDRESS -> true
         OscPreference.DNS_DO_USE_CUSTOM_SERVER -> false

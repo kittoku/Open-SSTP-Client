@@ -14,6 +14,7 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
     abstract val oscPreference: OscPreference
     abstract val preferenceTitle: String
     protected open val textType = InputType.TYPE_CLASS_TEXT
+    protected open val hint: String? = null
     protected open val dependingPreference: OscPreference? = null
     protected open val provider = SummaryProvider<Preference> {
         getStringPrefValue(oscPreference, it.sharedPreferences!!).ifEmpty { "[No Value Entered]" }
@@ -28,6 +29,9 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
 
         setOnBindEditTextListener { editText ->
             editText.inputType = textType
+            hint?.also {
+                editText.hint = it
+            }
         }
 
         text = getStringPrefValue(oscPreference, sharedPreferences!!)
@@ -44,6 +48,13 @@ internal class HomeHostnamePreference(context: Context, attrs: AttributeSet) : S
 internal class HomeUsernamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPreference = OscPreference.HOME_USERNAME
     override val preferenceTitle = "Username"
+}
+
+internal class PPPStaticIPv4AddressPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+    override val oscPreference = OscPreference.PPP_STATIC_IPv4_ADDRESS
+    override val preferenceTitle = "Static IPv4 Address"
+    override val hint = "192.168.0.1"
+    override val dependingPreference = OscPreference.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS
 }
 
 internal class ProxyHostnamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {

@@ -4,6 +4,9 @@ import kittoku.osc.client.ClientBridge
 import kittoku.osc.client.ControlMessage
 import kittoku.osc.client.Result
 import kittoku.osc.client.Where
+import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.unit.ppp.IpcpConfigureAck
 import kittoku.osc.unit.ppp.IpcpConfigureFrame
 import kittoku.osc.unit.ppp.IpcpConfigureReject
@@ -12,10 +15,16 @@ import kittoku.osc.unit.ppp.option.IpcpAddressOption
 import kittoku.osc.unit.ppp.option.IpcpOptionPack
 import kittoku.osc.unit.ppp.option.OPTION_TYPE_IPCP_DNS
 import kittoku.osc.unit.ppp.option.OPTION_TYPE_IPCP_IP
+import java.net.Inet4Address
 
 
 internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFrame>(Where.IPCP, bridge) {
     private var isDNSRejected = false
+    private val requestedAddress = if (getBooleanPrefValue(OscPreference.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS, bridge.prefs)) {
+        Inet4Address.getByName(getStringPrefValue(OscPreference.PPP_STATIC_IPv4_ADDRESS, bridge.prefs)).address
+    } else {
+        null
+    }
 
     override fun tryCreateServerReject(request: IpcpConfigureFrame): IpcpConfigureFrame? {
         val reject = IpcpOptionPack()
@@ -51,6 +60,10 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
     override fun createClientRequest(): IpcpConfigureFrame {
         val request = IpcpConfigureRequest()
 
+        requestedAddress?.also {
+            it.copyInto(bridge.currentIPv4)
+        }
+
         request.options.ipOption = IpcpAddressOption(OPTION_TYPE_IPCP_IP).also {
             bridge.currentIPv4.copyInto(it.address)
         }
@@ -64,9 +77,13 @@ internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFram
         return request
     }
 
-    override fun tryAcceptClientNak(nak: IpcpConfigureFrame) {
+    override suspend fun tryAcceptClientNak(nak: IpcpConfigureFrame) {
         nak.options.ipOption?.also {
-            it.address.copyInto(bridge.currentIPv4)
+            if (requestedAddress != null) {
+                bridge.controlMailbox.send(ControlMessage(Where.IPCP, Result.ERR_ADDRESS_REJECTED))
+            } else {
+                it.address.copyInto(bridge.currentIPv4)
+            }
         }
 
         nak.options.dnsOption?.also {

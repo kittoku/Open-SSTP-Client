@@ -91,7 +91,7 @@ internal class LCPClient(bridge: ClientBridge) : ConfigClient<LCPConfigureFrame>
         return request
     }
 
-    override fun tryAcceptClientNak(nak: LCPConfigureFrame) {
+    override suspend fun tryAcceptClientNak(nak: LCPConfigureFrame) {
         nak.options.mruOption?.also {
             bridge.currentMRU = max(min(it.unitSize, bridge.PPP_MRU), MIN_MRU)
         }

@@ -50,7 +50,7 @@ internal class Ipv6cpClient(bridge: ClientBridge) : ConfigClient<Ipv6cpConfigure
         return request
     }
 
-    override fun tryAcceptClientNak(nak: Ipv6cpConfigureFrame) {
+    override suspend fun tryAcceptClientNak(nak: Ipv6cpConfigureFrame) {
         nak.options.identifierOption?.also {
             it.identifier.copyInto(bridge.currentIPv6)
         }

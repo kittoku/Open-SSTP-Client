@@ -56,6 +56,13 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
     val isIPv6Enabled = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
     if (!isIPv4Enabled && !isIPv6Enabled) return "No network protocol was enabled"
 
+    val isStaticIPv4Requested = getBooleanPrefValue(OscPreference.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS, prefs)
+    if (isIPv4Enabled && isStaticIPv4Requested) {
+        getStringPrefValue(OscPreference.PPP_STATIC_IPv4_ADDRESS, prefs).also {
+            if (it.isEmpty()) return "No static IPv4 address was given"
+        }
+    }
+
     val isPAPEnabled = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
     val isMSChapv2Enabled = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
     if (!isPAPEnabled && !isMSChapv2Enabled) return "No authentication protocol was enabled"

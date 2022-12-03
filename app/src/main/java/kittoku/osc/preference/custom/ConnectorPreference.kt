@@ -16,7 +16,7 @@ internal class HomeConnectorPreference(context: Context, attrs: AttributeSet) : 
         isChecked = getBooleanPrefValue(oscPrefKey, sharedPreferences!!)
     }
 
-    private var listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+    private var listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == oscPrefKey.name) {
             updateView()
         }

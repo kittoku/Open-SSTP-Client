@@ -4,7 +4,7 @@ import kittoku.osc.client.*
 import kittoku.osc.client.incoming.IncomingClient
 import kittoku.osc.client.ppp.*
 import kittoku.osc.debug.assertAlways
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.resetReconnectionLife
@@ -40,9 +40,9 @@ internal class ControlClient(internal val bridge: ClientBridge) {
 
     private val mutex = Mutex()
 
-    private val isReconnectionEnabled = getBooleanPrefValue(OscPreference.RECONNECTION_ENABLED, bridge.prefs)
+    private val isReconnectionEnabled = getBooleanPrefValue(OscPrefKey.RECONNECTION_ENABLED, bridge.prefs)
     private val isReconnectionAvailable: Boolean
-        get() = getIntPrefValue(OscPreference.RECONNECTION_LIFE, bridge.prefs) > 0
+        get() = getIntPrefValue(OscPrefKey.RECONNECTION_LIFE, bridge.prefs) > 0
 
     private fun attachHandler() {
         bridge.handler = CoroutineExceptionHandler { _, throwable ->
@@ -101,7 +101,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
             }
 
 
-            val authTimeout = getIntPrefValue(OscPreference.PPP_AUTH_TIMEOUT, bridge.prefs) * 1000L
+            val authTimeout = getIntPrefValue(OscPrefKey.PPP_AUTH_TIMEOUT, bridge.prefs) * 1000L
             when (bridge.currentAuth) {
                 is AuthOptionPAP -> PAPClient(bridge).also {
                     incomingClient!!.registerMailbox(it)

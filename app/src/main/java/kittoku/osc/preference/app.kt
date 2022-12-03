@@ -28,7 +28,7 @@ internal fun getInstalledAppInfos(pm: PackageManager): List<ApplicationInfo> {
 
 internal fun getValidAllowedAppInfos(prefs: SharedPreferences, pm: PackageManager): List<ApplicationInfo> {
     // return currently-installed allowed apps
-    return getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, prefs).mapNotNull {
+    return getSetPrefValue(OscPrefKey.ROUTE_ALLOWED_APPS, prefs).mapNotNull {
         try {
             pm.getApplicationInfo(it, 0)
         } catch (_: PackageManager.NameNotFoundException) {

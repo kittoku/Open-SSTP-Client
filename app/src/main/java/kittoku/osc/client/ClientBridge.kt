@@ -2,7 +2,7 @@ package kittoku.osc.client
 
 import androidx.preference.PreferenceManager
 import kittoku.osc.preference.AppString
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
@@ -96,14 +96,14 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal var sslTerminal: SSLTerminal? = null
     internal var ipTerminal: IPTerminal? = null
 
-    internal val HOME_USERNAME = getStringPrefValue(OscPreference.HOME_USERNAME, prefs)
-    internal val HOME_PASSWORD = getStringPrefValue(OscPreference.HOME_PASSWORD, prefs)
-    internal val PPP_MRU = getIntPrefValue(OscPreference.PPP_MRU, prefs)
-    internal val PPP_MTU = getIntPrefValue(OscPreference.PPP_MTU, prefs)
-    internal val PPP_PAP_ENABLED = getBooleanPrefValue(OscPreference.PPP_PAP_ENABLED, prefs)
-    internal val PPP_MSCHAPv2_ENABLED = getBooleanPrefValue(OscPreference.PPP_MSCHAPv2_ENABLED, prefs)
-    internal val PPP_IPv4_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv4_ENABLED, prefs)
-    internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPreference.PPP_IPv6_ENABLED, prefs)
+    internal val HOME_USERNAME = getStringPrefValue(OscPrefKey.HOME_USERNAME, prefs)
+    internal val HOME_PASSWORD = getStringPrefValue(OscPrefKey.HOME_PASSWORD, prefs)
+    internal val PPP_MRU = getIntPrefValue(OscPrefKey.PPP_MRU, prefs)
+    internal val PPP_MTU = getIntPrefValue(OscPrefKey.PPP_MTU, prefs)
+    internal val PPP_PAP_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_PAP_ENABLED, prefs)
+    internal val PPP_MSCHAPv2_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_MSCHAPv2_ENABLED, prefs)
+    internal val PPP_IPv4_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_IPv4_ENABLED, prefs)
+    internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_IPv6_ENABLED, prefs)
 
     internal lateinit var chapMessage: ChapMessage
     internal val nonce = ByteArray(32)
@@ -120,7 +120,7 @@ internal class ClientBridge(internal val service: SstpVpnService) {
     internal val currentProposedDNS = ByteArray(4)
 
     internal val allowedApps: List<AppString> = mutableListOf<AppString>().also {
-        if (getBooleanPrefValue(OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE, prefs)) {
+        if (getBooleanPrefValue(OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE, prefs)) {
             getValidAllowedAppInfos(prefs, service.packageManager).forEach { info ->
                 it.add(
                     AppString(

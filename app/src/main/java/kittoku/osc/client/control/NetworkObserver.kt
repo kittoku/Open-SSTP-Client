@@ -3,7 +3,7 @@ package kittoku.osc.client.control
 import android.net.*
 import android.os.Build
 import kittoku.osc.client.ClientBridge
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.setStringPrefValue
 
 
@@ -82,12 +82,12 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         summary.reduce { acc, s ->
             acc + "\n" + s
         }.also {
-            setStringPrefValue(it, OscPreference.HOME_STATUS, bridge.prefs)
+            setStringPrefValue(it, OscPrefKey.HOME_STATUS, bridge.prefs)
         }
     }
 
     private fun wipeStatus() {
-        setStringPrefValue("", OscPreference.HOME_STATUS, bridge.prefs)
+        setStringPrefValue("", OscPrefKey.HOME_STATUS, bridge.prefs)
     }
 
     internal fun close() {

@@ -1,29 +1,15 @@
 package kittoku.osc.preference.accessor
 
 import android.content.SharedPreferences
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.DEFAULT_STRING_MAP
+import kittoku.osc.preference.OscPrefKey
 
 
-internal fun getStringPrefValue(key: OscPreference, prefs: SharedPreferences): String {
-    val defaultValue = when (key) {
-        OscPreference.HOME_HOSTNAME,
-        OscPreference.HOME_USERNAME,
-        OscPreference.HOME_PASSWORD,
-        OscPreference.HOME_STATUS,
-        OscPreference.PROXY_HOSTNAME,
-        OscPreference.PROXY_USERNAME,
-        OscPreference.PROXY_PASSWORD,
-        OscPreference.PPP_STATIC_IPv4_ADDRESS,
-        OscPreference.DNS_CUSTOM_ADDRESS,
-        OscPreference.ROUTE_CUSTOM_ROUTES -> ""
-        OscPreference.SSL_VERSION -> "DEFAULT"
-        else -> throw NotImplementedError()
-    }
-
-    return prefs.getString(key.name, defaultValue)!!
+internal fun getStringPrefValue(key: OscPrefKey, prefs: SharedPreferences): String {
+    return prefs.getString(key.name, DEFAULT_STRING_MAP[key]!!)!!
 }
 
-internal fun setStringPrefValue(value: String, key: OscPreference, prefs: SharedPreferences) {
+internal fun setStringPrefValue(value: String, key: OscPrefKey, prefs: SharedPreferences) {
     prefs.edit().also {
         it.putString(key.name, value)
         it.apply()

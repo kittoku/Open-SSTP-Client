@@ -7,11 +7,9 @@ import android.util.AttributeSet
 import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import kittoku.osc.preference.OscPreference
 
 
 internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
-    abstract val oscPreference: OscPreference
     abstract val preferenceTitle: String
     abstract val preferenceSummary: String
     abstract val url: String
@@ -42,7 +40,6 @@ internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : 
 }
 
 internal class LinkOscPreference(context: Context, attrs: AttributeSet) : LinkPreference(context, attrs) {
-    override val oscPreference = OscPreference.LINK_OSC
     override val preferenceTitle = "Move to this app's project page"
     override val preferenceSummary = "github.com/kittoku/Open-SSTP-Client"
     override val url = "https://github.com/kittoku/Open-SSTP-Client"

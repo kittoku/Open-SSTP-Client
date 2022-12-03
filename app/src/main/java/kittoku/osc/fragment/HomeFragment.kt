@@ -10,7 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import kittoku.osc.R
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.checkPreferences
 import kittoku.osc.preference.custom.HomeConnectorPreference
 import kittoku.osc.preference.toastInvalidSetting
@@ -47,7 +47,7 @@ class HomeFragment : PreferenceFragmentCompat() {
     }
 
     private fun attachConnectorListener() {
-        findPreference<HomeConnectorPreference>(OscPreference.HOME_CONNECTOR.name)!!.also {
+        findPreference<HomeConnectorPreference>(OscPrefKey.HOME_CONNECTOR.name)!!.also {
             it.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newState ->
                 if (newState == true) {
                     checkPreferences(preferenceManager.sharedPreferences!!)?.also { message ->

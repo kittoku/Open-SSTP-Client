@@ -9,7 +9,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.checkPreferences
 
@@ -22,14 +22,14 @@ internal class SstpTileService : TileService() {
 
     private val listener by lazy {
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == OscPreference.ROOT_STATE.name) {
+            if (key == OscPrefKey.ROOT_STATE.name) {
                 updateTileState()
             }
         }
     }
 
     private val rootState: Boolean
-        get() = getBooleanPrefValue(OscPreference.ROOT_STATE, prefs)
+        get() = getBooleanPrefValue(OscPrefKey.ROOT_STATE, prefs)
 
     private val isVpnPrepared: Boolean
         get() = VpnService.prepare(this) == null

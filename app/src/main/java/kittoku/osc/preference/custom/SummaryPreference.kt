@@ -6,39 +6,25 @@ import android.util.AttributeSet
 import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 
 
-internal abstract class SummaryPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
-    abstract val oscPreference: OscPreference
-    abstract val preferenceTitle: String
+internal abstract class SummaryPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs), OscPreference {
     protected open val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == oscPreference.name) {
-            updateSummary()
+        if (key == oscPrefKey.name) {
+            updateView()
         }
     }
 
-    protected open val summaryValue: String
-        get() = getStringPrefValue(oscPreference, sharedPreferences!!)
-
-    private fun updateSummary() {
-        summary = summaryValue
-    }
-
     override fun onAttached() {
-        super.onAttached()
-
-        title = preferenceTitle
-        updateSummary()
-
         sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
+
+        initialize(this)
     }
 
     override fun onDetached() {
-        super.onDetached()
-
         sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
@@ -53,33 +39,25 @@ internal abstract class SummaryPreference(context: Context, attrs: AttributeSet)
 }
 
 internal class HomeStatusPreference(context: Context, attrs: AttributeSet) : SummaryPreference(context, attrs) {
-    override val oscPreference = OscPreference.HOME_STATUS
+    override val oscPrefKey = OscPrefKey.HOME_STATUS
+    override val parentKey: OscPrefKey? = null
     override val preferenceTitle = "Current Status"
-    override val summaryValue: String
-        get() {
-            val status = getStringPrefValue(oscPreference, sharedPreferences!!)
 
-            return status.ifEmpty {
-                "[No Connection Established]"
-            }
-        }
+    override fun updateView() {
+        summary = getStringPrefValue(oscPrefKey, sharedPreferences!!).ifEmpty { "[No Connection Established]" }
+    }
 }
 
 internal class RouteAllowedAppsPreference(context: Context, attrs: AttributeSet) : SummaryPreference(context, attrs) {
-    override val oscPreference = OscPreference.ROUTE_ALLOWED_APPS
+    override val oscPrefKey = OscPrefKey.ROUTE_ALLOWED_APPS
+    override val parentKey = OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE
     override val preferenceTitle = "Select Allowed Apps"
-    override val summaryValue: String
-        get() {
-            return when (val size = getSetPrefValue(oscPreference, sharedPreferences!!).size) {
-                0 -> "[No App Selected]"
-                1 -> "[1 App Selected]"
-                else -> "[$size Apps Selected]"
-            }
+
+    override fun updateView() {
+        summary = when (val size = getSetPrefValue(oscPrefKey, sharedPreferences!!).size) {
+            0 -> "[No App Selected]"
+            1 -> "[1 App Selected]"
+            else -> "[$size Apps Selected]"
         }
-
-    override fun onAttached() {
-        super.onAttached()
-
-        dependency = OscPreference.ROUTE_DO_ENABLE_APP_BASED_RULE.name
     }
 }

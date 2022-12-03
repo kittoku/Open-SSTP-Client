@@ -63,6 +63,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory>
-        <kittoku.osc.preference.custom.LinkOscPreference android:key="LINK_OSC"/>
+        <kittoku.osc.preference.custom.LinkOscPreference/>
     </PreferenceCategory>
 </PreferenceScreen>

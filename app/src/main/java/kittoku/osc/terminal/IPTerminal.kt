@@ -7,7 +7,7 @@ import kittoku.osc.client.Result
 import kittoku.osc.client.Where
 import kittoku.osc.extension.isSame
 import kittoku.osc.extension.toHexByteArray
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 import java.io.FileInputStream
@@ -23,10 +23,10 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     private lateinit var outputStream: FileOutputStream
 
     private val isAppBasedRuleEnabled = bridge.allowedApps.isNotEmpty()
-    private val isDefaultRouteAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
-    private val isPrivateAddressesRouted = getBooleanPrefValue(OscPreference.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
-    private val isCustomDNSServerUsed = getBooleanPrefValue(OscPreference.DNS_DO_USE_CUSTOM_SERVER, bridge.prefs)
-    private val isCustomRoutesAdded = getBooleanPrefValue(OscPreference.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
+    private val isDefaultRouteAdded = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
+    private val isPrivateAddressesRouted = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
+    private val isCustomDNSServerUsed = getBooleanPrefValue(OscPrefKey.DNS_DO_USE_CUSTOM_SERVER, bridge.prefs)
+    private val isCustomRoutesAdded = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
 
     internal suspend fun initializeTun(): Boolean {
         if (bridge.PPP_IPv4_ENABLED) {
@@ -40,7 +40,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
             }
 
             if (isCustomDNSServerUsed) {
-                bridge.builder.addDnsServer(getStringPrefValue(OscPreference.DNS_CUSTOM_ADDRESS, bridge.prefs))
+                bridge.builder.addDnsServer(getStringPrefValue(OscPrefKey.DNS_CUSTOM_ADDRESS, bridge.prefs))
             }
 
             if (!bridge.currentProposedDNS.isSame(ByteArray(4))) {
@@ -116,7 +116,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun addCustomRoutes(): Boolean {
-        getStringPrefValue(OscPreference.ROUTE_CUSTOM_ROUTES, bridge.prefs).split("\n").filter { it.isNotEmpty() }.forEach {
+        getStringPrefValue(OscPrefKey.ROUTE_CUSTOM_ROUTES, bridge.prefs).split("\n").filter { it.isNotEmpty() }.forEach {
             val parsed = it.split("/")
             if (parsed.size != 2) {
                 bridge.controlMailbox.send(ControlMessage(Where.ROUTE, Result.ERR_PARSING_FAILED))

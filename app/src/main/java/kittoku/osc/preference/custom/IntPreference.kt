@@ -4,75 +4,64 @@ import android.content.Context
 import android.text.InputType
 import android.util.AttributeSet
 import androidx.preference.EditTextPreference
-import androidx.preference.Preference
-import androidx.preference.Preference.SummaryProvider
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getIntPrefValue
 
 
-internal abstract class IntPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs) {
-    abstract val oscPreference: OscPreference
-    abstract val preferenceTitle: String
-    protected open val dependingPreference: OscPreference? = null
-    protected open val provider = SummaryProvider<Preference> {
-        getIntPrefValue(oscPreference, it.sharedPreferences!!).toString()
-    }
-
-    private fun initialize() {
-        text = getIntPrefValue(oscPreference, sharedPreferences!!).toString()
+internal abstract class IntPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs), OscPreference {
+    override fun updateView() {
+        text = getIntPrefValue(oscPrefKey, sharedPreferences!!).toString()
     }
 
     override fun onAttached() {
-        super.onAttached()
-
-        initialize()
-
-        title = preferenceTitle
-        summaryProvider = provider
-        dependingPreference?.also {
-            dependency = it.name
-        }
+        summaryProvider = SimpleSummaryProvider.getInstance()
 
         setOnBindEditTextListener { editText ->
             editText.inputType = InputType.TYPE_CLASS_NUMBER
         }
+
+        initialize(this)
     }
 }
 
 internal class SSLPortPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.SSL_PORT
+    override val oscPrefKey = OscPrefKey.SSL_PORT
+    override val parentKey: OscPrefKey? = null
     override val preferenceTitle = "Port Number"
 }
 
 internal class ProxyPortPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.PROXY_PORT
+    override val oscPrefKey = OscPrefKey.PROXY_PORT
+    override val parentKey = OscPrefKey.PROXY_DO_USE_PROXY
     override val preferenceTitle = "Proxy Server Port Number"
-    override val dependingPreference: OscPreference = OscPreference.PROXY_DO_USE_PROXY
 }
 
 internal class PPPMruPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.PPP_MRU
+    override val oscPrefKey = OscPrefKey.PPP_MRU
+    override val parentKey: OscPrefKey? = null
     override val preferenceTitle = "MRU"
 }
 
 internal class PPPMtuPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.PPP_MTU
+    override val oscPrefKey = OscPrefKey.PPP_MTU
+    override val parentKey: OscPrefKey? = null
     override val preferenceTitle = "MTU"
 }
 
 internal class PPPAuthTimeoutPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.PPP_AUTH_TIMEOUT
+    override val oscPrefKey = OscPrefKey.PPP_AUTH_TIMEOUT
+    override val parentKey: OscPrefKey? = null
     override val preferenceTitle = "Timeout Period (second)"
 }
 
 internal class ReconnectionCountPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.RECONNECTION_COUNT
+    override val oscPrefKey = OscPrefKey.RECONNECTION_COUNT
+    override val parentKey = OscPrefKey.RECONNECTION_ENABLED
     override val preferenceTitle = "Retry Count"
-    override val dependingPreference = OscPreference.RECONNECTION_ENABLED
 }
 
 internal class ReconnectionIntervalPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {
-    override val oscPreference = OscPreference.RECONNECTION_INTERVAL
+    override val oscPrefKey = OscPrefKey.RECONNECTION_INTERVAL
+    override val parentKey = OscPrefKey.RECONNECTION_ENABLED
     override val preferenceTitle = "Retry Interval (second)"
-    override val dependingPreference = OscPreference.RECONNECTION_ENABLED
 }

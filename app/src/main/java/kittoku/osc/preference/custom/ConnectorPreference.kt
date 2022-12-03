@@ -4,27 +4,29 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
 import androidx.preference.SwitchPreferenceCompat
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 
 
-internal class HomeConnectorPreference(context: Context, attrs: AttributeSet) : SwitchPreferenceCompat(context, attrs) {
-    private val oscPreference = OscPreference.HOME_CONNECTOR
+internal class HomeConnectorPreference(context: Context, attrs: AttributeSet) : SwitchPreferenceCompat(context, attrs), OscPreference {
+    override val oscPrefKey = OscPrefKey.HOME_CONNECTOR
+    override val parentKey: OscPrefKey? = null
+    override val preferenceTitle = ""
+    override fun updateView() {
+        isChecked = getBooleanPrefValue(oscPrefKey, sharedPreferences!!)
+    }
+
     private var listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-        if (key == oscPreference.name) {
-            isChecked = getBooleanPrefValue(oscPreference, prefs)
+        if (key == oscPrefKey.name) {
+            updateView()
         }
     }
 
     override fun onAttached() {
-        super.onAttached()
-
         sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
     }
 
     override fun onDetached() {
-        super.onDetached()
-
         sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(listener)
     }
 }

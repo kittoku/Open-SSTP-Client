@@ -18,7 +18,7 @@ import kittoku.osc.R
 import kittoku.osc.client.ClientBridge
 import kittoku.osc.client.control.ControlClient
 import kittoku.osc.client.control.LogWriter
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.*
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
@@ -45,7 +45,7 @@ internal class SstpVpnService : VpnService() {
     private var jobReconnect: Job? = null
 
     private fun setRootState(state: Boolean) {
-        setBooleanPrefValue(state, OscPreference.ROOT_STATE, prefs)
+        setBooleanPrefValue(state, OscPrefKey.ROOT_STATE, prefs)
     }
 
     private fun requestTileListening() {
@@ -62,10 +62,10 @@ internal class SstpVpnService : VpnService() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == OscPreference.ROOT_STATE.name) {
-                val newState = getBooleanPrefValue(OscPreference.ROOT_STATE, prefs)
+            if (key == OscPrefKey.ROOT_STATE.name) {
+                val newState = getBooleanPrefValue(OscPrefKey.ROOT_STATE, prefs)
 
-                setBooleanPrefValue(newState, OscPreference.HOME_CONNECTOR, prefs)
+                setBooleanPrefValue(newState, OscPrefKey.HOME_CONNECTOR, prefs)
                 requestTileListening()
             }
         }
@@ -82,7 +82,7 @@ internal class SstpVpnService : VpnService() {
 
                 beForegrounded()
                 resetReconnectionLife(prefs)
-                if (getBooleanPrefValue(OscPreference.LOG_DO_SAVE_LOG, prefs)) {
+                if (getBooleanPrefValue(OscPrefKey.LOG_DO_SAVE_LOG, prefs)) {
                     prepareLogWriter()
                 }
 
@@ -119,7 +119,7 @@ internal class SstpVpnService : VpnService() {
         val currentDateTime = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
         val filename = "log_osc_${currentDateTime}.txt"
 
-        val prefURI = getURIPrefValue(OscPreference.LOG_DIR, prefs)
+        val prefURI = getURIPrefValue(OscPrefKey.LOG_DIR, prefs)
         if (prefURI == null) {
             makeNotification(NOTIFICATION_ERROR_ID, "LOG: ERR_NULL_PREFERENCE")
             return
@@ -149,16 +149,16 @@ internal class SstpVpnService : VpnService() {
     internal fun launchJobReconnect() {
         jobReconnect = scope.launch {
             try {
-                getIntPrefValue(OscPreference.RECONNECTION_LIFE, prefs).also {
+                getIntPrefValue(OscPrefKey.RECONNECTION_LIFE, prefs).also {
                     val life = it - 1
-                    setIntPrefValue(life, OscPreference.RECONNECTION_LIFE, prefs)
+                    setIntPrefValue(life, OscPrefKey.RECONNECTION_LIFE, prefs)
 
                     val message = "Reconnection will be tried (LIFE = $life)"
                     makeNotification(NOTIFICATION_RECONNECT_ID, message)
                     logWriter?.report(message)
                 }
 
-                delay(getIntPrefValue(OscPreference.RECONNECTION_INTERVAL, prefs) * 1000L)
+                delay(getIntPrefValue(OscPrefKey.RECONNECTION_INTERVAL, prefs) * 1000L)
 
                 initializeClient()
             } catch (_: CancellationException) { }

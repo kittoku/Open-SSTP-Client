@@ -9,7 +9,7 @@ import kittoku.osc.client.Where
 import kittoku.osc.extension.capacityAfterLimit
 import kittoku.osc.extension.slide
 import kittoku.osc.extension.toIntAsUByte
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.*
 import kittoku.osc.unit.DataUnit
 import kotlinx.coroutines.Job
@@ -47,11 +47,11 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
 
     private var jobInitialize: Job? = null
 
-    private val doUseProxy = getBooleanPrefValue(OscPreference.PROXY_DO_USE_PROXY, bridge.prefs)
-    private val sslHostname = getStringPrefValue(OscPreference.HOME_HOSTNAME, bridge.prefs)
-    private val sslPort = getIntPrefValue(OscPreference.SSL_PORT, bridge.prefs)
-    private val selectedVersion = getStringPrefValue(OscPreference.SSL_VERSION, bridge.prefs)
-    private val enabledSuites = getSetPrefValue(OscPreference.SSL_SUITES, bridge.prefs)
+    private val doUseProxy = getBooleanPrefValue(OscPrefKey.PROXY_DO_USE_PROXY, bridge.prefs)
+    private val sslHostname = getStringPrefValue(OscPrefKey.HOME_HOSTNAME, bridge.prefs)
+    private val sslPort = getIntPrefValue(OscPrefKey.SSL_PORT, bridge.prefs)
+    private val selectedVersion = getStringPrefValue(OscPrefKey.SSL_VERSION, bridge.prefs)
+    private val enabledSuites = getSetPrefValue(OscPrefKey.SSL_SUITES, bridge.prefs)
 
     internal suspend fun initialize() {
         jobInitialize = bridge.service.scope.launch(bridge.handler) {
@@ -66,7 +66,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     private fun createTrustManagers(): Array<TrustManager> {
         val document = DocumentFile.fromTreeUri(
             bridge.service,
-            getURIPrefValue(OscPreference.SSL_CERT_DIR, bridge.prefs)!!
+            getURIPrefValue(OscPrefKey.SSL_CERT_DIR, bridge.prefs)!!
         )!!
 
         val certFactory = CertificateFactory.getInstance("X.509")
@@ -94,7 +94,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun startHandshake(): Boolean {
-        val sslContext = if (getBooleanPrefValue(OscPreference.SSL_DO_ADD_CERT, bridge.prefs)) {
+        val sslContext = if (getBooleanPrefValue(OscPrefKey.SSL_DO_ADD_CERT, bridge.prefs)) {
             SSLContext.getInstance(selectedVersion).also {
                 it.init(null, createTrustManagers(), null)
             }
@@ -109,7 +109,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             engine.enabledProtocols = arrayOf(selectedVersion)
         }
 
-        if (getBooleanPrefValue(OscPreference.SSL_DO_SELECT_SUITES, bridge.prefs)) {
+        if (getBooleanPrefValue(OscPrefKey.SSL_DO_SELECT_SUITES, bridge.prefs)) {
             val sortedSuites = engine.supportedCipherSuites.filter {
                 enabledSuites.contains(it)
             }
@@ -117,8 +117,8 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             engine.enabledCipherSuites = sortedSuites.toTypedArray()
         }
 
-        val socketHostname = if (doUseProxy) getStringPrefValue(OscPreference.PROXY_HOSTNAME, bridge.prefs) else sslHostname
-        val socketPort = if (doUseProxy) getIntPrefValue(OscPreference.PROXY_PORT, bridge.prefs) else sslPort
+        val socketHostname = if (doUseProxy) getStringPrefValue(OscPrefKey.PROXY_HOSTNAME, bridge.prefs) else sslHostname
+        val socketPort = if (doUseProxy) getIntPrefValue(OscPrefKey.PROXY_PORT, bridge.prefs) else sslPort
         socket = Socket(socketHostname, socketPort).also {
             socketInputStream = it.getInputStream()
             socketOutputStream = it.getOutputStream()
@@ -160,7 +160,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
             }
         }
 
-        if (getBooleanPrefValue(OscPreference.SSL_DO_VERIFY, bridge.prefs)) {
+        if (getBooleanPrefValue(OscPrefKey.SSL_DO_VERIFY, bridge.prefs)) {
             HttpsURLConnection.getDefaultHostnameVerifier().also {
                 if (!it.verify(sslHostname, engine.session)) {
                     bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_VERIFICATION_FAILED))
@@ -173,8 +173,8 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun establishProxy(): Boolean {
-        val username = getStringPrefValue(OscPreference.PROXY_USERNAME, bridge.prefs)
-        val password = getStringPrefValue(OscPreference.PROXY_PASSWORD, bridge.prefs)
+        val username = getStringPrefValue(OscPrefKey.PROXY_USERNAME, bridge.prefs)
+        val password = getStringPrefValue(OscPrefKey.PROXY_PASSWORD, bridge.prefs)
 
         val request = mutableListOf(
             "CONNECT ${sslHostname}:${sslPort} HTTP/1.1",

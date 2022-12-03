@@ -9,8 +9,9 @@ import android.view.MenuItem
 import androidx.preference.CheckBoxPreference
 import androidx.preference.PreferenceFragmentCompat
 import kittoku.osc.R
-import kittoku.osc.preference.APP_KEY_HEADER
-import kittoku.osc.preference.OscPreference
+import kittoku.osc.extension.removeTemporaryPreferences
+import kittoku.osc.preference.OscPrefKey
+import kittoku.osc.preference.TEMP_KEY_HEADER
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.setSetPrefValue
 import kittoku.osc.preference.getInstalledAppInfos
@@ -27,26 +28,12 @@ internal class AppsFragment : PreferenceFragmentCompat() {
         retrieveEachAppPreference(requireContext().applicationContext.packageManager)
     }
 
-    private fun getAppsKeys(): List<String> {
-        return prefs.all.keys.filter { it.startsWith(APP_KEY_HEADER) }
-    }
-
-    private fun clearEachAppPreference() { // needed for not reserving uninstalled apps' preferences
-        prefs.edit().also {
-            getAppsKeys().forEach { key ->
-                it.remove(key)
-            }
-
-            it.apply()
-        }
-    }
-
     private fun retrieveEachAppPreference(pm: PackageManager) {
-        val allowed = getSetPrefValue(OscPreference.ROUTE_ALLOWED_APPS, prefs)
+        val allowed = getSetPrefValue(OscPrefKey.ROUTE_ALLOWED_APPS, prefs)
 
         getInstalledAppInfos(pm).forEach { info ->
             val checkBox = CheckBoxPreference(requireContext()).also {
-                it.key = APP_KEY_HEADER + info.packageName
+                it.key = TEMP_KEY_HEADER + info.packageName
                 it.icon = pm.getApplicationIcon(info)
                 it.title = pm.getApplicationLabel(info)
                 it.isChecked = allowed.contains(info.packageName)
@@ -77,11 +64,11 @@ internal class AppsFragment : PreferenceFragmentCompat() {
         // use Checkbox preferences to ensure that only currently-installed apps are memorized
         processCurrentPreferences {
             if (it.isChecked) {
-                allowed.add(it.key.substring(APP_KEY_HEADER.length))
+                allowed.add(it.key.substring(TEMP_KEY_HEADER.length))
             }
         }
 
-        setSetPrefValue(allowed, OscPreference.ROUTE_ALLOWED_APPS, prefs)
+        setSetPrefValue(allowed, OscPrefKey.ROUTE_ALLOWED_APPS, prefs)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -100,7 +87,7 @@ internal class AppsFragment : PreferenceFragmentCompat() {
     override fun onDestroy() {
         super.onDestroy()
 
-        clearEachAppPreference()
+        prefs.removeTemporaryPreferences()
         memorizeAllowedApps()
     }
 }

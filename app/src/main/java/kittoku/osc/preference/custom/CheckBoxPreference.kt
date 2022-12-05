@@ -13,7 +13,7 @@ internal abstract class ModifiedCheckBoxPreference(context: Context, attrs: Attr
     }
 
     override fun onAttached() {
-        initialize(this)
+        initialize()
     }
 }
 

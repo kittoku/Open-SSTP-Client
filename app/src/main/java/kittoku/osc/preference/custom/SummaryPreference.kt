@@ -21,7 +21,7 @@ internal abstract class SummaryPreference(context: Context, attrs: AttributeSet)
     override fun onAttached() {
         sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
 
-        initialize(this)
+        initialize()
     }
 
     override fun onDetached() {

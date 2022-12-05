@@ -25,7 +25,7 @@ internal abstract class ModifiedMultiSelectListPreference(context: Context, attr
 
         summaryProvider = provider
 
-        initialize(this)
+        initialize()
     }
 }
 

@@ -20,7 +20,7 @@ internal abstract class IntPreference(context: Context, attrs: AttributeSet) : E
             editText.inputType = InputType.TYPE_CLASS_NUMBER
         }
 
-        initialize(this)
+        initialize()
     }
 }
 

@@ -29,7 +29,7 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
 
         summaryProvider = provider
 
-        initialize(this)
+        initialize()
     }
 }
 

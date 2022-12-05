@@ -13,7 +13,7 @@ internal abstract class SwitchPreference(context: Context, attrs: AttributeSet) 
     }
 
     override fun onAttached() {
-        initialize(this)
+        initialize()
     }
 }
 

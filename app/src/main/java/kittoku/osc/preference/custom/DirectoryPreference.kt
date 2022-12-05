@@ -13,7 +13,7 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
     }
 
     override fun onAttached() {
-        initialize(this)
+        initialize()
     }
 }
 

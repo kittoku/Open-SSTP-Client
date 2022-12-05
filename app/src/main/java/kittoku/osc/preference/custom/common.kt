@@ -11,11 +11,11 @@ internal interface OscPreference {
     fun updateView()
 }
 
-internal fun Preference.initialize(oscPreference: OscPreference) {
-    title = oscPreference.preferenceTitle
+internal fun <T> T.initialize() where T : Preference, T : OscPreference {
+    title = preferenceTitle
     isSingleLineTitle = false
 
-    oscPreference.parentKey?.also { dependency = it.name }
+    parentKey?.also { dependency = it.name }
 
-    oscPreference.updateView()
+    updateView()
 }

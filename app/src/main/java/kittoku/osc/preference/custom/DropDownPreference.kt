@@ -20,7 +20,7 @@ internal abstract class ModifiedDropDownPreference(context: Context, attrs: Attr
         entries = names ?: values
         summaryProvider = SimpleSummaryProvider.getInstance()
 
-        initialize(this)
+        initialize()
     }
 }
 

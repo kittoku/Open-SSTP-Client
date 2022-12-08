@@ -342,9 +342,9 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
                     outboundBuffer.position()
                 )
 
-                socketOutputStream.flush()
-
                 if (!buffer.hasRemaining()) {
+                    socketOutputStream.flush()
+
                     break
                 }
             }

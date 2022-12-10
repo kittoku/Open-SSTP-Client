@@ -48,7 +48,6 @@ internal enum class OscPrefKey {
     RECONNECTION_LIFE,
     LOG_DO_SAVE_LOG,
     LOG_DIR,
-    PROFILES,
 }
 
 

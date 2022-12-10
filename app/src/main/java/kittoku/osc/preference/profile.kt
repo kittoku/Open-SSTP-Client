@@ -34,7 +34,7 @@ internal fun exportProfile(prefs: SharedPreferences): String {
         profile += it.name + UNIT_SEPARATOR + getStringPrefValue(it, prefs) + RECORD_SEPARATOR
     }
 
-    DEFAULT_SET_MAP.keys.filter { it != OscPrefKey.PROFILES }.forEach {
+    DEFAULT_SET_MAP.keys.forEach {
         profile += it.name + UNIT_SEPARATOR + getSetPrefValue(it, prefs).joinToString(UNIT_SEPARATOR) + RECORD_SEPARATOR
     }
 
@@ -71,7 +71,7 @@ internal fun importProfile(profile: String, prefs: SharedPreferences) {
         setStringPrefValue(value, it, prefs)
     }
 
-    DEFAULT_SET_MAP.keys.filter { it != OscPrefKey.PROFILES }.forEach { key ->
+    DEFAULT_SET_MAP.keys.forEach { key ->
         val value = profileMap[key.name]?.split(UNIT_SEPARATOR)?.filter { it.isNotEmpty() }?.toSet() ?: DEFAULT_SET_MAP.getValue(key)
 
         setSetPrefValue(value, key, prefs)

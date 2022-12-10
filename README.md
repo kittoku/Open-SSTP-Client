@@ -10,11 +10,13 @@ Some of previous versions are released as apk file on [the releases page](https:
 ## Usage
 Enter `Host`, `Username` and `Password` preferences and turn the switch on. If a key icon gets to show on 
 the right side of the status bar, establishing a VPN connection has been succeeded. To disconnect 
-the connection, turn the switch off in the home tab or tap the notification.  
+the connection, turn the switch off in the home tab or tap the notification. You can save/load the 
+profile from the upper-right option menu.  
 <br>
-<img src="images/example_home.png" width=25%>
-<img src="images/example_setting_2.png" width=25%>
-<img src="images/example_tile.png" width=25%>
+<img src="images/example_home.png" width=20%>
+<img src="images/example_setting_1.png" width=20%>
+<img src="images/example_setting_2.png" width=20%>
+<img src="images/example_tile.png" width=20%>
 
 
 ## Setting tab

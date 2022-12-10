@@ -124,7 +124,7 @@ internal class ControlClient(internal val bridge: ClientBridge) {
                     }
                 }
 
-                else -> throw NotImplementedError()
+                else -> throw NotImplementedError(bridge.currentAuth.protocol.toString())
             }
 
 

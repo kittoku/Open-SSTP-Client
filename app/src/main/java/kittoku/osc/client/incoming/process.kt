@@ -60,7 +60,7 @@ internal suspend fun IncomingClient.processLcpFrame(code: Byte, buffer: ByteBuff
             LCP_CODE_CONFIGURE_ACK -> LCPConfigureAck()
             LCP_CODE_CONFIGURE_NAK -> LCPConfigureNak()
             LCP_CODE_CONFIGURE_REJECT -> LCPConfigureReject()
-            else -> throw NotImplementedError()
+            else -> throw NotImplementedError(code.toString())
         }
 
         tryReadDataUnit(configureFrame, buffer)?.also {
@@ -80,7 +80,7 @@ internal suspend fun IncomingClient.processLcpFrame(code: Byte, buffer: ByteBuff
             LCP_CODE_ECHO_REQUEST -> LCPEchoRequest()
             LCP_CODE_ECHO_REPLY -> LCPEchoReply()
             LCP_CODE_DISCARD_REQUEST -> LcpDiscardRequest()
-            else -> throw NotImplementedError()
+            else -> throw NotImplementedError(code.toString())
         }
 
         tryReadDataUnit(frame, buffer)?.also {

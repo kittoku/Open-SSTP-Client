@@ -57,7 +57,7 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
             is Ipv6cpClient -> ipv6cpMailbox = client.mailbox
             is PPPClient -> pppMailbox = client.mailbox
             is SstpClient -> sstpMailbox = client.mailbox
-            else -> throw NotImplementedError()
+            else -> throw NotImplementedError(client?.toString() ?: "")
         }
     }
 
@@ -70,7 +70,7 @@ internal class IncomingClient(internal val bridge: ClientBridge) {
             is Ipv6cpClient -> ipv6cpMailbox = null
             is PPPClient -> pppMailbox = null
             is SstpClient -> sstpMailbox = null
-            else -> throw NotImplementedError()
+            else -> throw NotImplementedError(client?.toString() ?: "")
         }
     }
 

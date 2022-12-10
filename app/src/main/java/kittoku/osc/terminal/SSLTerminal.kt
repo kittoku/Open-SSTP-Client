@@ -155,7 +155,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
                 }
 
                 else -> {
-                    throw NotImplementedError()
+                    throw NotImplementedError(engine.handshakeStatus.name)
                 }
             }
         }
@@ -313,7 +313,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
                 }
 
                 else -> {
-                    throw NotImplementedError()
+                    throw NotImplementedError(result.status.name)
                 }
             }
         }
@@ -333,7 +333,7 @@ internal class SSLTerminal(private val bridge: ClientBridge) {
 
                 result = engine.wrap(buffer, outboundBuffer)
                 if (result.status != SSLEngineResult.Status.OK) {
-                    throw NotImplementedError()
+                    throw NotImplementedError(result.status.name)
                 }
 
                 socketOutputStream.write(

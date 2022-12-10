@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 return when (position) {
                     0 -> homeFragment
                     1 -> settingFragment
-                    else -> throw NotImplementedError()
+                    else -> throw NotImplementedError(position.toString())
                 }
             }
         }.also {
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             tab.text = when (position) {
                 0 -> "HOME"
                 1 -> "SETTING"
-                else -> throw NotImplementedError()
+                else -> throw NotImplementedError(position.toString())
             }
         }.attach()
     }

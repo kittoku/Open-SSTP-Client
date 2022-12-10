@@ -29,7 +29,7 @@ internal class HashSetting(hashProtocol: Byte) {
                 macProtocol = "HmacSHA256"
             }
 
-            else -> throw NotImplementedError()
+            else -> throw NotImplementedError(hashProtocol.toString())
         }
     }
 }

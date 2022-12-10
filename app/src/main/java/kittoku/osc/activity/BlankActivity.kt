@@ -29,7 +29,7 @@ class BlankActivity : AppCompatActivity() {
                 fragment = AppsFragment()
             }
 
-            else -> throw NotImplementedError()
+            else -> throw NotImplementedError(intent.toString())
         }
 
         val binding = ActivityBlankBinding.inflate(layoutInflater)

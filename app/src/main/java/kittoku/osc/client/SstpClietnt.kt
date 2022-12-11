@@ -182,7 +182,7 @@ internal class SstpClient(val bridge: ClientBridge) {
 
         try { // maybe the socket is no longer available
             bridge.sslTerminal!!.sendDataUnit(packet)
-        } catch (_: Exception) { }
+        } catch (_: Throwable) { }
     }
 
     internal fun cancel() {

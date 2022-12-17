@@ -44,6 +44,7 @@ internal enum class Where {
     IPCP_IP,
     IPV6CP,
     IPV6CP_IDENTIFIER,
+    IP,
     IPv4,
     IPv6,
     ROUTE,

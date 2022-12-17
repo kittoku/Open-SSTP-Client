@@ -19,8 +19,8 @@ import java.nio.ByteBuffer
 internal class IPTerminal(private val bridge: ClientBridge) {
     private var fd: ParcelFileDescriptor? = null
 
-    private lateinit var inputStream: FileInputStream
-    private lateinit var outputStream: FileOutputStream
+    private var inputStream: FileInputStream? = null
+    private var outputStream: FileOutputStream? = null
 
     private val isAppBasedRuleEnabled = bridge.allowedApps.isNotEmpty()
     private val isDefaultRouteAdded = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
@@ -28,11 +28,11 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     private val isCustomDNSServerUsed = getBooleanPrefValue(OscPrefKey.DNS_DO_USE_CUSTOM_SERVER, bridge.prefs)
     private val isCustomRoutesAdded = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
 
-    internal suspend fun initializeTun(): Boolean {
+    internal suspend fun initialize() {
         if (bridge.PPP_IPv4_ENABLED) {
             if (bridge.currentIPv4.isSame(ByteArray(4))) {
                 bridge.controlMailbox.send(ControlMessage(Where.IPv4, Result.ERR_INVALID_ADDRESS))
-                return false
+                return
             }
 
             InetAddress.getByAddress(bridge.currentIPv4).also {
@@ -55,7 +55,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
         if (bridge.PPP_IPv6_ENABLED) {
             if (bridge.currentIPv6.isSame(ByteArray(8))) {
                 bridge.controlMailbox.send(ControlMessage(Where.IPv6, Result.ERR_INVALID_ADDRESS))
-                return false
+                return
             }
 
             ByteArray(16).also { // for link local addresses
@@ -84,7 +84,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
             outputStream = FileOutputStream(it.fileDescriptor)
         }
 
-        return true
+        bridge.controlMailbox.send(ControlMessage(Where.IP, Result.PROCEEDED))
     }
 
     private fun setIPv4BasedRouteing() {
@@ -142,13 +142,14 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     }
 
     internal fun writePacket(start: Int, size: Int, buffer: ByteBuffer) {
+        // nothing will be written until initialized
         // the position won't be changed
-        outputStream.write(buffer.array(), start, size)
+        outputStream?.write(buffer.array(), start, size)
     }
 
     internal fun readPacket(buffer: ByteBuffer) {
         buffer.clear()
-        buffer.position(inputStream.read(buffer.array(), 0, bridge.PPP_MTU))
+        buffer.position(inputStream?.read(buffer.array(), 0, bridge.PPP_MTU) ?: buffer.position())
         buffer.flip()
     }
 

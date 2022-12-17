@@ -59,6 +59,9 @@ internal class ControlClient(internal val bridge: ClientBridge) {
 
         jobMain = bridge.service.scope.launch(bridge.handler) {
             bridge.attachSSLTerminal()
+            bridge.attachIPTerminal()
+
+
             bridge.sslTerminal!!.initialize()
             if (!expectProceeded(Where.SSL, SSL_REQUEST_INTERVAL)) {
                 return@launch
@@ -83,11 +86,13 @@ internal class ControlClient(internal val bridge: ClientBridge) {
                 sstpClient!!.launchJobControl()
             }
 
+
             PPPClient(bridge).also {
                 pppClient = it
                 incomingClient!!.registerMailbox(it)
                 it.launchJobControl()
             }
+
 
             LCPClient(bridge).also {
                 incomingClient!!.registerMailbox(it)
@@ -158,16 +163,25 @@ internal class ControlClient(internal val bridge: ClientBridge) {
                 }
             }
 
+
+            bridge.ipTerminal!!.initialize()
+            if (!expectProceeded(Where.IP, null)) {
+                return@launch
+            }
+
+
             OutgoingClient(bridge).also {
                 it.launchJobMain()
                 outgoingClient = it
             }
+
 
             observer = NetworkObserver(bridge)
 
             if (isReconnectionEnabled) {
                 resetReconnectionLife(bridge.prefs)
             }
+
 
             expectProceeded(Where.SSTP_CONTROL, null) // wait ERR_ message until disconnection
         }

@@ -26,9 +26,6 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
 
     internal fun launchJobMain() {
         jobMain = bridge.service.scope.launch(bridge.handler) {
-            bridge.attachIPTerminal()
-            if (!bridge.ipTerminal!!.initializeTun()) return@launch
-
             launchJobRetrieve()
 
             val minCapacity = PREFIX_SIZE + bridge.PPP_MTU

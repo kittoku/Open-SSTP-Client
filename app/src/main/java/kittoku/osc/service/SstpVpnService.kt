@@ -1,5 +1,6 @@
 package kittoku.osc.service
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,9 +8,11 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.Build
 import android.service.quicksettings.TileService
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
@@ -203,7 +206,13 @@ internal class SstpVpnService : VpnService() {
             it.priority = NotificationCompat.PRIORITY_DEFAULT
             it.setAutoCancel(true)
 
-            notificationManager.notify(id, it.build())
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationManager.notify(id, it.build())
+            }
         }
     }
 

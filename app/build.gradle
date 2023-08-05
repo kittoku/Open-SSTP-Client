@@ -6,14 +6,14 @@ plugins {
 android {
     namespace 'kittoku.osc'
 
-    compileSdkVersion 33
+    compileSdk 33
 
     defaultConfig {
         applicationId "kittoku.osc"
-        minSdkVersion 23
-        targetSdkVersion 33
-        versionCode 34
-        versionName "1.6.4"
+        minSdk 23
+        targetSdk 33
+        versionCode 35
+        versionName "1.6.5"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -40,10 +40,10 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation "androidx.preference:preference-ktx:1.2.0"
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

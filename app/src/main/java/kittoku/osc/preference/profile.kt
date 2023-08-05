@@ -2,7 +2,16 @@ package kittoku.osc.preference
 
 import android.content.SharedPreferences
 import kittoku.osc.extension.toUri
-import kittoku.osc.preference.accessor.*
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.accessor.getURIPrefValue
+import kittoku.osc.preference.accessor.setBooleanPrefValue
+import kittoku.osc.preference.accessor.setIntPrefValue
+import kittoku.osc.preference.accessor.setSetPrefValue
+import kittoku.osc.preference.accessor.setStringPrefValue
+import kittoku.osc.preference.accessor.setURIPrefValue
 
 
 private const val RECORD_SEPARATOR = 0x1E.toChar().toString()
@@ -47,14 +56,14 @@ internal fun exportProfile(prefs: SharedPreferences): String {
     return profile
 }
 
-internal fun importProfile(profile: String, prefs: SharedPreferences) {
-    val profileMap = profile.split(RECORD_SEPARATOR).filter { it.isNotEmpty() }.associate {
+internal fun importProfile(profile: String?, prefs: SharedPreferences) {
+    val profileMap = profile?.split(RECORD_SEPARATOR)?.filter { it.isNotEmpty() }?.associate {
         val index = it.indexOf(UNIT_SEPARATOR)
         val key = it.substring(0, index)
         val value = it.substring(index + 1)
 
         key to value
-    }
+    } ?: mapOf()
 
     DEFAULT_BOOLEAN_MAP.keys.filter { it !in EXCLUDED_BOOLEAN_PREFERENCES }.forEach {
         val value = profileMap[it.name]?.toBooleanStrict() ?: DEFAULT_BOOLEAN_MAP.getValue(it)

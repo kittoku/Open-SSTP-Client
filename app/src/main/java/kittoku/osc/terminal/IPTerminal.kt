@@ -49,7 +49,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 }
             }
 
-            setIPv4BasedRouteing()
+            setIPv4BasedRouting()
         }
 
         if (bridge.PPP_IPv6_ENABLED) {
@@ -65,7 +65,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
                 bridge.builder.addAddress(InetAddress.getByAddress(it), 64)
             }
 
-            setIPv6BasedRouteing()
+            setIPv6BasedRouting()
         }
 
         if (isCustomRoutesAdded) {
@@ -87,7 +87,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
         bridge.controlMailbox.send(ControlMessage(Where.IP, Result.PROCEEDED))
     }
 
-    private fun setIPv4BasedRouteing() {
+    private fun setIPv4BasedRouting() {
         if (isDefaultRouteAdded) {
             bridge.builder.addRoute("0.0.0.0", 0)
         }
@@ -99,7 +99,7 @@ internal class IPTerminal(private val bridge: ClientBridge) {
         }
     }
 
-    private fun setIPv6BasedRouteing() {
+    private fun setIPv6BasedRouting() {
         if (isDefaultRouteAdded) {
             bridge.builder.addRoute("::", 0)
         }

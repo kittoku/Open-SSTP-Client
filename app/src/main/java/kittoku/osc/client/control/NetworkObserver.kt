@@ -66,7 +66,7 @@ internal class NetworkObserver(val bridge: ClientBridge) {
         }
         summary.add("")
 
-        summary.add("[Routeing]")
+        summary.add("[Routing]")
         properties.routes.forEach {
             summary.add(it.toString())
         }

@@ -37,7 +37,7 @@ domain names possibly cannot be resolved.
 
 ### Enable App-Based Rule
 With `Select Allowed Apps` option, you can specify the apps which use the VPN tunnel.
-Even allowed apps cannot use the VPN tunnel if their routes are not on the routeing table.
+Even allowed apps cannot use the VPN tunnel if their routes are not on the routing table.
 So when you use this option, enabling `Add Default Route` option is recommended.
 
 

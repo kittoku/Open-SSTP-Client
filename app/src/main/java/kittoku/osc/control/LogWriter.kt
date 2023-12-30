@@ -1,11 +1,12 @@
-package kittoku.osc.client.control
+package kittoku.osc.control
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.BufferedOutputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 
 internal class LogWriter(logOutput: OutputStream) {

@@ -1,6 +1,6 @@
 package kittoku.osc.cipher.ppp
 
-import kittoku.osc.client.ChapMessage
+import kittoku.osc.ChapMessage
 import kittoku.osc.extension.isSame
 import kittoku.osc.extension.sum
 import kittoku.osc.extension.toHexByteArray

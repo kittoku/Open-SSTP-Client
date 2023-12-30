@@ -1,4 +1,4 @@
-package kittoku.osc.client.incoming
+package kittoku.osc.io.incoming
 
 internal class EchoTimer(private val interval: Long, private val echoFunction: suspend () -> Unit) {
     private var lastTicked = 0L

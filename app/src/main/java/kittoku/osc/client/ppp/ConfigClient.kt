@@ -1,10 +1,14 @@
 package kittoku.osc.client.ppp
 
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
-import kittoku.osc.unit.ppp.*
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
+import kittoku.osc.unit.ppp.Frame
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_ACK
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_NAK
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_REJECT
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_REQUEST
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
@@ -17,7 +21,7 @@ private const val PPP_REQUEST_COUNT = 10
 internal const val PPP_NEGOTIATION_TIMEOUT = PPP_REQUEST_INTERVAL * PPP_REQUEST_COUNT
 
 
-internal abstract class ConfigClient<T: Frame>(private val where: Where, protected val bridge: ClientBridge) {
+internal abstract class ConfigClient<T: Frame>(private val where: Where, protected val bridge: SharedBridge) {
     internal val mailbox = Channel<T>(Channel.BUFFERED)
 
     private var jobNegotiation: Job? = null

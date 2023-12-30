@@ -1,9 +1,9 @@
 package kittoku.osc.client.ppp
 
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.unit.ppp.Ipv6cpConfigureAck
 import kittoku.osc.unit.ppp.Ipv6cpConfigureFrame
 import kittoku.osc.unit.ppp.Ipv6cpConfigureReject
@@ -12,7 +12,7 @@ import kittoku.osc.unit.ppp.option.Ipv6cpIdentifierOption
 import kittoku.osc.unit.ppp.option.Ipv6cpOptionPack
 
 
-internal class Ipv6cpClient(bridge: ClientBridge) : ConfigClient<Ipv6cpConfigureFrame>(Where.IPV6CP, bridge) {
+internal class Ipv6cpClient(bridge: SharedBridge) : ConfigClient<Ipv6cpConfigureFrame>(Where.IPV6CP, bridge) {
     override fun tryCreateServerReject(request: Ipv6cpConfigureFrame): Ipv6cpConfigureFrame? {
         val reject = Ipv6cpOptionPack()
 

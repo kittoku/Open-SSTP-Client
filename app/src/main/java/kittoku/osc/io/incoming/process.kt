@@ -1,16 +1,76 @@
-package kittoku.osc.client.incoming
+package kittoku.osc.io.incoming
 
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.Where
 import kittoku.osc.extension.move
 import kittoku.osc.unit.DataUnit
-import kittoku.osc.unit.ppp.*
-import kittoku.osc.unit.sstp.*
+import kittoku.osc.unit.ppp.CHAP_CODE_CHALLENGE
+import kittoku.osc.unit.ppp.CHAP_CODE_FAILURE
+import kittoku.osc.unit.ppp.CHAP_CODE_RESPONSE
+import kittoku.osc.unit.ppp.CHAP_CODE_SUCCESS
+import kittoku.osc.unit.ppp.ChapChallenge
+import kittoku.osc.unit.ppp.ChapFailure
+import kittoku.osc.unit.ppp.ChapResponse
+import kittoku.osc.unit.ppp.ChapSuccess
+import kittoku.osc.unit.ppp.IpcpConfigureAck
+import kittoku.osc.unit.ppp.IpcpConfigureNak
+import kittoku.osc.unit.ppp.IpcpConfigureReject
+import kittoku.osc.unit.ppp.IpcpConfigureRequest
+import kittoku.osc.unit.ppp.Ipv6cpConfigureAck
+import kittoku.osc.unit.ppp.Ipv6cpConfigureNak
+import kittoku.osc.unit.ppp.Ipv6cpConfigureReject
+import kittoku.osc.unit.ppp.Ipv6cpConfigureRequest
+import kittoku.osc.unit.ppp.LCPCodeReject
+import kittoku.osc.unit.ppp.LCPConfigureAck
+import kittoku.osc.unit.ppp.LCPConfigureNak
+import kittoku.osc.unit.ppp.LCPConfigureReject
+import kittoku.osc.unit.ppp.LCPConfigureRequest
+import kittoku.osc.unit.ppp.LCPEchoReply
+import kittoku.osc.unit.ppp.LCPEchoRequest
+import kittoku.osc.unit.ppp.LCPProtocolReject
+import kittoku.osc.unit.ppp.LCPTerminalAck
+import kittoku.osc.unit.ppp.LCPTerminalRequest
+import kittoku.osc.unit.ppp.LCP_CODE_CODE_REJECT
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_ACK
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_NAK
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_REJECT
+import kittoku.osc.unit.ppp.LCP_CODE_CONFIGURE_REQUEST
+import kittoku.osc.unit.ppp.LCP_CODE_DISCARD_REQUEST
+import kittoku.osc.unit.ppp.LCP_CODE_ECHO_REPLY
+import kittoku.osc.unit.ppp.LCP_CODE_ECHO_REQUEST
+import kittoku.osc.unit.ppp.LCP_CODE_PROTOCOL_REJECT
+import kittoku.osc.unit.ppp.LCP_CODE_TERMINATE_ACK
+import kittoku.osc.unit.ppp.LCP_CODE_TERMINATE_REQUEST
+import kittoku.osc.unit.ppp.LcpDiscardRequest
+import kittoku.osc.unit.ppp.PAPAuthenticateAck
+import kittoku.osc.unit.ppp.PAPAuthenticateNak
+import kittoku.osc.unit.ppp.PAPAuthenticateRequest
+import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_ACK
+import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_NAK
+import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_REQUEST
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECTED
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECT_NAK
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECT_REQUEST
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_ECHO_REQUEST
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_ECHO_RESPONSE
+import kittoku.osc.unit.sstp.SstpCallAbort
+import kittoku.osc.unit.sstp.SstpCallConnectAck
+import kittoku.osc.unit.sstp.SstpCallConnectNak
+import kittoku.osc.unit.sstp.SstpCallConnectRequest
+import kittoku.osc.unit.sstp.SstpCallConnected
+import kittoku.osc.unit.sstp.SstpCallDisconnect
+import kittoku.osc.unit.sstp.SstpCallDisconnectAck
+import kittoku.osc.unit.sstp.SstpEchoRequest
+import kittoku.osc.unit.sstp.SstpEchoResponse
 import java.nio.ByteBuffer
 
 
-private suspend fun IncomingClient.tryReadDataUnit(unit: DataUnit, buffer: ByteBuffer): Exception? {
+private suspend fun IncomingManager.tryReadDataUnit(unit: DataUnit, buffer: ByteBuffer): Exception? {
     try {
         unit.read(buffer)
     } catch (e: Exception) { // need to save packet log
@@ -24,7 +84,7 @@ private suspend fun IncomingClient.tryReadDataUnit(unit: DataUnit, buffer: ByteB
     return null
 }
 
-internal suspend fun IncomingClient.processControlPacket(type: Short, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processControlPacket(type: Short, buffer: ByteBuffer): Boolean {
     val packet = when (type) {
         SSTP_MESSAGE_TYPE_CALL_CONNECT_REQUEST -> SstpCallConnectRequest()
         SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK -> SstpCallConnectAck()
@@ -53,7 +113,7 @@ internal suspend fun IncomingClient.processControlPacket(type: Short, buffer: By
     return true
 }
 
-internal suspend fun IncomingClient.processLcpFrame(code: Byte, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processLcpFrame(code: Byte, buffer: ByteBuffer): Boolean {
     if (code in 1..4) {
         val configureFrame = when (code) {
             LCP_CODE_CONFIGURE_REQUEST -> LCPConfigureRequest()
@@ -98,7 +158,7 @@ internal suspend fun IncomingClient.processLcpFrame(code: Byte, buffer: ByteBuff
     return false
 }
 
-internal suspend fun IncomingClient.processPAPFrame(code: Byte, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processPAPFrame(code: Byte, buffer: ByteBuffer): Boolean {
     val frame = when (code) {
         PAP_CODE_AUTHENTICATE_REQUEST -> PAPAuthenticateRequest()
         PAP_CODE_AUTHENTICATE_ACK -> PAPAuthenticateAck()
@@ -120,7 +180,7 @@ internal suspend fun IncomingClient.processPAPFrame(code: Byte, buffer: ByteBuff
     return true
 }
 
-internal suspend fun IncomingClient.processChapFrame(code: Byte, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processChapFrame(code: Byte, buffer: ByteBuffer): Boolean {
     val frame = when (code) {
         CHAP_CODE_CHALLENGE -> ChapChallenge()
         CHAP_CODE_RESPONSE -> ChapResponse()
@@ -143,7 +203,7 @@ internal suspend fun IncomingClient.processChapFrame(code: Byte, buffer: ByteBuf
     return true
 }
 
-internal suspend fun IncomingClient.processIpcpFrame(code: Byte, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processIpcpFrame(code: Byte, buffer: ByteBuffer): Boolean {
     val frame = when (code) {
         LCP_CODE_CONFIGURE_REQUEST -> IpcpConfigureRequest()
         LCP_CODE_CONFIGURE_ACK -> IpcpConfigureAck()
@@ -166,7 +226,7 @@ internal suspend fun IncomingClient.processIpcpFrame(code: Byte, buffer: ByteBuf
     return true
 }
 
-internal suspend fun IncomingClient.processIpv6cpFrame(code: Byte, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processIpv6cpFrame(code: Byte, buffer: ByteBuffer): Boolean {
     val frame = when (code) {
         LCP_CODE_CONFIGURE_REQUEST -> Ipv6cpConfigureRequest()
         LCP_CODE_CONFIGURE_ACK -> Ipv6cpConfigureAck()
@@ -189,7 +249,7 @@ internal suspend fun IncomingClient.processIpv6cpFrame(code: Byte, buffer: ByteB
     return true
 }
 
-internal suspend fun IncomingClient.processUnknownProtocol(protocol: Short, packetSize: Int, buffer: ByteBuffer): Boolean {
+internal suspend fun IncomingManager.processUnknownProtocol(protocol: Short, packetSize: Int, buffer: ByteBuffer): Boolean {
     LCPProtocolReject().also {
         it.rejectedProtocol = protocol
         it.id = bridge.allocateNewFrameID()
@@ -205,7 +265,7 @@ internal suspend fun IncomingClient.processUnknownProtocol(protocol: Short, pack
     return true
 }
 
-internal fun IncomingClient.processIPPacket(isEnabledProtocol: Boolean, packetSize: Int, buffer: ByteBuffer) {
+internal fun IncomingManager.processIPPacket(isEnabledProtocol: Boolean, packetSize: Int, buffer: ByteBuffer) {
     if (isEnabledProtocol) {
         val start = buffer.position() + 8
         val ipPacketSize = packetSize - 8

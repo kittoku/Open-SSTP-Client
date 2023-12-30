@@ -1,4 +1,4 @@
-package kittoku.osc.client
+package kittoku.osc
 
 import androidx.preference.PreferenceManager
 import kittoku.osc.preference.AppString
@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
+import java.util.UUID
 
 
 internal class ChapMessage {
@@ -87,7 +87,7 @@ internal enum class Result {
     ERR_INVALID_PACKET_SIZE,
 }
 
-internal class ClientBridge(internal val service: SstpVpnService) {
+internal class SharedBridge(internal val service: SstpVpnService) {
     internal val prefs = PreferenceManager.getDefaultSharedPreferences(service)
     internal val builder = service.Builder()
     internal lateinit var handler: CoroutineExceptionHandler

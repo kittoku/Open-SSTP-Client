@@ -1,7 +1,7 @@
 package kittoku.osc.cipher.sstp
 
+import kittoku.osc.ChapMessage
 import kittoku.osc.cipher.ppp.hashMd4
-import kittoku.osc.client.ChapMessage
 import kittoku.osc.extension.sum
 import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.unit.sstp.CERT_HASH_PROTOCOL_SHA1

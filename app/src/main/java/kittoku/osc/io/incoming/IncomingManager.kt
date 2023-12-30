@@ -1,12 +1,35 @@
-package kittoku.osc.client.incoming
+package kittoku.osc.io.incoming
 
+import kittoku.osc.ControlMessage
 import kittoku.osc.MAX_MRU
-import kittoku.osc.client.*
-import kittoku.osc.client.ppp.*
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
+import kittoku.osc.client.SstpClient
+import kittoku.osc.client.ppp.ChapClient
+import kittoku.osc.client.ppp.IpcpClient
+import kittoku.osc.client.ppp.Ipv6cpClient
+import kittoku.osc.client.ppp.LCPClient
+import kittoku.osc.client.ppp.PAPClient
+import kittoku.osc.client.ppp.PPPClient
 import kittoku.osc.extension.probeByte
 import kittoku.osc.extension.probeShort
 import kittoku.osc.extension.toIntAsUShort
-import kittoku.osc.unit.ppp.*
+import kittoku.osc.unit.ppp.ChapFrame
+import kittoku.osc.unit.ppp.Frame
+import kittoku.osc.unit.ppp.IpcpConfigureFrame
+import kittoku.osc.unit.ppp.Ipv6cpConfigureFrame
+import kittoku.osc.unit.ppp.LCPConfigureFrame
+import kittoku.osc.unit.ppp.LCPEchoRequest
+import kittoku.osc.unit.ppp.PAPFrame
+import kittoku.osc.unit.ppp.PPP_HEADER
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_CHAP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_IP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPCP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPv6
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPv6CP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_LCP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_PAP
 import kittoku.osc.unit.sstp.ControlPacket
 import kittoku.osc.unit.sstp.SSTP_PACKET_TYPE_CONTROL
 import kittoku.osc.unit.sstp.SSTP_PACKET_TYPE_DATA
@@ -21,7 +44,7 @@ import java.nio.ByteBuffer
 private const val SSTP_ECHO_INTERVAL = 20_000L
 private const val PPP_ECHO_INTERVAL = 20_000L
 
-internal class IncomingClient(internal val bridge: ClientBridge) {
+internal class IncomingManager(internal val bridge: SharedBridge) {
     private val bufferSize = bridge.sslTerminal!!.getApplicationBufferSize() + MAX_MRU + 8 // MAX_MRU + 8 for fragment
 
     private var jobMain: Job? = null

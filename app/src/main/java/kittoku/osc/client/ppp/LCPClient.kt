@@ -1,18 +1,26 @@
 package kittoku.osc.client.ppp
 
+import kittoku.osc.ControlMessage
 import kittoku.osc.DEFAULT_MRU
 import kittoku.osc.MIN_MRU
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
-import kittoku.osc.unit.ppp.*
-import kittoku.osc.unit.ppp.option.*
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
+import kittoku.osc.unit.ppp.LCPConfigureAck
+import kittoku.osc.unit.ppp.LCPConfigureFrame
+import kittoku.osc.unit.ppp.LCPConfigureNak
+import kittoku.osc.unit.ppp.LCPConfigureReject
+import kittoku.osc.unit.ppp.LCPConfigureRequest
+import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
+import kittoku.osc.unit.ppp.option.AuthOptionPAP
+import kittoku.osc.unit.ppp.option.AuthOptionUnknown
+import kittoku.osc.unit.ppp.option.LCPOptionPack
+import kittoku.osc.unit.ppp.option.MRUOption
 import kotlin.math.max
 import kotlin.math.min
 
 
-internal class LCPClient(bridge: ClientBridge) : ConfigClient<LCPConfigureFrame>(Where.LCP, bridge) {
+internal class LCPClient(bridge: SharedBridge) : ConfigClient<LCPConfigureFrame>(Where.LCP, bridge) {
     private var isMruRejected = false
 
     override fun tryCreateServerReject(request: LCPConfigureFrame): LCPConfigureFrame? {

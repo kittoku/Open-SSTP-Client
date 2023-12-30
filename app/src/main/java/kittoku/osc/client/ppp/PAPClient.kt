@@ -1,9 +1,9 @@
 package kittoku.osc.client.ppp
 
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.unit.ppp.PAPAuthenticateRequest
 import kittoku.osc.unit.ppp.PAPFrame
 import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_ACK
@@ -14,7 +14,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 
-internal class PAPClient(private val bridge: ClientBridge) {
+internal class PAPClient(private val bridge: SharedBridge) {
     internal val mailbox = Channel<PAPFrame>(Channel.BUFFERED)
     private var jobAuth: Job? = null
 

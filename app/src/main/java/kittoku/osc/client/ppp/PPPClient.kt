@@ -1,17 +1,24 @@
 package kittoku.osc.client.ppp
 
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
-import kittoku.osc.unit.ppp.*
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
+import kittoku.osc.unit.ppp.Frame
+import kittoku.osc.unit.ppp.LCPCodeReject
+import kittoku.osc.unit.ppp.LCPEchoReply
+import kittoku.osc.unit.ppp.LCPEchoRequest
+import kittoku.osc.unit.ppp.LCPProtocolReject
+import kittoku.osc.unit.ppp.LCPTerminalAck
+import kittoku.osc.unit.ppp.LCPTerminalRequest
+import kittoku.osc.unit.ppp.LcpDiscardRequest
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 
-internal class PPPClient(val bridge: ClientBridge) {
+internal class PPPClient(val bridge: SharedBridge) {
     internal val mailbox = Channel<Frame>(Channel.BUFFERED)
 
     private var jobControl: Job? = null

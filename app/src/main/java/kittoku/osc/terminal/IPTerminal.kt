@@ -1,10 +1,10 @@
 package kittoku.osc.terminal
 
 import android.os.ParcelFileDescriptor
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.extension.isSame
 import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.preference.OscPrefKey
@@ -16,7 +16,7 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 
 
-internal class IPTerminal(private val bridge: ClientBridge) {
+internal class IPTerminal(private val bridge: SharedBridge) {
     private var fd: ParcelFileDescriptor? = null
 
     private var inputStream: FileInputStream? = null

@@ -1,5 +1,9 @@
-package kittoku.osc.client
+package kittoku.osc.io
 
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.unit.ppp.PPP_HEADER
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPv6
@@ -13,11 +17,11 @@ import java.nio.ByteBuffer
 
 private const val PREFIX_SIZE = 8
 
-private const val IPv4_HEADER: Int = (0x4).shl(28)
-private const val IPv6_HEADER: Int = (0x6).shl(28)
-private const val IP_VERSION_MASK: Int = (0xF).shl(28)
+private const val IPv4_VERSION_HEADER: Int = (0x4).shl(4 + 3 * Byte.SIZE_BITS)
+private const val IPv6_VERSION_HEADER: Int = (0x6).shl(4 + 3 * Byte.SIZE_BITS)
+private const val IP_VERSION_MASK: Int = (0xF).shl(4 + 3 * Byte.SIZE_BITS)
 
-internal class OutgoingClient(private val bridge: ClientBridge) {
+internal class OutgoingManager(private val bridge: SharedBridge) {
     private var jobMain: Job? = null
     private var jobRetrieve: Job? = null
 
@@ -72,13 +76,13 @@ internal class OutgoingClient(private val bridge: ClientBridge) {
     private suspend fun load(packet: ByteBuffer): Boolean { // true if data protocol is enabled
         val header = packet.getInt(0)
         val protocol = when (header and IP_VERSION_MASK) {
-            IPv4_HEADER -> {
+            IPv4_VERSION_HEADER -> {
                 if (!bridge.PPP_IPv4_ENABLED) return false
 
                 PPP_PROTOCOL_IP
             }
 
-            IPv6_HEADER -> {
+            IPv6_VERSION_HEADER -> {
                 if (!bridge.PPP_IPv6_ENABLED) return false
 
                 PPP_PROTOCOL_IPv6

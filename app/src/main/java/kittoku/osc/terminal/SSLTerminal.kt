@@ -2,15 +2,19 @@ package kittoku.osc.terminal
 
 import android.util.Base64
 import androidx.documentfile.provider.DocumentFile
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.extension.capacityAfterLimit
 import kittoku.osc.extension.slide
 import kittoku.osc.extension.toIntAsUByte
 import kittoku.osc.preference.OscPrefKey
-import kittoku.osc.preference.accessor.*
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.accessor.getURIPrefValue
 import kittoku.osc.unit.DataUnit
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -26,7 +30,13 @@ import java.nio.ByteBuffer
 import java.security.KeyStore
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import javax.net.ssl.*
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLEngine
+import javax.net.ssl.SSLEngineResult
+import javax.net.ssl.SSLSession
+import javax.net.ssl.TrustManager
+import javax.net.ssl.TrustManagerFactory
 
 
 private const val HTTP_DELIMITER = "\r\n"
@@ -34,7 +44,7 @@ private const val HTTP_SUFFIX = "\r\n\r\n"
 
 internal const val SSL_REQUEST_INTERVAL = 10_000L
 
-internal class SSLTerminal(private val bridge: ClientBridge) {
+internal class SSLTerminal(private val bridge: SharedBridge) {
     private val mutex = Mutex()
 
     private var socket: Socket? = null

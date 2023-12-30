@@ -1,9 +1,19 @@
 package kittoku.osc.client.ppp
 
+import kittoku.osc.ChapMessage
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.cipher.ppp.authenticateChapServerResponse
 import kittoku.osc.cipher.ppp.generateChapClientResponse
-import kittoku.osc.client.*
-import kittoku.osc.unit.ppp.*
+import kittoku.osc.unit.ppp.CHAP_CODE_CHALLENGE
+import kittoku.osc.unit.ppp.CHAP_CODE_FAILURE
+import kittoku.osc.unit.ppp.CHAP_CODE_SUCCESS
+import kittoku.osc.unit.ppp.ChapChallenge
+import kittoku.osc.unit.ppp.ChapFrame
+import kittoku.osc.unit.ppp.ChapResponse
+import kittoku.osc.unit.ppp.ChapSuccess
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
@@ -11,7 +21,7 @@ import kotlinx.coroutines.launch
 import java.security.SecureRandom
 
 
-internal class ChapClient(private val bridge: ClientBridge) {
+internal class ChapClient(private val bridge: SharedBridge) {
     internal val mailbox = Channel<ChapFrame>(Channel.BUFFERED)
     private var jobAuth: Job? = null
 

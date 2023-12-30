@@ -1,13 +1,17 @@
-package kittoku.osc.client.control
+package kittoku.osc.control
 
-import android.net.*
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
-import kittoku.osc.client.ClientBridge
+import kittoku.osc.SharedBridge
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.setStringPrefValue
 
 
-internal class NetworkObserver(val bridge: ClientBridge) {
+internal class NetworkObserver(val bridge: SharedBridge) {
     private val manager = bridge.service.getSystemService(ConnectivityManager::class.java)
     private val callback: ConnectivityManager.NetworkCallback
 

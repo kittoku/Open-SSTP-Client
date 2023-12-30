@@ -1,9 +1,21 @@
-package kittoku.osc.client.control
+package kittoku.osc.control
 
-import kittoku.osc.client.*
-import kittoku.osc.client.incoming.IncomingClient
-import kittoku.osc.client.ppp.*
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
+import kittoku.osc.client.SSTP_REQUEST_TIMEOUT
+import kittoku.osc.client.SstpClient
+import kittoku.osc.client.ppp.ChapClient
+import kittoku.osc.client.ppp.IpcpClient
+import kittoku.osc.client.ppp.Ipv6cpClient
+import kittoku.osc.client.ppp.LCPClient
+import kittoku.osc.client.ppp.PAPClient
+import kittoku.osc.client.ppp.PPPClient
+import kittoku.osc.client.ppp.PPP_NEGOTIATION_TIMEOUT
 import kittoku.osc.debug.assertAlways
+import kittoku.osc.io.OutgoingManager
+import kittoku.osc.io.incoming.IncomingManager
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
@@ -22,13 +34,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withTimeoutOrNull
 
 
-internal class ControlClient(internal val bridge: ClientBridge) {
+internal class Controller(internal val bridge: SharedBridge) {
     private var observer: NetworkObserver? = null
 
     private var sstpClient: SstpClient? = null
     private var pppClient: PPPClient? = null
-    private var incomingClient: IncomingClient? = null
-    private var outgoingClient: OutgoingClient? = null
+    private var incomingManager: IncomingManager? = null
+    private var outgoingManager: OutgoingManager? = null
 
     private var lcpClient: LCPClient? = null
     private var papClient: PAPClient? = null
@@ -68,15 +80,15 @@ internal class ControlClient(internal val bridge: ClientBridge) {
             }
 
 
-            IncomingClient(bridge).also {
+            IncomingManager(bridge).also {
                 it.launchJobMain()
-                incomingClient = it
+                incomingManager = it
             }
 
 
             SstpClient(bridge).also {
                 sstpClient = it
-                incomingClient!!.registerMailbox(it)
+                incomingManager!!.registerMailbox(it)
                 it.launchJobRequest()
 
                 if (!expectProceeded(Where.SSTP_REQUEST, SSTP_REQUEST_TIMEOUT)) {
@@ -89,39 +101,39 @@ internal class ControlClient(internal val bridge: ClientBridge) {
 
             PPPClient(bridge).also {
                 pppClient = it
-                incomingClient!!.registerMailbox(it)
+                incomingManager!!.registerMailbox(it)
                 it.launchJobControl()
             }
 
 
             LCPClient(bridge).also {
-                incomingClient!!.registerMailbox(it)
+                incomingManager!!.registerMailbox(it)
                 it.launchJobNegotiation()
 
                 if (!expectProceeded(Where.LCP, PPP_NEGOTIATION_TIMEOUT)) {
                     return@launch
                 }
 
-                incomingClient!!.unregisterMailbox(it)
+                incomingManager!!.unregisterMailbox(it)
             }
 
 
             val authTimeout = getIntPrefValue(OscPrefKey.PPP_AUTH_TIMEOUT, bridge.prefs) * 1000L
             when (bridge.currentAuth) {
                 is AuthOptionPAP -> PAPClient(bridge).also {
-                    incomingClient!!.registerMailbox(it)
+                    incomingManager!!.registerMailbox(it)
                     it.launchJobAuth()
 
                     if (!expectProceeded(Where.PAP, authTimeout)) {
                         return@launch
                     }
 
-                    incomingClient!!.unregisterMailbox(it)
+                    incomingManager!!.unregisterMailbox(it)
                 }
 
                 is AuthOptionMSChapv2 -> ChapClient(bridge).also {
                     chapClient = it
-                    incomingClient!!.registerMailbox(it)
+                    incomingManager!!.registerMailbox(it)
                     it.launchJobAuth()
 
                     if (!expectProceeded(Where.CHAP, authTimeout)) {
@@ -138,28 +150,28 @@ internal class ControlClient(internal val bridge: ClientBridge) {
 
             if (bridge.PPP_IPv4_ENABLED) {
                 IpcpClient(bridge).also {
-                    incomingClient!!.registerMailbox(it)
+                    incomingManager!!.registerMailbox(it)
                     it.launchJobNegotiation()
 
                     if (!expectProceeded(Where.IPCP, PPP_NEGOTIATION_TIMEOUT)) {
                         return@launch
                     }
 
-                    incomingClient!!.unregisterMailbox(it)
+                    incomingManager!!.unregisterMailbox(it)
                 }
             }
 
 
             if (bridge.PPP_IPv6_ENABLED) {
                 Ipv6cpClient(bridge).also {
-                    incomingClient!!.registerMailbox(it)
+                    incomingManager!!.registerMailbox(it)
                     it.launchJobNegotiation()
 
                     if (!expectProceeded(Where.IPV6CP, PPP_NEGOTIATION_TIMEOUT)) {
                         return@launch
                     }
 
-                    incomingClient!!.unregisterMailbox(it)
+                    incomingManager!!.unregisterMailbox(it)
                 }
             }
 
@@ -170,9 +182,9 @@ internal class ControlClient(internal val bridge: ClientBridge) {
             }
 
 
-            OutgoingClient(bridge).also {
+            OutgoingManager(bridge).also {
                 it.launchJobMain()
-                outgoingClient = it
+                outgoingManager = it
             }
 
 
@@ -254,8 +266,8 @@ internal class ControlClient(internal val bridge: ClientBridge) {
         ipv6cpClient?.cancel()
         sstpClient?.cancel()
         pppClient?.cancel()
-        incomingClient?.cancel()
-        outgoingClient?.cancel()
+        incomingManager?.cancel()
+        outgoingManager?.cancel()
     }
 
     private fun closeTerminals() {

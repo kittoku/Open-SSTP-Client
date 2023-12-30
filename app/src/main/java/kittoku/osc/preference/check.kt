@@ -7,7 +7,11 @@ import kittoku.osc.MAX_MRU
 import kittoku.osc.MAX_MTU
 import kittoku.osc.MIN_MRU
 import kittoku.osc.MIN_MTU
-import kittoku.osc.preference.accessor.*
+import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
+import kittoku.osc.preference.accessor.getStringPrefValue
+import kittoku.osc.preference.accessor.getURIPrefValue
 
 
 internal fun toastInvalidSetting(message: String, context: Context) {

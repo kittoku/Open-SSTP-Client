@@ -1,10 +1,28 @@
 package kittoku.osc.client
 
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.cipher.sstp.HashSetting
 import kittoku.osc.cipher.sstp.generateChapHLAK
 import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
 import kittoku.osc.unit.ppp.option.AuthOptionPAP
-import kittoku.osc.unit.sstp.*
+import kittoku.osc.unit.sstp.CERT_HASH_PROTOCOL_SHA1
+import kittoku.osc.unit.sstp.CERT_HASH_PROTOCOL_SHA256
+import kittoku.osc.unit.sstp.ControlPacket
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT
+import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
+import kittoku.osc.unit.sstp.SstpCallAbort
+import kittoku.osc.unit.sstp.SstpCallConnectAck
+import kittoku.osc.unit.sstp.SstpCallConnectNak
+import kittoku.osc.unit.sstp.SstpCallConnectRequest
+import kittoku.osc.unit.sstp.SstpCallConnected
+import kittoku.osc.unit.sstp.SstpCallDisconnect
+import kittoku.osc.unit.sstp.SstpCallDisconnectAck
+import kittoku.osc.unit.sstp.SstpEchoRequest
+import kittoku.osc.unit.sstp.SstpEchoResponse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
@@ -21,7 +39,7 @@ private const val SSTP_REQUEST_INTERVAL = 60_000L
 private const val SSTP_REQUEST_COUNT = 3
 internal const val SSTP_REQUEST_TIMEOUT = SSTP_REQUEST_INTERVAL * SSTP_REQUEST_COUNT
 
-internal class SstpClient(val bridge: ClientBridge) {
+internal class SstpClient(val bridge: SharedBridge) {
     internal val mailbox = Channel<ControlPacket>(Channel.BUFFERED)
 
     private var jobRequest: Job? = null

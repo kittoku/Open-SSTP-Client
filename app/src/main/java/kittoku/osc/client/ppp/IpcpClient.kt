@@ -1,9 +1,9 @@
 package kittoku.osc.client.ppp
 
-import kittoku.osc.client.ClientBridge
-import kittoku.osc.client.ControlMessage
-import kittoku.osc.client.Result
-import kittoku.osc.client.Where
+import kittoku.osc.ControlMessage
+import kittoku.osc.Result
+import kittoku.osc.SharedBridge
+import kittoku.osc.Where
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
@@ -18,7 +18,7 @@ import kittoku.osc.unit.ppp.option.OPTION_TYPE_IPCP_IP
 import java.net.Inet4Address
 
 
-internal class IpcpClient(bridge: ClientBridge) : ConfigClient<IpcpConfigureFrame>(Where.IPCP, bridge) {
+internal class IpcpClient(bridge: SharedBridge) : ConfigClient<IpcpConfigureFrame>(Where.IPCP, bridge) {
     private val isDNSRequested = getBooleanPrefValue(OscPrefKey.DNS_DO_REQUEST_ADDRESS, bridge.prefs)
     private var isDNSRejected = false
     private val requestedAddress = if (getBooleanPrefValue(OscPrefKey.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS, bridge.prefs)) {

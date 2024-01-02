@@ -1,7 +1,6 @@
 package kittoku.osc.cipher.ppp
 
 import kittoku.osc.ChapMessage
-import kittoku.osc.extension.isSame
 import kittoku.osc.extension.sum
 import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.extension.toHexString
@@ -109,5 +108,5 @@ internal fun authenticateChapServerResponse(username: String, password: String, 
 
     val expected = "S=${digest.toHexString()}".toByteArray(Charset.forName("US-ASCII"))
 
-    return expected.isSame(chapMessage.serverResponse)
+    return expected.contentEquals(chapMessage.serverResponse)
 }

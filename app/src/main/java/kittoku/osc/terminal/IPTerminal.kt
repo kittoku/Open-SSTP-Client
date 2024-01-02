@@ -5,7 +5,6 @@ import kittoku.osc.ControlMessage
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
-import kittoku.osc.extension.isSame
 import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
@@ -30,7 +29,7 @@ internal class IPTerminal(private val bridge: SharedBridge) {
 
     internal suspend fun initialize() {
         if (bridge.PPP_IPv4_ENABLED) {
-            if (bridge.currentIPv4.isSame(ByteArray(4))) {
+            if (bridge.currentIPv4.contentEquals(ByteArray(4))) {
                 bridge.controlMailbox.send(ControlMessage(Where.IPv4, Result.ERR_INVALID_ADDRESS))
                 return
             }
@@ -43,7 +42,7 @@ internal class IPTerminal(private val bridge: SharedBridge) {
                 bridge.builder.addDnsServer(getStringPrefValue(OscPrefKey.DNS_CUSTOM_ADDRESS, bridge.prefs))
             }
 
-            if (!bridge.currentProposedDNS.isSame(ByteArray(4))) {
+            if (!bridge.currentProposedDNS.contentEquals(ByteArray(4))) {
                 InetAddress.getByAddress(bridge.currentProposedDNS).also {
                     bridge.builder.addDnsServer(it)
                 }
@@ -53,7 +52,7 @@ internal class IPTerminal(private val bridge: SharedBridge) {
         }
 
         if (bridge.PPP_IPv6_ENABLED) {
-            if (bridge.currentIPv6.isSame(ByteArray(8))) {
+            if (bridge.currentIPv6.contentEquals(ByteArray(8))) {
                 bridge.controlMailbox.send(ControlMessage(Where.IPv6, Result.ERR_INVALID_ADDRESS))
                 return
             }

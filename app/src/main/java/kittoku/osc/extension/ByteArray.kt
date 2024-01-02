@@ -1,16 +1,6 @@
 package kittoku.osc.extension
 
 
-internal fun ByteArray.isSame(other: ByteArray): Boolean {
-    if (this.size != other.size) return false
-
-    this.zip(other).forEach {
-        if (it.first != it.second) return false
-    }
-
-    return true
-}
-
 internal fun ByteArray.toHexString(parse: Boolean = false): String {
     var output = ""
 

@@ -3,14 +3,14 @@ package kittoku.osc.preference.custom
 import android.content.Context
 import android.text.InputType
 import android.util.AttributeSet
-import android.widget.EditText
 import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getStringPrefValue
 
 
-internal abstract class PasswordPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+internal abstract class PasswordPreference(context: Context, attrs: AttributeSet) : OscEditTextPreference(context, attrs) {
+    override val inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
     override val provider = SummaryProvider<Preference> {
         val currentValue = getStringPrefValue(oscPrefKey, it.sharedPreferences!!)
 
@@ -19,10 +19,6 @@ internal abstract class PasswordPreference(context: Context, attrs: AttributeSet
         } else {
             "[Password Entered]"
         }
-    }
-
-    override fun initEditText(editText: EditText) {
-        editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
     }
 }
 

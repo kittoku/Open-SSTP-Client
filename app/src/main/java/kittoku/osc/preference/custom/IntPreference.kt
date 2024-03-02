@@ -3,25 +3,11 @@ package kittoku.osc.preference.custom
 import android.content.Context
 import android.text.InputType
 import android.util.AttributeSet
-import androidx.preference.EditTextPreference
 import kittoku.osc.preference.OscPrefKey
-import kittoku.osc.preference.accessor.getIntPrefValue
 
 
-internal abstract class IntPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs), OscPreference {
-    override fun updateView() {
-        text = getIntPrefValue(oscPrefKey, sharedPreferences!!).toString()
-    }
-
-    override fun onAttached() {
-        summaryProvider = SimpleSummaryProvider.getInstance()
-
-        setOnBindEditTextListener { editText ->
-            editText.inputType = InputType.TYPE_CLASS_NUMBER
-        }
-
-        initialize()
-    }
+internal abstract class IntPreference(context: Context, attrs: AttributeSet) : OscEditTextPreference(context, attrs), OscPreference {
+    override val inputType = InputType.TYPE_CLASS_NUMBER
 }
 
 internal class SSLPortPreference(context: Context, attrs: AttributeSet) : IntPreference(context, attrs) {

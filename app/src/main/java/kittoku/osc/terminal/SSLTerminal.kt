@@ -1,5 +1,6 @@
 package kittoku.osc.terminal
 
+import android.os.Build
 import android.util.Base64
 import androidx.documentfile.provider.DocumentFile
 import kittoku.osc.ControlMessage
@@ -31,6 +32,7 @@ import java.security.KeyStore
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SNIHostName
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
 import javax.net.ssl.SSLEngineResult
@@ -125,6 +127,12 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
             }
 
             engine.enabledCipherSuites = sortedSuites.toTypedArray()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && getBooleanPrefValue(OscPrefKey.SSL_DO_USE_CUSTOM_SNI, bridge.prefs)) {
+            engine.sslParameters = engine.sslParameters.also {
+                it.serverNames = listOf(SNIHostName(getStringPrefValue(OscPrefKey.SSL_CUSTOM_SNI, bridge.prefs)))
+            }
         }
 
         val socketHostname = if (doUseProxy) getStringPrefValue(OscPrefKey.PROXY_HOSTNAME, bridge.prefs) else sslHostname

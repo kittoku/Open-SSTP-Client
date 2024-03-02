@@ -45,6 +45,12 @@ internal class HomeUsernamePreference(context: Context, attrs: AttributeSet) : S
     override val preferenceTitle = "Username"
 }
 
+internal class SSLCustomSNIHostnamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.SSL_CUSTOM_SNI
+    override val parentKey = OscPrefKey.SSL_DO_USE_CUSTOM_SNI
+    override val preferenceTitle = "Custom SNI Hostname"
+}
+
 internal class PPPStaticIPv4AddressPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.PPP_STATIC_IPv4_ADDRESS
     override val preferenceTitle = "Static IPv4 Address"

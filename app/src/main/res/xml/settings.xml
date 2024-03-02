@@ -8,6 +8,8 @@
         <kittoku.osc.preference.custom.SSLCertDirPreference android:key="SSL_CERT_DIR"/>
         <kittoku.osc.preference.custom.SSLDoSelectSuitesPreference android:key="SSL_DO_SELECT_SUITES"/>
         <kittoku.osc.preference.custom.SSLSuitesPreference android:key="SSL_SUITES"/>
+        <kittoku.osc.preference.custom.SSLDoUseCustomSNIPreference android:key="SSL_DO_USE_CUSTOM_SNI"/>
+        <kittoku.osc.preference.custom.SSLCustomSNIHostnamePreference android:key="SSL_CUSTOM_SNI"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="HTTP Proxy">

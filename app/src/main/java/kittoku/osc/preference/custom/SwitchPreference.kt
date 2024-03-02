@@ -29,6 +29,12 @@ internal class SSLDoSelectSuitesPreference(context: Context, attrs: AttributeSet
     override val preferenceTitle = "Enable Only Selected Cipher Suites"
 }
 
+internal class SSLDoUseCustomSNIPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.SSL_DO_USE_CUSTOM_SNI
+    override val parentKey: OscPrefKey? = null
+    override val preferenceTitle = "Use Custom SNI"
+}
+
 internal class PPPDoRequestStaticIPv4AddressPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS
     override val parentKey = OscPrefKey.PPP_IPv4_ENABLED

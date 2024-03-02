@@ -2,6 +2,7 @@ package kittoku.osc.preference
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.widget.Toast
 import kittoku.osc.MAX_MRU
 import kittoku.osc.MAX_MTU
@@ -37,6 +38,12 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
     val doSelectSuites = getBooleanPrefValue(OscPrefKey.SSL_DO_SELECT_SUITES, prefs)
     val suites = getSetPrefValue(OscPrefKey.SSL_SUITES, prefs)
     if (doSelectSuites && suites.isEmpty()) return "No cipher suite was selected"
+
+    val doUseCustomSNI = getBooleanPrefValue(OscPrefKey.SSL_DO_USE_CUSTOM_SNI, prefs)
+    val isAPILevelLacked = Build.VERSION.SDK_INT < Build.VERSION_CODES.N
+    val customSNIHostname = getStringPrefValue(OscPrefKey.SSL_CUSTOM_SNI, prefs)
+    if (doUseCustomSNI && isAPILevelLacked) return "Custom SNI needs 24 or higher API level"
+    if (doUseCustomSNI && customSNIHostname.isEmpty()) return "Custom SNI Hostname must not be blank"
 
     if (getBooleanPrefValue(OscPrefKey.PROXY_DO_USE_PROXY, prefs)) {
         getStringPrefValue(OscPrefKey.HOME_HOSTNAME, prefs).also {

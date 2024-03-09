@@ -19,7 +19,7 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
 
 internal class SSLCertDirPreference(context: Context, attrs: AttributeSet) : DirectoryPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.SSL_CERT_DIR
-    override val preferenceTitle = "Select Cipher Suites"
+    override val preferenceTitle = "Select Trusted Certificates"
     override val parentKey = OscPrefKey.SSL_DO_SPECIFY_CERT
 }
 

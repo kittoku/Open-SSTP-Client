@@ -28,12 +28,12 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
         if (it !in 0..65535) return "The given port is out of 0-65535"
     }
 
-    val doAddCerts = getBooleanPrefValue(OscPrefKey.SSL_DO_ADD_CERT, prefs)
+    val doSpecifyCerts = getBooleanPrefValue(OscPrefKey.SSL_DO_SPECIFY_CERT, prefs)
     val version = getStringPrefValue(OscPrefKey.SSL_VERSION, prefs)
     val certDir = getURIPrefValue(OscPrefKey.SSL_CERT_DIR, prefs)
-    if (doAddCerts && version == "DEFAULT") return "Adding trusted certificates needs SSL version to be specified"
+    if (doSpecifyCerts && version == "DEFAULT") return "Specifying trusted certificates needs SSL version to be specified"
 
-    if (doAddCerts && certDir == null) return "No certificates directory was selected"
+    if (doSpecifyCerts && certDir == null) return "No certificates directory was selected"
 
     val doSelectSuites = getBooleanPrefValue(OscPrefKey.SSL_DO_SELECT_SUITES, prefs)
     val suites = getSetPrefValue(OscPrefKey.SSL_SUITES, prefs)

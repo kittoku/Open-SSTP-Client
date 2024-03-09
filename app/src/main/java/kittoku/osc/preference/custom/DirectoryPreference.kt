@@ -20,7 +20,7 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
 internal class SSLCertDirPreference(context: Context, attrs: AttributeSet) : DirectoryPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.SSL_CERT_DIR
     override val preferenceTitle = "Select Cipher Suites"
-    override val parentKey = OscPrefKey.SSL_DO_ADD_CERT
+    override val parentKey = OscPrefKey.SSL_DO_SPECIFY_CERT
 }
 
 internal class LogDirPreference(context: Context, attrs: AttributeSet) : DirectoryPreference(context, attrs) {

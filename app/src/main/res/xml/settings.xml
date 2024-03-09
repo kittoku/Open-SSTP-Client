@@ -4,7 +4,7 @@
         <kittoku.osc.preference.custom.SSLPortPreference android:key="SSL_PORT"/>
         <kittoku.osc.preference.custom.SSLVersionPreference android:key="SSL_VERSION"/>
         <kittoku.osc.preference.custom.SSLDoVerifyPreference android:key="SSL_DO_VERIFY"/>
-        <kittoku.osc.preference.custom.SSLDoAddCertPreference android:key="SSL_DO_ADD_CERT"/>
+        <kittoku.osc.preference.custom.SSLDoSpecifyCertPreference android:key="SSL_DO_SPECIFY_CERT"/>
         <kittoku.osc.preference.custom.SSLCertDirPreference android:key="SSL_CERT_DIR"/>
         <kittoku.osc.preference.custom.SSLDoSelectSuitesPreference android:key="SSL_DO_SELECT_SUITES"/>
         <kittoku.osc.preference.custom.SSLSuitesPreference android:key="SSL_SUITES"/>

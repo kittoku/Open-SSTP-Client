@@ -17,10 +17,10 @@ internal abstract class SwitchPreference(context: Context, attrs: AttributeSet) 
     }
 }
 
-internal class SSLDoAddCertPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
-    override val oscPrefKey = OscPrefKey.SSL_DO_ADD_CERT
+internal class SSLDoSpecifyCertPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.SSL_DO_SPECIFY_CERT
     override val parentKey: OscPrefKey? = null
-    override val preferenceTitle = "Add Trusted Certificates"
+    override val preferenceTitle = "Specify Trusted Certificates"
 }
 
 internal class SSLDoSelectSuitesPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {

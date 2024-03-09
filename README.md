@@ -22,9 +22,11 @@ profile from the upper-right option menu.
 ## Setting tab
 Some settings to be noted are written below:
 
-### Add Trusted Certificates (SSL Layer)
+### Specify Trusted Certificates (SSL Layer)
 If you choose a certain directory, the client uses ONLY certificates in the directory, but the default 
-certificate store. I made this option for debugging. 
+certificate store. I made this option for debugging.  
+  
+This preference is displayed as `Add Trusted Certificates` in v1.7.0 or older.
 
 ### PPP Network Protocol
 You can choose what network protocol PPP layer tries enabling. Remember, IPv6 option just gives the device 

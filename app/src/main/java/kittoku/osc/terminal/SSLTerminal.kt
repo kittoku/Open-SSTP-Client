@@ -106,7 +106,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
     }
 
     private suspend fun startHandshake(): Boolean {
-        val sslContext = if (getBooleanPrefValue(OscPrefKey.SSL_DO_ADD_CERT, bridge.prefs)) {
+        val sslContext = if (getBooleanPrefValue(OscPrefKey.SSL_DO_SPECIFY_CERT, bridge.prefs)) {
             SSLContext.getInstance(selectedVersion).also {
                 it.init(null, createTrustManagers(), null)
             }

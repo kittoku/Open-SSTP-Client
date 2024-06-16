@@ -39,7 +39,7 @@ internal class SSLSuitesPreference(context: Context, attrs: AttributeSet) : Modi
         val currentValue = getSetPrefValue(oscPrefKey, it.sharedPreferences!!)
 
         when (currentValue.size) {
-            0 -> "[No Suite Entered]"
+            0 -> "[No Suite Selected]"
             1 -> "1 Suite Selected"
             else -> "${currentValue.size} Suites Selected"
         }

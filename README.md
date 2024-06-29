@@ -54,7 +54,7 @@ the setting tab.
  
 * Only **PAP** and **MS-CHAPv2** authentication protocols can be enabled. No EAP.
 
-* If the SSTP server is a MikroTik RouterOS and you are using Let's Encrypt on it for SSTP, you should install and trust the 'lets-encrypt-r3.der' root CA file on your MikroTik RouterOS SSTP server.
+* If the SSTP server is a MikroTik RouterOS and you are using Let's Encrypt on it for SSTP, you should install and trust the ['lets-encrypt-r3.der', r11.der and r10.der](https://letsencrypt.org/certificates/) root CA files on your MikroTik RouterOS SSTP server.
  
 ## Debugging
 It is almost impossible that I can debug a problem caused in any environments but my own. In a networking

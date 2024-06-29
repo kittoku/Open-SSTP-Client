@@ -52,7 +52,9 @@ the setting tab.
  
 * A server must enable DHCP
  
-* Only **PAP** and **MS-CHAPv2** authentication protocols can be enabled. No EAP. 
+* Only **PAP** and **MS-CHAPv2** authentication protocols can be enabled. No EAP.
+
+* If the SSTP server is a MikroTik RouterOS and you are using Let's Encrypt on it for SSTP, you should install and trust the 'lets-encrypt-r3.der' root CA file on your MikroTik RouterOS SSTP server.
  
 ## Debugging
 It is almost impossible that I can debug a problem caused in any environments but my own. In a networking

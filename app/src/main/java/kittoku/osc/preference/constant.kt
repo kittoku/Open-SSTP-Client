@@ -28,8 +28,7 @@ internal enum class OscPrefKey {
     PROXY_PASSWORD,
     PPP_MRU,
     PPP_MTU,
-    PPP_PAP_ENABLED,
-    PPP_MSCHAPv2_ENABLED,
+    PPP_AUTH_PROTOCOLS,
     PPP_AUTH_TIMEOUT,
     PPP_IPv4_ENABLED,
     PPP_DO_REQUEST_STATIC_IPv4_ADDRESS,
@@ -61,8 +60,6 @@ internal val DEFAULT_BOOLEAN_MAP = mapOf(
     OscPrefKey.SSL_DO_SELECT_SUITES to false,
     OscPrefKey.SSL_DO_USE_CUSTOM_SNI to false,
     OscPrefKey.PROXY_DO_USE_PROXY to false,
-    OscPrefKey.PPP_PAP_ENABLED to true,
-    OscPrefKey.PPP_MSCHAPv2_ENABLED to true,
     OscPrefKey.PPP_IPv4_ENABLED to true,
     OscPrefKey.PPP_DO_REQUEST_STATIC_IPv4_ADDRESS to false,
     OscPrefKey.PPP_IPv6_ENABLED to false,
@@ -106,8 +103,13 @@ internal val DEFAULT_STRING_MAP = mapOf(
 
 private val EMPTY_SET = setOf<String>()
 
+internal val AUTH_PROTOCOl_PAP = "PAP"
+internal val AUTH_PROTOCOL_MSCHAPv2 = "MSCHAPv2"
+internal val AUTH_PROTOCOL_EAP_MSCHAPv2 = "EAP-MSCHAPv2"
+
 internal val DEFAULT_SET_MAP = mapOf(
     OscPrefKey.SSL_SUITES to EMPTY_SET,
+    OscPrefKey.PPP_AUTH_PROTOCOLS to setOf(AUTH_PROTOCOl_PAP, AUTH_PROTOCOL_MSCHAPv2),
     OscPrefKey.ROUTE_ALLOWED_APPS to EMPTY_SET,
 )
 

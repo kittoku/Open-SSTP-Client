@@ -23,18 +23,6 @@ internal class SSLDoVerifyPreference(context: Context, attrs: AttributeSet) : Mo
     override val preferenceTitle = "Verify Hostname"
 }
 
-internal class PPPPapEnabledPreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
-    override val oscPrefKey = OscPrefKey.PPP_PAP_ENABLED
-    override val parentKey: OscPrefKey? = null
-    override val preferenceTitle = "Enable PAP"
-}
-
-internal class PPPMsChapv2EnabledPreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
-    override val oscPrefKey = OscPrefKey.PPP_MSCHAPv2_ENABLED
-    override val parentKey: OscPrefKey? = null
-    override val preferenceTitle = "Enable MS-CHAPv2"
-}
-
 internal class PPPIPv4EnabledPreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.PPP_IPv4_ENABLED
     override val parentKey: OscPrefKey? = null

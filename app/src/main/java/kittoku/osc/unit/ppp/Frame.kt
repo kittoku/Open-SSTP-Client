@@ -7,23 +7,25 @@ import kittoku.osc.unit.sstp.SSTP_PACKET_TYPE_DATA
 import java.nio.ByteBuffer
 
 
-internal const val PPP_HEADER = 0xFF03.toShort()
+internal const val PPP_HDLC_HEADER = 0xFF03.toShort()
+internal const val PPP_HEADER_SIZE = 4 // code, id, and frame length
 
 internal const val PPP_PROTOCOL_LCP = 0xC021.toShort()
 internal const val PPP_PROTOCOL_PAP = 0xC023.toShort()
 internal const val PPP_PROTOCOL_CHAP = 0xC223.toShort()
+internal const val PPP_PROTOCOL_EAP = 0xC227.toShort()
 internal const val PPP_PROTOCOL_IPCP = 0x8021.toShort()
 internal const val PPP_PROTOCOL_IPv6CP = 0x8057.toShort()
 internal const val PPP_PROTOCOL_IP = 0x0021.toShort()
 internal const val PPP_PROTOCOL_IPv6 = 0x0057.toShort()
 
 
-internal abstract class Frame : DataUnit {
+internal abstract class Frame : DataUnit() {
     internal abstract val code: Byte
     internal abstract val protocol: Short
 
-    private val offsetSize = 8 // from SSTP header to PPP protocol
-    protected val headerSize = offsetSize + 4 // add code, id and frame length
+    private val offsetSize = 8 // from SSTP header to PPP HDLC header
+    protected val headerSize = offsetSize + PPP_HEADER_SIZE
 
     protected var givenLength = 0
 
@@ -33,7 +35,7 @@ internal abstract class Frame : DataUnit {
         assertAlways(buffer.short == SSTP_PACKET_TYPE_DATA)
         givenLength = buffer.short.toIntAsUShort()
 
-        assertAlways(buffer.short == PPP_HEADER)
+        assertAlways(buffer.short == PPP_HDLC_HEADER)
         assertAlways(buffer.short == protocol)
         assertAlways(buffer.get() == code)
         id = buffer.get()
@@ -44,7 +46,7 @@ internal abstract class Frame : DataUnit {
         buffer.putShort(SSTP_PACKET_TYPE_DATA)
         buffer.putShort(length.toShort())
 
-        buffer.putShort(PPP_HEADER)
+        buffer.putShort(PPP_HDLC_HEADER)
         buffer.putShort(protocol)
         buffer.put(code)
         buffer.put(id)

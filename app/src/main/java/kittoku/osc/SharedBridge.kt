@@ -5,27 +5,18 @@ import kittoku.osc.preference.AppString
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.preference.getValidAllowedAppInfos
 import kittoku.osc.service.SstpVpnService
 import kittoku.osc.terminal.IPTerminal
 import kittoku.osc.terminal.SSLTerminal
-import kittoku.osc.unit.ppp.option.AuthOption
-import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
-import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 
-
-internal class ChapMessage {
-    val serverChallenge = ByteArray(16)
-    val clientChallenge = ByteArray(16)
-    val serverResponse = ByteArray(42)
-    val clientResponse = ByteArray(24)
-}
 
 internal enum class Where {
     SSL,
@@ -37,6 +28,8 @@ internal enum class Where {
     PPP,
     PAP,
     CHAP,
+    MSCAHPV2,
+    EAP,
     LCP,
     LCP_MRU,
     LCP_AUTH,
@@ -101,12 +94,11 @@ internal class SharedBridge(internal val service: SstpVpnService) {
     internal val HOME_PASSWORD = getStringPrefValue(OscPrefKey.HOME_PASSWORD, prefs)
     internal val PPP_MRU = getIntPrefValue(OscPrefKey.PPP_MRU, prefs)
     internal val PPP_MTU = getIntPrefValue(OscPrefKey.PPP_MTU, prefs)
-    internal val PPP_PAP_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_PAP_ENABLED, prefs)
-    internal val PPP_MSCHAPv2_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_MSCHAPv2_ENABLED, prefs)
+    internal val PPP_AUTH_PROTOCOLS = getSetPrefValue(OscPrefKey.PPP_AUTH_PROTOCOLS, prefs)
     internal val PPP_IPv4_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_IPv4_ENABLED, prefs)
     internal val PPP_IPv6_ENABLED = getBooleanPrefValue(OscPrefKey.PPP_IPv6_ENABLED, prefs)
 
-    internal lateinit var chapMessage: ChapMessage
+    internal var hlak: ByteArray? = null
     internal val nonce = ByteArray(32)
     internal val guid = UUID.randomUUID().toString()
     internal var hashProtocol: Byte = 0
@@ -115,7 +107,7 @@ internal class SharedBridge(internal val service: SstpVpnService) {
     private var frameID = -1
 
     internal var currentMRU = PPP_MRU
-    internal var currentAuth = getPreferredAuthOption()
+    internal var currentAuth = ""
     internal val currentIPv4 = ByteArray(4)
     internal val currentIPv6 = ByteArray(8)
     internal val currentProposedDNS = ByteArray(4)
@@ -133,8 +125,8 @@ internal class SharedBridge(internal val service: SstpVpnService) {
         }
     }
 
-    internal fun getPreferredAuthOption(): AuthOption {
-        return if (PPP_MSCHAPv2_ENABLED) AuthOptionMSChapv2() else AuthOptionPAP()
+    internal fun isEnabled(authProtocol: String): Boolean {
+        return authProtocol in PPP_AUTH_PROTOCOLS
     }
 
     internal fun attachSSLTerminal() {

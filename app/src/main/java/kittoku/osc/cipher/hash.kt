@@ -1,4 +1,4 @@
-package kittoku.osc.cipher.ppp
+package kittoku.osc.cipher
 
 import java.nio.ByteBuffer
 import java.nio.IntBuffer

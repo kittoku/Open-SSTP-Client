@@ -21,7 +21,7 @@ internal const val SSTP_MESSAGE_TYPE_ECHO_REQUEST: Short = 8
 internal const val SSTP_MESSAGE_TYPE_ECHO_RESPONSE: Short = 9
 
 
-internal abstract class ControlPacket : DataUnit {
+internal abstract class ControlPacket : DataUnit() {
     internal abstract val type: Short
     internal abstract val numAttribute: Int
 

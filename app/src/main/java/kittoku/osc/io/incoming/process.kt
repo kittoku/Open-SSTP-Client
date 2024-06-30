@@ -5,14 +5,6 @@ import kittoku.osc.Result
 import kittoku.osc.Where
 import kittoku.osc.extension.move
 import kittoku.osc.unit.DataUnit
-import kittoku.osc.unit.ppp.CHAP_CODE_CHALLENGE
-import kittoku.osc.unit.ppp.CHAP_CODE_FAILURE
-import kittoku.osc.unit.ppp.CHAP_CODE_RESPONSE
-import kittoku.osc.unit.ppp.CHAP_CODE_SUCCESS
-import kittoku.osc.unit.ppp.ChapChallenge
-import kittoku.osc.unit.ppp.ChapFailure
-import kittoku.osc.unit.ppp.ChapResponse
-import kittoku.osc.unit.ppp.ChapSuccess
 import kittoku.osc.unit.ppp.IpcpConfigureAck
 import kittoku.osc.unit.ppp.IpcpConfigureNak
 import kittoku.osc.unit.ppp.IpcpConfigureReject
@@ -43,12 +35,28 @@ import kittoku.osc.unit.ppp.LCP_CODE_PROTOCOL_REJECT
 import kittoku.osc.unit.ppp.LCP_CODE_TERMINATE_ACK
 import kittoku.osc.unit.ppp.LCP_CODE_TERMINATE_REQUEST
 import kittoku.osc.unit.ppp.LcpDiscardRequest
-import kittoku.osc.unit.ppp.PAPAuthenticateAck
-import kittoku.osc.unit.ppp.PAPAuthenticateNak
-import kittoku.osc.unit.ppp.PAPAuthenticateRequest
-import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_ACK
-import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_NAK
-import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_REQUEST
+import kittoku.osc.unit.ppp.auth.CHAP_CODE_CHALLENGE
+import kittoku.osc.unit.ppp.auth.CHAP_CODE_FAILURE
+import kittoku.osc.unit.ppp.auth.CHAP_CODE_RESPONSE
+import kittoku.osc.unit.ppp.auth.CHAP_CODE_SUCCESS
+import kittoku.osc.unit.ppp.auth.ChapChallenge
+import kittoku.osc.unit.ppp.auth.ChapFailure
+import kittoku.osc.unit.ppp.auth.ChapResponse
+import kittoku.osc.unit.ppp.auth.ChapSuccess
+import kittoku.osc.unit.ppp.auth.EAPFailure
+import kittoku.osc.unit.ppp.auth.EAPRequest
+import kittoku.osc.unit.ppp.auth.EAPResponse
+import kittoku.osc.unit.ppp.auth.EAPSuccess
+import kittoku.osc.unit.ppp.auth.EAP_CODE_FAILURE
+import kittoku.osc.unit.ppp.auth.EAP_CODE_REQUEST
+import kittoku.osc.unit.ppp.auth.EAP_CODE_RESPONSE
+import kittoku.osc.unit.ppp.auth.EAP_CODE_SUCCESS
+import kittoku.osc.unit.ppp.auth.PAPAuthenticateAck
+import kittoku.osc.unit.ppp.auth.PAPAuthenticateNak
+import kittoku.osc.unit.ppp.auth.PAPAuthenticateRequest
+import kittoku.osc.unit.ppp.auth.PAP_CODE_AUTHENTICATE_ACK
+import kittoku.osc.unit.ppp.auth.PAP_CODE_AUTHENTICATE_NAK
+import kittoku.osc.unit.ppp.auth.PAP_CODE_AUTHENTICATE_REQUEST
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECTED
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_CONNECT_ACK
@@ -203,6 +211,29 @@ internal suspend fun IncomingManager.processChapFrame(code: Byte, buffer: ByteBu
     return true
 }
 
+internal suspend fun IncomingManager.processEAPFrame(code: Byte, buffer: ByteBuffer): Boolean {
+    val frame = when (code) {
+        EAP_CODE_REQUEST -> EAPRequest()
+        EAP_CODE_RESPONSE -> EAPResponse()
+        EAP_CODE_SUCCESS -> EAPSuccess()
+        EAP_CODE_FAILURE -> EAPFailure()
+        else -> {
+            bridge.controlMailbox.send(
+                ControlMessage(Where.EAP, Result.ERR_UNKNOWN_TYPE)
+            )
+
+            return false
+        }
+    }
+
+    tryReadDataUnit(frame, buffer)?.also {
+        return false
+    }
+
+    eapMailbox?.send(frame)
+    return true
+}
+
 internal suspend fun IncomingManager.processIpcpFrame(code: Byte, buffer: ByteBuffer): Boolean {
     val frame = when (code) {
         LCP_CODE_CONFIGURE_REQUEST -> IpcpConfigureRequest()
@@ -257,7 +288,7 @@ internal suspend fun IncomingManager.processUnknownProtocol(protocol: Short, pac
         val infoStop = buffer.position() + packetSize
         it.holder = buffer.array().sliceArray(infoStart until infoStop)
 
-        bridge.sslTerminal!!.sendDataUnit(it)
+        bridge.sslTerminal!!.send(it.toByteBuffer())
     }
 
     buffer.move(packetSize)

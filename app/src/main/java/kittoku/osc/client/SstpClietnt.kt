@@ -4,10 +4,9 @@ import kittoku.osc.ControlMessage
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
-import kittoku.osc.cipher.sstp.HashSetting
-import kittoku.osc.cipher.sstp.generateChapHLAK
-import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
-import kittoku.osc.unit.ppp.option.AuthOptionPAP
+import kittoku.osc.preference.AUTH_PROTOCOL_EAP_MSCHAPv2
+import kittoku.osc.preference.AUTH_PROTOCOL_MSCHAPv2
+import kittoku.osc.preference.AUTH_PROTOCOl_PAP
 import kittoku.osc.unit.sstp.CERT_HASH_PROTOCOL_SHA1
 import kittoku.osc.unit.sstp.CERT_HASH_PROTOCOL_SHA256
 import kittoku.osc.unit.sstp.ControlPacket
@@ -39,6 +38,31 @@ private const val SSTP_REQUEST_INTERVAL = 60_000L
 private const val SSTP_REQUEST_COUNT = 3
 internal const val SSTP_REQUEST_TIMEOUT = SSTP_REQUEST_INTERVAL * SSTP_REQUEST_COUNT
 
+private class HashSetting(hashProtocol: Byte) {
+    val cmacSize: Short // little endian
+    val digestProtocol: String
+    val macProtocol: String
+
+    init {
+        when (hashProtocol) {
+            CERT_HASH_PROTOCOL_SHA1 -> {
+                cmacSize = 0x1400.toShort()
+                digestProtocol = "SHA-1"
+                macProtocol = "HmacSHA1"
+
+            }
+
+            CERT_HASH_PROTOCOL_SHA256 -> {
+                cmacSize = 0x2000.toShort()
+                digestProtocol = "SHA-256"
+                macProtocol = "HmacSHA256"
+            }
+
+            else -> throw NotImplementedError(hashProtocol.toString())
+        }
+    }
+}
+
 internal class SstpClient(val bridge: SharedBridge) {
     internal val mailbox = Channel<ControlPacket>(Channel.BUFFERED)
 
@@ -51,7 +75,7 @@ internal class SstpClient(val bridge: SharedBridge) {
                 when (mailbox.receive()) {
                     is SstpEchoRequest -> {
                         SstpEchoResponse().also {
-                            bridge.sslTerminal!!.sendDataUnit(it)
+                            bridge.sslTerminal!!.send(it.toByteBuffer())
                         }
                     }
 
@@ -97,7 +121,7 @@ internal class SstpClient(val bridge: SharedBridge) {
                     return@launch
                 }
 
-                bridge.sslTerminal!!.sendDataUnit(request)
+                bridge.sslTerminal!!.send(request.toByteBuffer())
 
                 received = withTimeoutOrNull(SSTP_REQUEST_INTERVAL) { mailbox.receive() } ?: continue
 
@@ -168,9 +192,9 @@ internal class SstpClient(val bridge: SharedBridge) {
         call.write(cmacInputBuffer)
 
         val hlak = when (bridge.currentAuth) {
-            is AuthOptionPAP -> ByteArray(32)
-            is AuthOptionMSChapv2 -> generateChapHLAK(bridge.HOME_PASSWORD, bridge.chapMessage)
-            else -> throw NotImplementedError(bridge.currentAuth.protocol.toString())
+            AUTH_PROTOCOl_PAP -> ByteArray(32)
+            AUTH_PROTOCOL_MSCHAPv2, AUTH_PROTOCOL_EAP_MSCHAPv2 -> bridge.hlak!!
+            else -> throw NotImplementedError(bridge.currentAuth)
         }
 
         val cmkSeed = "SSTP inner method derived CMK".toByteArray(Charset.forName("US-ASCII"))
@@ -186,7 +210,7 @@ internal class SstpClient(val bridge: SharedBridge) {
             cmac.copyInto(call.binding.compoundMac)
         }
 
-        bridge.sslTerminal!!.sendDataUnit(call)
+        bridge.sslTerminal!!.send(call.toByteBuffer())
     }
 
     internal suspend fun sendLastPacket(type: Short) {
@@ -199,7 +223,7 @@ internal class SstpClient(val bridge: SharedBridge) {
         }
 
         try { // maybe the socket is no longer available
-            bridge.sslTerminal!!.sendDataUnit(packet)
+            bridge.sslTerminal!!.send(packet.toByteBuffer())
         } catch (_: Throwable) { }
     }
 

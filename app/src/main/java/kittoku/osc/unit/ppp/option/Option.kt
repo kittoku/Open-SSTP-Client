@@ -6,7 +6,7 @@ import kittoku.osc.unit.DataUnit
 import java.nio.ByteBuffer
 
 
-internal abstract class Option : DataUnit {
+internal abstract class Option : DataUnit() {
     internal abstract val type: Byte
 
     protected val headerSize = 2
@@ -48,7 +48,7 @@ internal class UnknownOption(unknownType: Byte) : Option() {
     }
 }
 
-internal abstract class OptionPack(private val givenLength: Int) : DataUnit {
+internal abstract class OptionPack(private val givenLength: Int) : DataUnit() {
     internal abstract val knownOptions: List<Option>
     internal var unknownOptions = listOf<UnknownOption>()
     internal val allOptions: List<Option>

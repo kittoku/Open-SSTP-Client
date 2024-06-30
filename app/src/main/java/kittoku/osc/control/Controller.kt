@@ -6,24 +6,28 @@ import kittoku.osc.SharedBridge
 import kittoku.osc.Where
 import kittoku.osc.client.SSTP_REQUEST_TIMEOUT
 import kittoku.osc.client.SstpClient
-import kittoku.osc.client.ppp.ChapClient
 import kittoku.osc.client.ppp.IpcpClient
 import kittoku.osc.client.ppp.Ipv6cpClient
 import kittoku.osc.client.ppp.LCPClient
-import kittoku.osc.client.ppp.PAPClient
 import kittoku.osc.client.ppp.PPPClient
 import kittoku.osc.client.ppp.PPP_NEGOTIATION_TIMEOUT
+import kittoku.osc.client.ppp.auth.ChapClient
+import kittoku.osc.client.ppp.auth.ChapMSCHAPV2Client
+import kittoku.osc.client.ppp.auth.EAPClient
+import kittoku.osc.client.ppp.auth.EAPMSAuthClient
+import kittoku.osc.client.ppp.auth.PAPClient
 import kittoku.osc.debug.assertAlways
 import kittoku.osc.io.OutgoingManager
 import kittoku.osc.io.incoming.IncomingManager
+import kittoku.osc.preference.AUTH_PROTOCOL_EAP_MSCHAPv2
+import kittoku.osc.preference.AUTH_PROTOCOL_MSCHAPv2
+import kittoku.osc.preference.AUTH_PROTOCOl_PAP
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.resetReconnectionLife
 import kittoku.osc.service.NOTIFICATION_ERROR_ID
 import kittoku.osc.terminal.SSL_REQUEST_INTERVAL
-import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
-import kittoku.osc.unit.ppp.option.AuthOptionPAP
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT_ACK
@@ -45,6 +49,7 @@ internal class Controller(internal val bridge: SharedBridge) {
     private var lcpClient: LCPClient? = null
     private var papClient: PAPClient? = null
     private var chapClient: ChapClient? = null
+    private var eapClient: EAPClient? = null
     private var ipcpClient: IpcpClient? = null
     private var ipv6cpClient: Ipv6cpClient? = null
 
@@ -120,7 +125,7 @@ internal class Controller(internal val bridge: SharedBridge) {
 
             val authTimeout = getIntPrefValue(OscPrefKey.PPP_AUTH_TIMEOUT, bridge.prefs) * 1000L
             when (bridge.currentAuth) {
-                is AuthOptionPAP -> PAPClient(bridge).also {
+                AUTH_PROTOCOl_PAP -> PAPClient(bridge).also {
                     incomingManager!!.registerMailbox(it)
                     it.launchJobAuth()
 
@@ -131,7 +136,7 @@ internal class Controller(internal val bridge: SharedBridge) {
                     incomingManager!!.unregisterMailbox(it)
                 }
 
-                is AuthOptionMSChapv2 -> ChapClient(bridge).also {
+                AUTH_PROTOCOL_MSCHAPv2 -> ChapMSCHAPV2Client(bridge).also {
                     chapClient = it
                     incomingManager!!.registerMailbox(it)
                     it.launchJobAuth()
@@ -141,7 +146,17 @@ internal class Controller(internal val bridge: SharedBridge) {
                     }
                 }
 
-                else -> throw NotImplementedError(bridge.currentAuth.protocol.toString())
+                AUTH_PROTOCOL_EAP_MSCHAPv2 -> EAPMSAuthClient(bridge).also {
+                    eapClient = it
+                    incomingManager!!.registerMailbox(it)
+                    it.launchJobAuth()
+
+                    if (!expectProceeded(Where.EAP, authTimeout)) {
+                        return@launch
+                    }
+                }
+
+                else -> throw NotImplementedError(bridge.currentAuth)
             }
 
 
@@ -262,6 +277,7 @@ internal class Controller(internal val bridge: SharedBridge) {
         lcpClient?.cancel()
         papClient?.cancel()
         chapClient?.cancel()
+        eapClient?.cancel()
         ipcpClient?.cancel()
         ipv6cpClient?.cancel()
         sstpClient?.cancel()

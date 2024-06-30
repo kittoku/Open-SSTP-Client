@@ -1,8 +1,10 @@
-package kittoku.osc.unit.ppp
+package kittoku.osc.unit.ppp.auth
 
 import kittoku.osc.debug.ParsingDataUnitException
 import kittoku.osc.debug.assertAlways
 import kittoku.osc.extension.toIntAsUByte
+import kittoku.osc.unit.ppp.Frame
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_PAP
 import java.nio.ByteBuffer
 
 

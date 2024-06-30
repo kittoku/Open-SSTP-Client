@@ -6,14 +6,19 @@ import kittoku.osc.MIN_MRU
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
+import kittoku.osc.preference.AUTH_PROTOCOL_EAP_MSCHAPv2
+import kittoku.osc.preference.AUTH_PROTOCOL_MSCHAPv2
+import kittoku.osc.preference.AUTH_PROTOCOl_PAP
 import kittoku.osc.unit.ppp.LCPConfigureAck
 import kittoku.osc.unit.ppp.LCPConfigureFrame
 import kittoku.osc.unit.ppp.LCPConfigureNak
 import kittoku.osc.unit.ppp.LCPConfigureReject
 import kittoku.osc.unit.ppp.LCPConfigureRequest
-import kittoku.osc.unit.ppp.option.AuthOptionMSChapv2
-import kittoku.osc.unit.ppp.option.AuthOptionPAP
-import kittoku.osc.unit.ppp.option.AuthOptionUnknown
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_CHAP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_EAP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_PAP
+import kittoku.osc.unit.ppp.option.AuthOption
+import kittoku.osc.unit.ppp.option.CHAP_ALGORITHM_MSCHAPv2
 import kittoku.osc.unit.ppp.option.LCPOptionPack
 import kittoku.osc.unit.ppp.option.MRUOption
 import kotlin.math.max
@@ -48,27 +53,56 @@ internal class LCPClient(bridge: SharedBridge) : ConfigClient<LCPConfigureFrame>
         }
 
 
-        val serverAuth = request.options.authOption ?: AuthOptionUnknown(0)
+        val serverAuth = request.options.authOption
         var isAuthAcknowledged = false
 
-        when (serverAuth) {
-            is AuthOptionMSChapv2 -> {
-                if (bridge.PPP_MSCHAPv2_ENABLED) {
-                    bridge.currentAuth = serverAuth
+        when (serverAuth?.protocol) {
+            PPP_PROTOCOL_EAP -> {
+                if (bridge.isEnabled(AUTH_PROTOCOL_EAP_MSCHAPv2)) {
+                    bridge.currentAuth = AUTH_PROTOCOL_EAP_MSCHAPv2
                     isAuthAcknowledged = true
                 }
             }
 
-            is AuthOptionPAP -> {
-                if (bridge.PPP_PAP_ENABLED) {
-                    bridge.currentAuth = serverAuth
+            PPP_PROTOCOL_CHAP -> {
+                if (serverAuth.holder.size != 1) {
+                    throw NotImplementedError(serverAuth.holder.size.toString())
+                }
+
+                if (serverAuth.holder[0] == CHAP_ALGORITHM_MSCHAPv2 && bridge.isEnabled(AUTH_PROTOCOL_MSCHAPv2)) {
+                    bridge.currentAuth = AUTH_PROTOCOL_MSCHAPv2
+                    isAuthAcknowledged = true
+                }
+            }
+
+            PPP_PROTOCOL_PAP -> {
+                if (bridge.isEnabled(AUTH_PROTOCOl_PAP)) {
+                    bridge.currentAuth = AUTH_PROTOCOl_PAP
                     isAuthAcknowledged = true
                 }
             }
         }
 
         if (!isAuthAcknowledged) {
-            nak.authOption = bridge.getPreferredAuthOption()
+            val authOption = AuthOption()
+            when {
+                bridge.isEnabled(AUTH_PROTOCOL_EAP_MSCHAPv2) -> {
+                    authOption.protocol = PPP_PROTOCOL_EAP
+                }
+
+                bridge.isEnabled(AUTH_PROTOCOL_MSCHAPv2) -> {
+                    authOption.protocol = PPP_PROTOCOL_CHAP
+                    authOption.holder = ByteArray(1) { CHAP_ALGORITHM_MSCHAPv2 }
+                }
+
+                bridge.isEnabled(AUTH_PROTOCOl_PAP) -> {
+                    authOption.protocol = PPP_PROTOCOL_PAP
+                }
+
+                else -> throw NotImplementedError()
+            }
+
+            nak.authOption = authOption
         }
 
 

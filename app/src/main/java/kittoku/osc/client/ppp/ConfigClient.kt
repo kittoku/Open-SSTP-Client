@@ -61,7 +61,7 @@ internal abstract class ConfigClient<T: Frame>(private val where: Where, protect
 
         createClientRequest().also {
             it.id = requestID
-            bridge.sslTerminal!!.sendDataUnit(it)
+            bridge.sslTerminal!!.send(it.toByteBuffer())
         }
     }
 
@@ -90,18 +90,18 @@ internal abstract class ConfigClient<T: Frame>(private val where: Where, protect
 
                     val reject = tryCreateServerReject(received)
                     if (reject != null) {
-                        bridge.sslTerminal!!.sendDataUnit(reject)
+                        bridge.sslTerminal!!.send(reject.toByteBuffer())
                         continue
                     }
 
                     val nak = tryCreateServerNak(received)
                     if (nak != null) {
-                        bridge.sslTerminal!!.sendDataUnit(nak)
+                        bridge.sslTerminal!!.send(nak.toByteBuffer())
                         continue
                     }
 
                     createServerAck(received).also {
-                        bridge.sslTerminal!!.sendDataUnit(it)
+                        bridge.sslTerminal!!.send(it.toByteBuffer())
                         isServerReady = true
                     }
                 } else {

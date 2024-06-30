@@ -31,7 +31,7 @@ internal class PPPClient(val bridge: SharedBridge) {
                         LCPEchoReply().also {
                             it.id = received.id
                             it.holder = "Abura Mashi Mashi".toByteArray(Charsets.US_ASCII)
-                            bridge.sslTerminal!!.sendDataUnit(it)
+                            bridge.sslTerminal!!.send(it.toByteBuffer())
                         }
                     }
 
@@ -42,7 +42,7 @@ internal class PPPClient(val bridge: SharedBridge) {
                     is LCPTerminalRequest -> {
                         LCPTerminalAck().also {
                             it.id = received.id
-                            bridge.sslTerminal!!.sendDataUnit(it)
+                            bridge.sslTerminal!!.send(it.toByteBuffer())
                         }
 
                         bridge.controlMailbox.send(

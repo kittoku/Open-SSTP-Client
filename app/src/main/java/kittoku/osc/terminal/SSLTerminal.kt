@@ -16,7 +16,6 @@ import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.preference.accessor.getURIPrefValue
-import kittoku.osc.unit.DataUnit
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -368,14 +367,6 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
             }
 
             return result
-        }
-    }
-
-    internal suspend fun sendDataUnit(unit: DataUnit) {
-        ByteBuffer.allocate(unit.length).also {
-            unit.write(it)
-            it.flip()
-            send(it)
         }
     }
 

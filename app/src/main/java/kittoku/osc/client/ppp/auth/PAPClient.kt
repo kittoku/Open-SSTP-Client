@@ -1,13 +1,13 @@
-package kittoku.osc.client.ppp
+package kittoku.osc.client.ppp.auth
 
 import kittoku.osc.ControlMessage
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
-import kittoku.osc.unit.ppp.PAPAuthenticateRequest
-import kittoku.osc.unit.ppp.PAPFrame
-import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_ACK
-import kittoku.osc.unit.ppp.PAP_CODE_AUTHENTICATE_NAK
+import kittoku.osc.unit.ppp.auth.PAPAuthenticateRequest
+import kittoku.osc.unit.ppp.auth.PAPFrame
+import kittoku.osc.unit.ppp.auth.PAP_CODE_AUTHENTICATE_ACK
+import kittoku.osc.unit.ppp.auth.PAP_CODE_AUTHENTICATE_NAK
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
@@ -52,7 +52,7 @@ internal class PAPClient(private val bridge: SharedBridge) {
             it.idFiled = bridge.HOME_USERNAME.toByteArray(Charsets.US_ASCII)
             it.passwordFiled = bridge.HOME_PASSWORD.toByteArray(Charsets.US_ASCII)
 
-            bridge.sslTerminal!!.sendDataUnit(it)
+            bridge.sslTerminal!!.send(it.toByteBuffer())
         }
     }
 

@@ -18,7 +18,7 @@ internal const val CERT_HASH_PROTOCOL_SHA1: Byte = 1
 internal const val CERT_HASH_PROTOCOL_SHA256: Byte = 2
 
 
-internal abstract class Attribute : DataUnit {
+internal abstract class Attribute : DataUnit() {
     internal abstract val id: Byte
     protected var givenLength = 0
 

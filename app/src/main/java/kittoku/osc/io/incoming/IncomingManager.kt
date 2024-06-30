@@ -6,30 +6,33 @@ import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
 import kittoku.osc.client.SstpClient
-import kittoku.osc.client.ppp.ChapClient
 import kittoku.osc.client.ppp.IpcpClient
 import kittoku.osc.client.ppp.Ipv6cpClient
 import kittoku.osc.client.ppp.LCPClient
-import kittoku.osc.client.ppp.PAPClient
 import kittoku.osc.client.ppp.PPPClient
+import kittoku.osc.client.ppp.auth.ChapClient
+import kittoku.osc.client.ppp.auth.EAPClient
+import kittoku.osc.client.ppp.auth.PAPClient
 import kittoku.osc.extension.probeByte
 import kittoku.osc.extension.probeShort
 import kittoku.osc.extension.toIntAsUShort
-import kittoku.osc.unit.ppp.ChapFrame
 import kittoku.osc.unit.ppp.Frame
 import kittoku.osc.unit.ppp.IpcpConfigureFrame
 import kittoku.osc.unit.ppp.Ipv6cpConfigureFrame
 import kittoku.osc.unit.ppp.LCPConfigureFrame
 import kittoku.osc.unit.ppp.LCPEchoRequest
-import kittoku.osc.unit.ppp.PAPFrame
-import kittoku.osc.unit.ppp.PPP_HEADER
+import kittoku.osc.unit.ppp.PPP_HDLC_HEADER
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_CHAP
+import kittoku.osc.unit.ppp.PPP_PROTOCOL_EAP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPCP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPv6
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_IPv6CP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_LCP
 import kittoku.osc.unit.ppp.PPP_PROTOCOL_PAP
+import kittoku.osc.unit.ppp.auth.ChapFrame
+import kittoku.osc.unit.ppp.auth.EAPFrame
+import kittoku.osc.unit.ppp.auth.PAPFrame
 import kittoku.osc.unit.sstp.ControlPacket
 import kittoku.osc.unit.sstp.SSTP_PACKET_TYPE_CONTROL
 import kittoku.osc.unit.sstp.SSTP_PACKET_TYPE_DATA
@@ -52,6 +55,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
     internal var lcpMailbox: Channel<LCPConfigureFrame>? = null
     internal var papMailbox: Channel<PAPFrame>? = null
     internal var chapMailbox: Channel<ChapFrame>? = null
+    internal var eapMailbox: Channel<EAPFrame>? = null
     internal var ipcpMailbox: Channel<IpcpConfigureFrame>? = null
     internal var ipv6cpMailbox: Channel<Ipv6cpConfigureFrame>? = null
     internal var pppMailbox: Channel<Frame>? = null
@@ -59,7 +63,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
 
     private val sstpTimer = EchoTimer(SSTP_ECHO_INTERVAL) {
         SstpEchoRequest().also {
-            bridge.sslTerminal!!.sendDataUnit(it)
+            bridge.sslTerminal!!.send(it.toByteBuffer())
         }
     }
 
@@ -67,7 +71,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
         LCPEchoRequest().also {
             it.id = bridge.allocateNewFrameID()
             it.holder = "Abura Mashi Mashi".toByteArray(Charsets.US_ASCII)
-            bridge.sslTerminal!!.sendDataUnit(it)
+            bridge.sslTerminal!!.send(it.toByteBuffer())
         }
     }
 
@@ -76,6 +80,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
             is LCPClient -> lcpMailbox = client.mailbox
             is PAPClient -> papMailbox = client.mailbox
             is ChapClient -> chapMailbox = client.mailbox
+            is EAPClient -> eapMailbox = client.mailbox
             is IpcpClient -> ipcpMailbox = client.mailbox
             is Ipv6cpClient -> ipv6cpMailbox = client.mailbox
             is PPPClient -> pppMailbox = client.mailbox
@@ -89,6 +94,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
             is LCPClient -> lcpMailbox = null
             is PAPClient -> papMailbox = null
             is ChapClient -> chapMailbox = null
+            is EAPClient -> eapMailbox = null
             is IpcpClient -> ipcpMailbox = null
             is Ipv6cpClient -> ipv6cpMailbox = null
             is PPPClient -> pppMailbox = null
@@ -148,7 +154,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
 
                 when (buffer.probeShort(0)) {
                     SSTP_PACKET_TYPE_DATA -> {
-                        if (buffer.probeShort(4) != PPP_HEADER) {
+                        if (buffer.probeShort(4) != PPP_HDLC_HEADER) {
                             bridge.controlMailbox.send(
                                 ControlMessage(Where.SSTP_DATA, Result.ERR_UNKNOWN_TYPE)
                             )
@@ -178,6 +184,7 @@ internal class IncomingManager(internal val bridge: SharedBridge) {
                             PPP_PROTOCOL_LCP -> processLcpFrame(code, buffer)
                             PPP_PROTOCOL_PAP -> processPAPFrame(code, buffer)
                             PPP_PROTOCOL_CHAP -> processChapFrame(code, buffer)
+                            PPP_PROTOCOL_EAP -> processEAPFrame(code, buffer)
                             PPP_PROTOCOL_IPCP -> processIpcpFrame(code, buffer)
                             PPP_PROTOCOL_IPv6CP -> processIpv6cpFrame(code, buffer)
                             else -> processUnknownProtocol(protocol, size, buffer)

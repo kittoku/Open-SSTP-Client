@@ -26,8 +26,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="PPP Authentication Protocol">
-        <kittoku.osc.preference.custom.PPPPapEnabledPreference android:key="PPP_PAP_ENABLED"/>
-        <kittoku.osc.preference.custom.PPPMsChapv2EnabledPreference android:key="PPP_MSCHAPv2_ENABLED"/>
+        <kittoku.osc.preference.custom.PPPAuthProtocolsPreference android:key="PPP_AUTH_PROTOCOLS"/>
         <kittoku.osc.preference.custom.PPPAuthTimeoutPreference android:key="PPP_AUTH_TIMEOUT"/>
     </PreferenceCategory>
 

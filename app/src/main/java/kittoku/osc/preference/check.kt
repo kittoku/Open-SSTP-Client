@@ -74,9 +74,8 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
         }
     }
 
-    val isPAPEnabled = getBooleanPrefValue(OscPrefKey.PPP_PAP_ENABLED, prefs)
-    val isMSChapv2Enabled = getBooleanPrefValue(OscPrefKey.PPP_MSCHAPv2_ENABLED, prefs)
-    if (!isPAPEnabled && !isMSChapv2Enabled) return "No authentication protocol was enabled"
+    val authProtocols = getSetPrefValue(OscPrefKey.PPP_AUTH_PROTOCOLS, prefs)
+    if (authProtocols.isEmpty()) return "No authentication protocol was selected"
 
     getIntPrefValue(OscPrefKey.PPP_AUTH_TIMEOUT, prefs).also {
         if (it < 1) return "PPP authentication timeout period must be >=1 second"

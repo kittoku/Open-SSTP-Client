@@ -26,7 +26,6 @@ import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.resetReconnectionLife
-import kittoku.osc.service.NOTIFICATION_ERROR_ID
 import kittoku.osc.terminal.SSL_REQUEST_INTERVAL
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_ABORT
 import kittoku.osc.unit.sstp.SSTP_MESSAGE_TYPE_CALL_DISCONNECT
@@ -66,7 +65,7 @@ internal class Controller(internal val bridge: SharedBridge) {
             kill(isReconnectionEnabled) {
                 val header = "OSC: ERR_UNEXPECTED"
                 bridge.service.logWriter?.report(header + "\n" + throwable.stackTraceToString())
-                bridge.service.makeNotification(NOTIFICATION_ERROR_ID, header)
+                bridge.service.notifyError(header)
             }
         }
     }
@@ -240,7 +239,7 @@ internal class Controller(internal val bridge: SharedBridge) {
 
             val message = "${received.from.name}: ${received.result.name}"
             bridge.service.logWriter?.report(message)
-            bridge.service.makeNotification(NOTIFICATION_ERROR_ID, message)
+            bridge.service.notifyError(message)
         }
 
         return false

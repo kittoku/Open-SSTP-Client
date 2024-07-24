@@ -19,6 +19,7 @@ import java.util.UUID
 
 
 internal enum class Where {
+    CERT,
     CERT_PATH,
     SSL,
     PROXY,

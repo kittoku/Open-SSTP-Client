@@ -8,6 +8,7 @@ import kotlinx.coroutines.sync.withLock
 import java.io.BufferedOutputStream
 import java.io.OutputStream
 import java.security.cert.CertPathValidatorException
+import java.security.cert.CertificateException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,6 +27,16 @@ internal class LogWriter(logOutput: OutputStream) {
 
     internal suspend fun report(message: String) {
         mutex.withLock { write(message) }
+    }
+
+    internal suspend fun logParsingCertFailure(filename: String?, exception: CertificateException) {
+        var log = "${Where.CERT}: ${Result.ERR_PARSING_FAILED}\n"
+
+        log += "[FAILED FILE]\n$filename\n\n"
+
+        log += "[STACK TRACE]\n${exception.stackTraceToString()}"
+
+        report(log)
     }
 
     internal suspend fun logCertPathValidatorException(exception: CertPathValidatorException) {
@@ -48,7 +59,7 @@ internal class LogWriter(logOutput: OutputStream) {
         log += if (exception.index == -1) "NOT DEFINED" else exception.index.toString()
         log += "\n\n"
 
-        log += "[STACK TRACE]\n${exception.stackTraceToString()}\n"
+        log += "[STACK TRACE]\n${exception.stackTraceToString()}"
 
         report(log)
     }

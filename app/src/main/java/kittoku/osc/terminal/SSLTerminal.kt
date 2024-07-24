@@ -28,6 +28,8 @@ import java.net.Socket
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
 import java.security.KeyStore
+import java.security.cert.CertPathValidatorException
+import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
@@ -66,9 +68,9 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
 
     internal suspend fun initialize() {
         jobInitialize = bridge.service.scope.launch(bridge.handler) {
-            if (!startHandshake()) return@launch
+            if (!establishSSL()) return@launch
 
-            if (!establishHttps()) return@launch
+            if (!establishHttp()) return@launch
 
             bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.PROCEEDED))
         }
@@ -104,7 +106,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
         return tmFactory.trustManagers
     }
 
-    private suspend fun startHandshake(): Boolean {
+    private suspend fun establishSSL(): Boolean {
         val sslContext = if (getBooleanPrefValue(OscPrefKey.SSL_DO_SPECIFY_CERT, bridge.prefs)) {
             SSLContext.getInstance(selectedVersion).also {
                 it.init(null, createTrustManagers(), null)
@@ -149,6 +151,35 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
 
         inboundBuffer = ByteBuffer.allocate(engine.session.packetBufferSize).also { it.limit(0) }
         outboundBuffer = ByteBuffer.allocate(engine.session.packetBufferSize)
+
+        try {
+            startSSLHandshake()
+        } catch (e: CertificateException) {
+            val cause = e.cause
+            if (cause is CertPathValidatorException) {
+                bridge.service.logWriter?.logCertPathValidatorException(cause)
+
+                bridge.controlMailbox.send(ControlMessage(Where.CERT_PATH, Result.ERR_VERIFICATION_FAILED))
+
+                return false
+            } else {
+                throw e
+            }
+        }
+
+        if (getBooleanPrefValue(OscPrefKey.SSL_DO_VERIFY, bridge.prefs)) {
+            HttpsURLConnection.getDefaultHostnameVerifier().also {
+                if (!it.verify(sslHostname, engine.session)) {
+                    bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_VERIFICATION_FAILED))
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
+    private suspend fun startSSLHandshake() {
         val tempBuffer = ByteBuffer.allocate(0)
 
         engine.beginHandshake()
@@ -176,17 +207,6 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
                 }
             }
         }
-
-        if (getBooleanPrefValue(OscPrefKey.SSL_DO_VERIFY, bridge.prefs)) {
-            HttpsURLConnection.getDefaultHostnameVerifier().also {
-                if (!it.verify(sslHostname, engine.session)) {
-                    bridge.controlMailbox.send(ControlMessage(Where.SSL, Result.ERR_VERIFICATION_FAILED))
-                    return false
-                }
-            }
-        }
-
-        return true
     }
 
     private suspend fun establishProxy(): Boolean {
@@ -235,7 +255,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
         return true
     }
 
-    private suspend fun establishHttps(): Boolean {
+    private suspend fun establishHttp(): Boolean {
         val buffer = ByteBuffer.allocate(getApplicationBufferSize())
 
         val request = arrayOf(

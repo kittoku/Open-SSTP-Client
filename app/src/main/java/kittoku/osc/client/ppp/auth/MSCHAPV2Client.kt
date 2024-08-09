@@ -34,7 +34,11 @@ internal class MSCHAPV2Client(private val bridge: SharedBridge) {
     }
 
     internal fun verifyAuthenticator(success: ChapMessageField): Boolean {
-        success.message.copyInto(serverResponse)
+        if (success.message.size < serverResponse.size) {
+            return false
+        }
+
+        success.message.copyInto(serverResponse, endIndex = serverResponse.size)
 
         return checkServerResponse()
     }

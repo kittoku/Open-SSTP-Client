@@ -10,6 +10,7 @@ import androidx.preference.PreferenceFragmentCompat
 import kittoku.osc.R
 import kittoku.osc.activity.BLANK_ACTIVITY_TYPE_APPS
 import kittoku.osc.activity.BlankActivity
+import kittoku.osc.activity.EXTRA_KEY_TYPE
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.setURIPrefValue
 import kittoku.osc.preference.custom.DirectoryPreference
@@ -83,7 +84,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
         findPreference<Preference>(OscPrefKey.ROUTE_ALLOWED_APPS.name)!!.also {
             it.onPreferenceClickListener = Preference.OnPreferenceClickListener {
                 startActivity(Intent(requireContext(), BlankActivity::class.java).putExtra(
-                    "type",
+                    EXTRA_KEY_TYPE,
                     BLANK_ACTIVITY_TYPE_APPS
                 ))
 

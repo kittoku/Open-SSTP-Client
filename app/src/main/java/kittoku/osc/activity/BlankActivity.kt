@@ -7,10 +7,16 @@ import kittoku.osc.R
 import kittoku.osc.databinding.ActivityBlankBinding
 import kittoku.osc.fragment.AppsFragment
 import kittoku.osc.fragment.ProfilesFragment
+import kittoku.osc.fragment.SaveCertFragment
 
 
 internal const val BLANK_ACTIVITY_TYPE_PROFILES = 0
 internal const val BLANK_ACTIVITY_TYPE_APPS = 1
+internal const val BLANK_ACTIVITY_TYPE_SAVE_CERT = 2
+
+internal const val EXTRA_KEY_TYPE = "TYPE"
+internal const val EXTRA_KEY_CERT = "CERT"
+internal const val EXTRA_KEY_FILENAME = "FILENAME"
 
 class BlankActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,7 +24,7 @@ class BlankActivity : AppCompatActivity() {
 
         val fragment: Fragment
 
-        when (intent.extras!!.getInt("type")) {
+        when (intent.extras!!.getInt(EXTRA_KEY_TYPE)) {
             BLANK_ACTIVITY_TYPE_PROFILES -> {
                 title = "Profiles"
                 fragment = ProfilesFragment()
@@ -27,6 +33,10 @@ class BlankActivity : AppCompatActivity() {
             BLANK_ACTIVITY_TYPE_APPS -> {
                 title = "Allowed Apps"
                 fragment = AppsFragment()
+            }
+
+            BLANK_ACTIVITY_TYPE_SAVE_CERT -> {
+                fragment = SaveCertFragment(intent)
             }
 
             else -> throw NotImplementedError(intent.toString())

@@ -1,6 +1,7 @@
 package kittoku.osc.service
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -49,10 +50,12 @@ internal const val ACTION_VPN_DISCONNECT = "kittoku.osc.disconnect"
 internal const val NOTIFICATION_ERROR_CHANNEL = "ERROR"
 internal const val NOTIFICATION_RECONNECT_CHANNEL = "RECONNECT"
 internal const val NOTIFICATION_DISCONNECT_CHANNEL = "DISCONNECT"
+internal const val NOTIFICATION_CERTIFICATE_CHANNEL = "CERTIFICATE"
 
 internal const val NOTIFICATION_ERROR_ID = 1
 internal const val NOTIFICATION_RECONNECT_ID = 2
 internal const val NOTIFICATION_DISCONNECT_ID = 3
+internal const val NOTIFICATION_CERTIFICATE_ID = 4
 
 
 internal class SstpVpnService : VpnService() {
@@ -176,7 +179,7 @@ internal class SstpVpnService : VpnService() {
                     setIntPrefValue(life, OscPrefKey.RECONNECTION_LIFE, prefs)
 
                     val message = "Reconnection will be tried (LIFE = $life)"
-                    makeNotification(message, NOTIFICATION_RECONNECT_ID, NOTIFICATION_RECONNECT_CHANNEL)
+                    notifyMessage(message, NOTIFICATION_RECONNECT_ID, NOTIFICATION_RECONNECT_CHANNEL)
                     logWriter?.report(message)
                 }
 
@@ -196,6 +199,7 @@ internal class SstpVpnService : VpnService() {
                 NOTIFICATION_ERROR_CHANNEL,
                 NOTIFICATION_RECONNECT_CHANNEL,
                 NOTIFICATION_DISCONNECT_CHANNEL,
+                NOTIFICATION_CERTIFICATE_CHANNEL,
             ).map {
                 NotificationChannel(it, it, NotificationManager.IMPORTANCE_DEFAULT)
             }.also {
@@ -221,25 +225,29 @@ internal class SstpVpnService : VpnService() {
         startForeground(NOTIFICATION_DISCONNECT_ID, builder.build())
     }
 
-    internal fun makeNotification(message: String, id: Int, channel: String) {
+    internal fun notifyMessage(message: String, id: Int, channel: String) {
         NotificationCompat.Builder(this, channel).also {
             it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
             it.setContentText(message)
             it.priority = NotificationCompat.PRIORITY_DEFAULT
             it.setAutoCancel(true)
 
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                notificationManager.notify(id, it.build())
-            }
+            tryNotify(it.build(), id)
         }
     }
 
     internal fun notifyError(message: String) {
-        makeNotification(message, NOTIFICATION_ERROR_ID, NOTIFICATION_ERROR_CHANNEL)
+        notifyMessage(message, NOTIFICATION_ERROR_ID, NOTIFICATION_ERROR_CHANNEL)
+    }
+
+    internal fun tryNotify(notification: Notification, id: Int) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(id, notification)
+        }
     }
 
     internal fun cancelNotification(id: Int) {

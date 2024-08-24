@@ -1,12 +1,21 @@
 package kittoku.osc.terminal
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Build
 import android.util.Base64
+import androidx.core.app.NotificationCompat
 import androidx.documentfile.provider.DocumentFile
 import kittoku.osc.ControlMessage
+import kittoku.osc.R
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
+import kittoku.osc.activity.BLANK_ACTIVITY_TYPE_SAVE_CERT
+import kittoku.osc.activity.BlankActivity
+import kittoku.osc.activity.EXTRA_KEY_CERT
+import kittoku.osc.activity.EXTRA_KEY_FILENAME
+import kittoku.osc.activity.EXTRA_KEY_TYPE
 import kittoku.osc.extension.capacityAfterLimit
 import kittoku.osc.extension.slide
 import kittoku.osc.extension.toIntAsUByte
@@ -16,6 +25,8 @@ import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.preference.accessor.getURIPrefValue
+import kittoku.osc.service.NOTIFICATION_CERTIFICATE_CHANNEL
+import kittoku.osc.service.NOTIFICATION_CERTIFICATE_ID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -29,6 +40,7 @@ import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
 import java.security.KeyStore
 import java.security.cert.CertPathValidatorException
+import java.security.cert.Certificate
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -170,8 +182,9 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
             val cause = e.cause
             if (cause is CertPathValidatorException) {
                 bridge.service.logWriter?.logCertPathValidatorException(cause)
-
                 bridge.controlMailbox.send(ControlMessage(Where.CERT_PATH, Result.ERR_VERIFICATION_FAILED))
+
+                notifyUntrustedCertificate(cause.certPath.certificates[0])
 
                 return false
             } else {
@@ -307,6 +320,39 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
         socket!!.soTimeout = 1_000
         bridge.service.protect(socket)
         return true
+    }
+
+    private fun notifyUntrustedCertificate(cert: Certificate) {
+        val basename = if (cert is X509Certificate) {
+            cert.subjectX500Principal.name
+        } else {
+            "server"
+        }
+
+        val saveIntent = Intent(bridge.service, BlankActivity::class.java).also {
+            it.putExtra(EXTRA_KEY_TYPE, BLANK_ACTIVITY_TYPE_SAVE_CERT)
+            it.putExtra(EXTRA_KEY_CERT, cert.encoded)
+            it.putExtra(EXTRA_KEY_FILENAME, "$basename.crt")
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            bridge.service,
+            0,
+            saveIntent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        NotificationCompat.Builder(bridge.service, NOTIFICATION_CERTIFICATE_CHANNEL).also {
+            it.priority = NotificationCompat.PRIORITY_DEFAULT
+            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+            it.setAutoCancel(true)
+            it.setContentTitle("You can download the untrusted server certificate")
+            it.setContentText("WARNING: untrusted certificates could have your device vulnerable")
+            it.setStyle(NotificationCompat.BigTextStyle())
+            it.setContentIntent(pendingIntent)
+        }.build().also {
+            bridge.service.tryNotify(it, NOTIFICATION_CERTIFICATE_ID)
+        }
     }
 
     internal fun getSession(): SSLSession {

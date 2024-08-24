@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.load_profile -> {
                 profileLauncher.launch(Intent(this, BlankActivity::class.java).putExtra(
-                    "type",
+                    EXTRA_KEY_TYPE,
                     BLANK_ACTIVITY_TYPE_PROFILES
                 ))
             }

@@ -237,9 +237,14 @@ internal class Controller(internal val bridge: SharedBridge) {
         kill(isReconnectionEnabled) {
             sstpClient?.sendLastPacket(lastPacketType)
 
-            val message = "${received.from.name}: ${received.result.name}"
-            bridge.service.logWriter?.report(message)
-            bridge.service.notifyError(message)
+            val header = "${received.from.name}: ${received.result.name}"
+            var log = header
+            if (received.supplement != null) {
+                log += "\n${received.supplement}"
+            }
+
+            bridge.service.logWriter?.report(log)
+            bridge.service.notifyError(header)
         }
 
         return false

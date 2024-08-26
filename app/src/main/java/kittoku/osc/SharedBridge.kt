@@ -49,8 +49,10 @@ internal enum class Where {
 
 internal data class ControlMessage(
     val from: Where,
-    val result: Result
+    val result: Result,
+    val supplement: String? = null
 )
+
 internal enum class Result {
     PROCEEDED,
 

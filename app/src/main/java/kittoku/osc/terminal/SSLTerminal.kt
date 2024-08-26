@@ -108,9 +108,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
                 try {
                     ca = certFactory.generateCertificate(stream) as X509Certificate
                 } catch (e: CertificateException) {
-                    bridge.service.logWriter?.logParsingCertFailure(file.name, e)
-
-                    bridge.controlMailbox.send(ControlMessage(Where.CERT, Result.ERR_PARSING_FAILED))
+                    bridge.controlMailbox.send(ControlMessage(Where.CERT, Result.ERR_PARSING_FAILED, generateParsingCertLog(file.name, e)))
 
                     return null
                 }
@@ -181,10 +179,9 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
         } catch (e: CertificateException) {
             val cause = e.cause
             if (cause is CertPathValidatorException) {
-                bridge.service.logWriter?.logCertPathValidatorException(cause)
-                bridge.controlMailbox.send(ControlMessage(Where.CERT_PATH, Result.ERR_VERIFICATION_FAILED))
-
                 notifyUntrustedCertificate(cause.certPath.certificates[0])
+
+                bridge.controlMailbox.send(ControlMessage(Where.CERT_PATH, Result.ERR_VERIFICATION_FAILED, generateCertPathLog(cause)))
 
                 return false
             } else {
@@ -320,6 +317,37 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
         socket!!.soTimeout = 1_000
         bridge.service.protect(socket)
         return true
+    }
+
+    private fun generateParsingCertLog(filename: String?, exception: CertificateException): String {
+        var log = "[FAILED FILE]\n$filename\n\n"
+
+        log += "[STACK TRACE]\n${exception.stackTraceToString()}"
+
+        return log
+    }
+
+    private fun generateCertPathLog(exception: CertPathValidatorException): String {
+        var log = "[MESSAGE]\n${exception.message}\n\n"
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            log += "[REASON]\n${exception.reason}\n\n"
+        }
+
+        log += "[CERT PATH]\n"
+        exception.certPath.certificates.forEachIndexed { i, cert ->
+            log += "-----CERT at $i-----\n"
+            log += "$cert\n"
+            log += "-----END CERT-----\n\n"
+        }
+
+        log += "[FAILED CERT INDEX]\n"
+        log += if (exception.index == -1) "NOT DEFINED" else exception.index.toString()
+        log += "\n\n"
+
+        log += "[STACK TRACE]\n${exception.stackTraceToString()}"
+
+        return log
     }
 
     private fun notifyUntrustedCertificate(cert: Certificate) {

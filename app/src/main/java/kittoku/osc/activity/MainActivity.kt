@@ -3,7 +3,10 @@ package kittoku.osc.activity
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuInflater
@@ -19,6 +22,7 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import androidx.preference.forEach
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.tabs.TabLayoutMediator
 import kittoku.osc.BuildConfig
 import kittoku.osc.R
@@ -93,8 +97,20 @@ class MainActivity : AppCompatActivity() {
             }
         }.also {
             binding.pager.adapter = it
-        }
+        }.also {
+            if (!isRunOnTV()) { return@also } // workaround for AndroidTV only
 
+            binding.pager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    when (position) {
+                        0 -> requestFocusForPreferenceFragment(homeFragment)
+                        1 -> requestFocusForPreferenceFragment(settingFragment)
+                    }
+
+                    super.onPageSelected(position)
+                }
+            })
+        }
 
         TabLayoutMediator(binding.tabBar, binding.pager) { tab, position ->
             tab.text = when (position) {
@@ -180,5 +196,17 @@ class MainActivity : AppCompatActivity() {
 
             it.show()
         }
+    }
+
+    private fun isRunOnTV(): Boolean {
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+    }
+
+    private fun requestFocusForPreferenceFragment(fragment: PreferenceFragmentCompat) {
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (fragment.view != null) {
+                fragment.requireView().requestFocus()
+            }
+        }, 500)
     }
 }

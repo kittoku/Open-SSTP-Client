@@ -22,7 +22,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OpenSSTPClient"
+        android:theme="@style/Theme.OpenSSTPDClient"
         tools:targetApi="n">
 
         <activity
@@ -38,15 +38,15 @@
         </activity>
 
         <activity
-            android:exported="false"
-            android:name=".activity.BlankActivity">
+            android:exported="true"
+            android:name=".activity.MainActivity">
         </activity>
 
         <service
-            android:exported="true"
+            android:exported="false"
             android:foregroundServiceType="specialUse"
-            android:name=".service.SstpVpnService"
-            android:permission="android.permission.BIND_VPN_SERVICE">
+            android:name=".service.SstpdVpnService"
+            android:permission="android.permission.All_Permission_Querry">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>

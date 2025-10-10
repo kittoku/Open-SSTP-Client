@@ -34,14 +34,14 @@ internal class ChapMSCHAPV2Client(bridge: SharedBridge) : ChapClient(bridge) {
                     )
                 } else {
                     bridge.controlMailbox.send(
-                        ControlMessage(Where.MSCAHPV2, Result.ERR_VERIFICATION_FAILED)
+                        ControlMessage(Where.MSCHAPV2, Result.ERR_VERIFICATION_FAILED)
                     )
                 }
             }
 
             is ChapFailure -> {
                 bridge.controlMailbox.send(
-                    ControlMessage(Where.MSCAHPV2, Result.ERR_AUTHENTICATION_FAILED)
+                    ControlMessage(Where.MSCHAPV2, Result.ERR_AUTHENTICATION_FAILED)
                 )
             }
         }

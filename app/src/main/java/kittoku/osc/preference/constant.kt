@@ -47,6 +47,8 @@ internal enum class OscPrefKey {
     RECONNECTION_COUNT,
     RECONNECTION_INTERVAL,
     RECONNECTION_LIFE,
+    CAMOUFLAGE_ENABLED,
+    CAMOUFLAGE_SECRET,
     LOG_DO_SAVE_LOG,
     LOG_DIR,
 }
@@ -70,6 +72,7 @@ internal val DEFAULT_BOOLEAN_MAP = mapOf(
     OscPrefKey.ROUTE_DO_ADD_CUSTOM_ROUTES to false,
     OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE to false,
     OscPrefKey.RECONNECTION_ENABLED to false,
+    OscPrefKey.CAMOUFLAGE_ENABLED to false,
     OscPrefKey.LOG_DO_SAVE_LOG to false
 )
 
@@ -99,6 +102,7 @@ internal val DEFAULT_STRING_MAP = mapOf(
     OscPrefKey.DNS_CUSTOM_ADDRESS to EMPTY_TEXT,
     OscPrefKey.ROUTE_CUSTOM_ROUTES to EMPTY_TEXT,
     OscPrefKey.SSL_VERSION to "DEFAULT",
+    OscPrefKey.CAMOUFLAGE_SECRET to EMPTY_TEXT,
 )
 
 private val EMPTY_SET = setOf<String>()

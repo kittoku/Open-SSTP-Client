@@ -77,6 +77,12 @@ internal class ReconnectionEnabledPreference(context: Context, attrs: AttributeS
     override val preferenceTitle = "Enable Reconnection"
 }
 
+internal class CamouflageEnabledPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.CAMOUFLAGE_ENABLED
+    override val parentKey: OscPrefKey? = null
+    override val preferenceTitle = "Use Camouflage"
+}
+
 internal class LogDoSaveLogPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.LOG_DO_SAVE_LOG
     override val parentKey: OscPrefKey? = null

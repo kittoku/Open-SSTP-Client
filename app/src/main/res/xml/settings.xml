@@ -58,6 +58,11 @@
         <kittoku.osc.preference.custom.ReconnectionIntervalPreference android:key="RECONNECTION_INTERVAL"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Camouflage (Keenetic)">
+        <kittoku.osc.preference.custom.CamouflageEnabledPreference android:key="CAMOUFLAGE_ENABLED"/>
+        <kittoku.osc.preference.custom.CamouflageSecretPreference android:key="CAMOUFLAGE_SECRET"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Log">
         <kittoku.osc.preference.custom.LogDoSaveLogPreference android:key="LOG_DO_SAVE_LOG"/>
         <kittoku.osc.preference.custom.LogDirPreference android:key="LOG_DIR"/>

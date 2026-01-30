@@ -28,6 +28,10 @@ internal fun checkPreferences(prefs: SharedPreferences): String? {
         if (it !in 0..65535) return "The given port is out of 0-65535"
     }
 
+    getBooleanPrefValue(OscPrefKey.CAMOUFLAGE_ENABLED, prefs).also {
+        if (it && getStringPrefValue(OscPrefKey.CAMOUFLAGE_SECRET, prefs).isEmpty()) return  "Camouflage secret is missing"
+    }
+
     val doSpecifyCerts = getBooleanPrefValue(OscPrefKey.SSL_DO_SPECIFY_CERT, prefs)
     val version = getStringPrefValue(OscPrefKey.SSL_VERSION, prefs)
     val certDir = getURIPrefValue(OscPrefKey.SSL_CERT_DIR, prefs)

@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.InputType
 import android.util.AttributeSet
 import androidx.preference.Preference
-import androidx.preference.Preference.SummaryProvider
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getStringPrefValue
 
@@ -85,4 +84,10 @@ internal class RouteCustomRoutesPreference(context: Context, attrs: AttributeSet
             "[Custom Routes Entered]"
         }
     }
+}
+
+internal class CamouflageSecretPreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.CAMOUFLAGE_SECRET
+    override val parentKey = OscPrefKey.CAMOUFLAGE_ENABLED
+    override val preferenceTitle = "Camouflage Secret"
 }

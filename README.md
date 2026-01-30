@@ -42,6 +42,9 @@ With `Select Allowed Apps` option, you can specify the apps which use the VPN tu
 Even allowed apps cannot use the VPN tunnel if their routes are not on the routing table.
 So when you use this option, enabling `Add Default Route` option is recommended.
 
+### Camouflage Mode (Keenetic)
+With `Camouflage Secret` option, you can specify secret you have configured on Keenetic router.
+You can obtain secret from url "your.address/?secret" (without "?" symbol).
 
 ## Notice
 * `Host` preference can also contain IP address, but cannot include a port number. You can configure it in

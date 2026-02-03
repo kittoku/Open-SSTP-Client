@@ -79,7 +79,7 @@ internal class EAPMSAuthClient(bridge: SharedBridge) : EAPClient(bridge) {
                     }
                 } else {
                     bridge.controlMailbox.send(
-                        ControlMessage(Where.MSCAHPV2, Result.ERR_VERIFICATION_FAILED)
+                        ControlMessage(Where.MSCHAPV2, Result.ERR_VERIFICATION_FAILED)
                     )
                 }
             }
@@ -88,7 +88,7 @@ internal class EAPMSAuthClient(bridge: SharedBridge) : EAPClient(bridge) {
                 assertAlways(givenInnerID == challengeID)
 
                 bridge.controlMailbox.send(
-                    ControlMessage(Where.MSCAHPV2, Result.ERR_AUTHENTICATION_FAILED)
+                    ControlMessage(Where.MSCHAPV2, Result.ERR_AUTHENTICATION_FAILED)
                 )
             }
         }

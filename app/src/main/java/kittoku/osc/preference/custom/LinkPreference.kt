@@ -2,11 +2,11 @@ package kittoku.osc.preference.custom
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.AttributeSet
 import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
+import androidx.core.net.toUri
 
 
 internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
@@ -31,7 +31,7 @@ internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : 
     }
 
     override fun onClick() {
-        val intent = Intent(Intent.ACTION_VIEW).also { it.data = Uri.parse(url) }
+        val intent = Intent(Intent.ACTION_VIEW).also { it.data = url.toUri() }
 
         intent.resolveActivity(context.packageManager)?.also {
             context.startActivity(intent)

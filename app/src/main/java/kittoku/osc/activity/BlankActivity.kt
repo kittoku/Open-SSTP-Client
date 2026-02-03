@@ -43,6 +43,7 @@ class BlankActivity : AppCompatActivity() {
         }
 
         val binding = ActivityBlankBinding.inflate(layoutInflater)
+        binding.root.fitsSystemWindows = true
         setContentView(binding.root)
 
         supportFragmentManager.beginTransaction().also {

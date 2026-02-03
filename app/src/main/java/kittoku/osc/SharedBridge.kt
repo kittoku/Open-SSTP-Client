@@ -30,7 +30,7 @@ internal enum class Where {
     PPP,
     PAP,
     CHAP,
-    MSCAHPV2,
+    MSCHAPV2,
     EAP,
     LCP,
     LCP_MRU,

@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                 val preferenceGroups = mutableListOf<PreferenceGroup>(fragment.preferenceScreen)
 
                 while (preferenceGroups.isNotEmpty()) {
-                    preferenceGroups.removeFirst().forEach {
+                    preferenceGroups.removeAt(0).forEach {
                         if (it is OscPreference) {
                             it.updateView()
                         }
@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         title = "${getString(R.string.app_name)}: ${BuildConfig.VERSION_NAME}"
         val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding.root.fitsSystemWindows = true
         setContentView(binding.root)
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)

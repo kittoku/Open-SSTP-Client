@@ -17,7 +17,7 @@ internal fun View.firstEditText(): EditText {
     }
 
     while (true) {
-        viewGroups.removeFirst().children.forEach {
+        viewGroups.removeAt(0).children.forEach {
             if (it is EditText) {
                 return it
             }

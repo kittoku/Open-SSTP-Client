@@ -1,48 +1,41 @@
-name: Build Android APK
-
+name: Build Release APK
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
-
+    branches: [ main, master ]
+  workflow_dispatch:
 jobs:
   build:
+    name: Build APK
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: set up JDK 17
+      - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          java-version: '17'
+          cache: 'gradle'
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-      - name: Decode signing keystore
+      # ── Paste your signing + build steps here ──
+      - name: Decode keystore
         run: echo "${{ secrets.SIGNING_KEY_BASE64 }}" | base64 --decode > my-release-key.jks
 
-      - name: Build signed release APK
+      - name: Build signed APK
         env:
           KEYSTORE_FILE: my-release-key.jks
-        run: |
-          ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file="${KEYSTORE_FILE}" \
-            -Pandroid.injected.signing.store.password="${{ secrets.STORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
-            --stacktrace --info
+        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file="$KEYSTORE_FILE" -Pandroid.injected.signing.store.password="${{ secrets.STORE_PASSWORD }}" -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" --stacktrace --info
 
-      - name: Show built APKs
-        run: |
-          echo "APK files found:"
-          find app/build/outputs -type f -name "*.apk" || echo "No APKs"
-          ls -la app/build/outputs/apk/release/ 2>/dev/null || echo "No release folder"
+      - name: List APKs
+        run: find app/build/outputs -type f -name "*.apk" || echo "No APKs found"
 
-      - name: Upload signed APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: osc_1.9.2.2-signed
-          path: app/build/outputs/apk/release/*.apk
+          path: app/build/outputs/apk/release/osc_1.9.2.2-signed.apk

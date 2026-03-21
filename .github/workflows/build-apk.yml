@@ -1,36 +1,26 @@
-name: Build Release APK
+- name: Decode signing keystore
+        run: echo "${{ secrets.SIGNING_KEY_BASE64 }}" | base64 --decode > my-release-key.jks
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+      - name: Build signed release APK
+        env:
+          KEYSTORE_FILE: my-release-key.jks
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file="${KEYSTORE_FILE}" \
+            -Pandroid.injected.signing.store.password="${{ secrets.STORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
+            --stacktrace --info
 
-jobs:
-  build:
-    name: Build APK
-    runs-on: ubuntu-latest
+      - name: Show built APKs
+        run: |
+          echo "APK files found:"
+          find app/build/outputs -type f -name "*.apk" || echo "No APKs"
+          ls -la app/build/outputs/apk/release/ 2>/dev/null || echo "No release folder"
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-
-      - name: Upload APK
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: app-release-unsigned
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          name: osc_1.9.2.2-signed
+          path: app/build/outputs/apk/release/*.apk

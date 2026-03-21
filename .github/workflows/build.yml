@@ -1,0 +1,22 @@
+      - name: Decode Keystore from Secret
+        run: |
+          echo "${{ secrets.SIGNING_KEY_BASE64 }}" | base64 --decode > my-release-key.jks
+
+      - name: Build Signed Release APK
+        env:
+          KEYSTORE_FILE: my-release-key.jks
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$KEYSTORE_FILE \
+            -Pandroid.injected.signing.store.password="${{ secrets.STORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+
+      - name: List built files (for debugging)
+        run: ls -la app/build/outputs/apk/release/
+
+      - name: Upload Signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: osc_1.9.2.2-signed.apk
+          path: app/build/outputs/apk/release/app-release.apk   # ← change if your file has different name

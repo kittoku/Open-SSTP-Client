@@ -1,41 +1,36 @@
 name: Build Release APK
+
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+
 jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # ── Paste your signing + build steps here ──
-      - name: Decode keystore
-        run: echo "${{ secrets.SIGNING_KEY_BASE64 }}" | base64 --decode > my-release-key.jks
-
-      - name: Build signed APK
-        env:
-          KEYSTORE_FILE: my-release-key.jks
-        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file="$KEYSTORE_FILE" -Pandroid.injected.signing.store.password="${{ secrets.STORE_PASSWORD }}" -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" --stacktrace --info
-
-      - name: List APKs
-        run: find app/build/outputs -type f -name "*.apk" || echo "No APKs found"
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: osc_1.9.2.2-signed
-          path: app/build/outputs/apk/release/osc_1.9.2.2-signed.apk
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk

@@ -60,7 +60,9 @@ internal class SettingFragment : PreferenceFragmentCompat() {
 
     private fun setCertDirListener() {
         certDirPref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).also { intent ->
+            Intent(Intent.ACTION_OPEN_DOCUMENT).also { intent ->
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                intent.type = "*/*"
                 intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 certDirLauncher.launch(intent)
             }

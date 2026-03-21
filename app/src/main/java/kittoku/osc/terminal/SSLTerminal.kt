@@ -89,7 +89,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
     }
 
     private suspend fun createTrustManagers(): Array<TrustManager>? {
-        val document = DocumentFile.fromTreeUri(
+        val document = DocumentFile.fromSingleUri(
             bridge.service,
             getURIPrefValue(OscPrefKey.SSL_CERT_DIR, bridge.prefs)!!
         )!!
@@ -100,22 +100,22 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
         }
         keyStore.load(null, null)
 
-        for (file in document.listFiles()) {
-            if (file.isFile) {
-                val stream = BufferedInputStream(bridge.service.contentResolver.openInputStream(file.uri))
-                val ca: X509Certificate
+        if (document.isFile) {
+            val stream = BufferedInputStream(bridge.service.contentResolver.openInputStream(document.uri))
+            val ca: X509Certificate
 
-                try {
-                    ca = certFactory.generateCertificate(stream) as X509Certificate
-                } catch (e: CertificateException) {
-                    bridge.controlMailbox.send(ControlMessage(Where.CERT, Result.ERR_PARSING_FAILED, generateParsingCertLog(file.name, e)))
+            try {
+                ca = certFactory.generateCertificate(stream) as X509Certificate
+            } catch (e: CertificateException) {
+                bridge.controlMailbox.send(ControlMessage(Where.CERT, Result.ERR_PARSING_FAILED, generateParsingCertLog(document.name, e)))
 
-                    return null
-                }
-
-                keyStore.setCertificateEntry(file.name, ca)
-                stream.close()
+                return null
             }
+
+            keyStore.setCertificateEntry(document.name, ca)
+            stream.close()
+        } else {
+            return null
         }
 
         val tmFactory = TrustManagerFactory.getDefaultAlgorithm().let {

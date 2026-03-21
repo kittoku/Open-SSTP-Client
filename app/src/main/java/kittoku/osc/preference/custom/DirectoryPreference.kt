@@ -17,10 +17,18 @@ internal abstract class DirectoryPreference(context: Context, attrs: AttributeSe
     }
 }
 
-internal class SSLCertDirPreference(context: Context, attrs: AttributeSet) : DirectoryPreference(context, attrs) {
+internal class SSLCertDirPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs), OscPreference {
     override val oscPrefKey = OscPrefKey.SSL_CERT_DIR
-    override val preferenceTitle = "Select Trusted Certificates"
+    override val preferenceTitle = "Select Trusted Certificate"
     override val parentKey = OscPrefKey.SSL_DO_SPECIFY_CERT
+
+    override fun updateView() {
+        summary = getURIPrefValue(oscPrefKey, sharedPreferences!!)?.path ?: "[No Certificate Selected]"
+    }
+
+    override fun onAttached() {
+        initialize()
+    }
 }
 
 internal class LogDirPreference(context: Context, attrs: AttributeSet) : DirectoryPreference(context, attrs) {

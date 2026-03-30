@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.InputType
 import android.util.AttributeSet
 import androidx.preference.Preference
-import androidx.preference.Preference.SummaryProvider
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getStringPrefValue
 

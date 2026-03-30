@@ -78,7 +78,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
     private val selectedVersion = getStringPrefValue(OscPrefKey.SSL_VERSION, bridge.prefs)
     private val enabledSuites = getSetPrefValue(OscPrefKey.SSL_SUITES, bridge.prefs)
 
-    internal suspend fun initialize() {
+    internal fun initialize() {
         jobInitialize = bridge.service.scope.launch(bridge.handler) {
             if (!establishSSL()) return@launch
 

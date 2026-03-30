@@ -1,6 +1,5 @@
 package kittoku.osc.activity
 
-import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -44,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     private val dialogResource: Int by lazy { EditTextPreference(this).dialogLayoutResource }
 
     private val profileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode != Activity.RESULT_OK) {
+        if (result.resultCode != RESULT_OK) {
             return@registerForActivityResult
         }
 

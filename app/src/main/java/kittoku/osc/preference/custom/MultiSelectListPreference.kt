@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
-import androidx.preference.Preference.SummaryProvider
 import kittoku.osc.preference.AUTH_PROTOCOL_EAP_MSCHAPv2
 import kittoku.osc.preference.AUTH_PROTOCOL_MSCHAPv2
 import kittoku.osc.preference.AUTH_PROTOCOl_PAP

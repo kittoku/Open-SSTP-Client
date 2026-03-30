@@ -69,7 +69,7 @@ internal class SstpClient(val bridge: SharedBridge) {
     private var jobRequest: Job? = null
     private var jobControl: Job? = null
 
-    internal suspend fun launchJobControl() {
+    internal fun launchJobControl() {
         jobControl = bridge.service.scope.launch(bridge.handler) {
             while (isActive) {
                 when (mailbox.receive()) {
@@ -105,7 +105,7 @@ internal class SstpClient(val bridge: SharedBridge) {
         }
     }
 
-    internal suspend fun launchJobRequest() {
+    internal fun launchJobRequest() {
         jobRequest = bridge.service.scope.launch(bridge.handler) {
             val request = SstpCallConnectRequest()
             var requestCount = SSTP_REQUEST_COUNT

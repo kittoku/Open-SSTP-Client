@@ -103,9 +103,9 @@ internal val DEFAULT_STRING_MAP = mapOf(
 
 private val EMPTY_SET = setOf<String>()
 
-internal val AUTH_PROTOCOl_PAP = "PAP"
-internal val AUTH_PROTOCOL_MSCHAPv2 = "MSCHAPv2"
-internal val AUTH_PROTOCOL_EAP_MSCHAPv2 = "EAP-MSCHAPv2"
+internal const val AUTH_PROTOCOl_PAP = "PAP"
+internal const val AUTH_PROTOCOL_MSCHAPv2 = "MSCHAPv2"
+internal const val AUTH_PROTOCOL_EAP_MSCHAPv2 = "EAP-MSCHAPv2"
 
 internal val DEFAULT_SET_MAP = mapOf(
     OscPrefKey.SSL_SUITES to EMPTY_SET,

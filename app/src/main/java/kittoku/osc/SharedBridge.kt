@@ -116,6 +116,7 @@ internal class SharedBridge(internal val service: SstpVpnService) {
     internal val currentIPv6 = ByteArray(8)
     internal val currentProposedDNS = ByteArray(4)
 
+    internal val invertAllowedApps = getBooleanPrefValue(OscPrefKey.ROUTE_DO_INVERT_ALLOWED_APPS, prefs)
     internal val allowedApps: List<AppString> = mutableListOf<AppString>().also {
         if (getBooleanPrefValue(OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE, prefs)) {
             getValidAllowedAppInfos(prefs, service.packageManager).forEach { info ->

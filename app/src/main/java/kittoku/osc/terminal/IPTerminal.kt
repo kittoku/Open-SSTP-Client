@@ -109,8 +109,14 @@ internal class IPTerminal(private val bridge: SharedBridge) {
     }
 
     private fun addAppBasedRules() {
-        bridge.allowedApps.forEach {
-            bridge.builder.addAllowedApplication(it.packageName)
+        if (bridge.invertAllowedApps) {
+            bridge.allowedApps.forEach {
+                bridge.builder.addDisallowedApplication(it.packageName)
+            }
+        } else {
+            bridge.allowedApps.forEach {
+                bridge.builder.addAllowedApplication(it.packageName)
+            }
         }
     }
 

@@ -3,11 +3,14 @@ package kittoku.osc.activity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import kittoku.osc.R
 import kittoku.osc.databinding.ActivityBlankBinding
 import kittoku.osc.fragment.AppsFragment
 import kittoku.osc.fragment.ProfilesFragment
 import kittoku.osc.fragment.SaveCertFragment
+import kittoku.osc.preference.OscPrefKey
+import kittoku.osc.preference.accessor.getBooleanPrefValue
 
 
 internal const val BLANK_ACTIVITY_TYPE_PROFILES = 0
@@ -31,7 +34,9 @@ class BlankActivity : AppCompatActivity() {
             }
 
             BLANK_ACTIVITY_TYPE_APPS -> {
-                title = "Allowed Apps"
+                title = if (getBooleanPrefValue(OscPrefKey.ROUTE_DO_INVERT_ALLOWED_APPS, PreferenceManager.getDefaultSharedPreferences(this))) {
+                    "Disallowed Apps"
+                } else "Allowed Apps"
                 fragment = AppsFragment()
             }
 

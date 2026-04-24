@@ -49,6 +49,7 @@
         <kittoku.osc.preference.custom.RouteDoAddCustomRoutesPreference android:key="ROUTE_DO_ADD_CUSTOM_ROUTES"/>
         <kittoku.osc.preference.custom.RouteCustomRoutesPreference android:key="ROUTE_CUSTOM_ROUTES"/>
         <kittoku.osc.preference.custom.RouteDoEnableAppBasedRulePreference android:key="ROUTE_DO_ENABLE_APP_BASED_RULE"/>
+        <kittoku.osc.preference.custom.RouteDoInvertAllowedAppsPreference android:key="ROUTE_DO_INVERT_ALLOWED_APPS"/>
         <kittoku.osc.preference.custom.RouteAllowedAppsPreference android:key="ROUTE_ALLOWED_APPS"/>
     </PreferenceCategory>
 

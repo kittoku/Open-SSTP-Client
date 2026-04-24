@@ -46,3 +46,9 @@ internal class RouteDoRoutePrivateAddresses(context: Context, attrs: AttributeSe
     override val parentKey: OscPrefKey? = null
     override val preferenceTitle = "Route Private/Unique-Local Addresses"
 }
+
+internal class RouteDoInvertAllowedAppsPreference(context: Context, attrs: AttributeSet) : ModifiedCheckBoxPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.ROUTE_DO_INVERT_ALLOWED_APPS
+    override val parentKey = OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE
+    override val preferenceTitle = "Invert Allowed Apps"
+}

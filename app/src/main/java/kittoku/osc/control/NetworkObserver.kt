@@ -76,11 +76,11 @@ internal class NetworkObserver(val bridge: SharedBridge) {
         }
         summary.add("")
 
-        summary.add("[Allowed Apps]")
+        if (bridge.invertAllowedApps) summary.add("[Disallowed Apps]") else summary.add("[Allowed Apps]")
         if (bridge.allowedApps.isNotEmpty()) {
             bridge.allowedApps.forEach { summary.add(it.label) }
         } else {
-            summary.add("All apps")
+            if (bridge.invertAllowedApps) summary.add("No apps") else summary.add("All apps")
         }
 
         summary.reduce { acc, s ->

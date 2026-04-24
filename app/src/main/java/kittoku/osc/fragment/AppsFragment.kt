@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.PreferenceFragmentCompat
 import kittoku.osc.R
 import kittoku.osc.extension.removeTemporaryPreferences
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.TEMP_KEY_HEADER
+import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.setSetPrefValue
 import kittoku.osc.preference.getInstalledAppInfos
@@ -73,6 +75,9 @@ internal class AppsFragment : PreferenceFragmentCompat() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         MenuInflater(requireContext()).inflate(R.menu.apps_menu, menu)
+        val isInverted = getBooleanPrefValue(OscPrefKey.ROUTE_DO_INVERT_ALLOWED_APPS, prefs)
+        menu[0].title = if (isInverted) "Disallow all" else "Allow All"
+        menu[1].title = if (isInverted) "Allow All" else "Disallow all"
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

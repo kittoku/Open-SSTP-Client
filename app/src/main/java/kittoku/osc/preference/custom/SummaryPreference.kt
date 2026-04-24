@@ -7,13 +7,16 @@ import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import kittoku.osc.preference.OscPrefKey
+import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 
 
 internal abstract class SummaryPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs), OscPreference {
+    open val dependencyKey: OscPrefKey? = null
+
     protected open val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == oscPrefKey.name) {
+        if (key == oscPrefKey.name || key == dependencyKey?.name) {
             updateView()
         }
     }
@@ -49,11 +52,13 @@ internal class HomeStatusPreference(context: Context, attrs: AttributeSet) : Sum
 }
 
 internal class RouteAllowedAppsPreference(context: Context, attrs: AttributeSet) : SummaryPreference(context, attrs) {
+    override val dependencyKey = OscPrefKey.ROUTE_DO_INVERT_ALLOWED_APPS
     override val oscPrefKey = OscPrefKey.ROUTE_ALLOWED_APPS
     override val parentKey = OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE
     override val preferenceTitle = "Select Allowed Apps"
 
     override fun updateView() {
+        title = if (getBooleanPrefValue(OscPrefKey.ROUTE_DO_INVERT_ALLOWED_APPS, sharedPreferences!!)) "Select Disallowed Apps" else preferenceTitle
         summary = when (val size = getSetPrefValue(oscPrefKey, sharedPreferences!!).size) {
             0 -> "[No App Selected]"
             1 -> "[1 App Selected]"

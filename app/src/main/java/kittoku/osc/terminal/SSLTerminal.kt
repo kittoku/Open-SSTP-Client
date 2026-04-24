@@ -80,7 +80,7 @@ internal class SSLTerminal(private val bridge: SharedBridge) {
     private val isCamouflageEnabled = getBooleanPrefValue(OscPrefKey.CAMOUFLAGE_ENABLED, bridge.prefs)
     private val camouflageSecret = getStringPrefValue(OscPrefKey.CAMOUFLAGE_SECRET, bridge.prefs)
 
-    internal suspend fun initialize() {
+    internal fun initialize() {
         jobInitialize = bridge.service.scope.launch(bridge.handler) {
             if (!establishSSL()) return@launch
 

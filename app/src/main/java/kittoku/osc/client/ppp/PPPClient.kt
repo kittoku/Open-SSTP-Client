@@ -23,7 +23,7 @@ internal class PPPClient(val bridge: SharedBridge) {
 
     private var jobControl: Job? = null
 
-    internal suspend fun launchJobControl() {
+    internal fun launchJobControl() {
         jobControl = bridge.service.scope.launch(bridge.handler) {
             while (isActive) {
                 when (val received = mailbox.receive()) {

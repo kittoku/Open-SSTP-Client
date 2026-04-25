@@ -9,9 +9,10 @@ import kittoku.osc.preference.accessor.getSetPrefValue
 
 internal data class AppString(val packageName: String, val label: String)
 
-internal fun getInstalledAppInfos(pm: PackageManager): List<ApplicationInfo> {
-    val intent = Intent(Intent.ACTION_MAIN).also {
-        it.addCategory(Intent.CATEGORY_LAUNCHER)
+internal fun getInstalledAppInfos(doShowBackgroundApps: Boolean, pm: PackageManager): List<ApplicationInfo> {
+    val intent = Intent(Intent.ACTION_MAIN)
+    if (!doShowBackgroundApps) {
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
     }
 
     val addedPackageNames = mutableSetOf<String>()

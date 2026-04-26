@@ -31,7 +31,7 @@ class BlankActivity : AppCompatActivity() {
             }
 
             BLANK_ACTIVITY_TYPE_APPS -> {
-                title = "Allowed Apps"
+                title = "Allowed/Disallowed Apps"
                 fragment = AppsFragment()
             }
 

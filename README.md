@@ -38,7 +38,7 @@ the VPN tunnel. If you specify a IPv4(v6) address and disable IPv4(v6) network,
 domain names possibly cannot be resolved.
 
 ### Enable App-Based Rule
-With `Select Allowed Apps` option, you can specify the apps which use the VPN tunnel.
+With `Select Allowed/Disallowed Apps` option, you can specify the apps which can/cannot use the VPN tunnel.
 Even allowed apps cannot use the VPN tunnel if their routes are not on the routing table.
 So when you use this option, enabling `Add Default Route` option is recommended.
 

@@ -41,14 +41,14 @@ internal class AppsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val allowed = getSetPrefValue(OscPrefKey.ROUTE_ALLOWED_APPS, prefs)
+        val selected = getSetPrefValue(OscPrefKey.ROUTE_SELECTED_APPS, prefs)
 
         getInstalledAppInfos(doShowBackgroundApps, pm).forEach { info ->
             val checkBox = CheckBoxPreference(requireContext()).also {
                 it.key = TEMP_KEY_HEADER + info.packageName
                 it.icon = pm.getApplicationIcon(info)
                 it.title = pm.getApplicationLabel(info)
-                it.isChecked = allowed.contains(info.packageName)
+                it.isChecked = selected.contains(info.packageName)
             }
 
             shownCheckBoxes.add(checkBox)
@@ -71,17 +71,17 @@ internal class AppsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun memorizeAllowedApps() {
-        val allowed = mutableSetOf<String>()
+    private fun memorizeSelectedApps() {
+        val selected = mutableSetOf<String>()
 
         // use Checkbox preferences to ensure that only currently-installed apps are memorized
         processCurrentPreferences {
             if (it.isChecked) {
-                allowed.add(it.key.substring(TEMP_KEY_HEADER.length))
+                selected.add(it.key.substring(TEMP_KEY_HEADER.length))
             }
         }
 
-        setSetPrefValue(allowed, OscPrefKey.ROUTE_ALLOWED_APPS, prefs)
+        setSetPrefValue(selected, OscPrefKey.ROUTE_SELECTED_APPS, prefs)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -90,8 +90,8 @@ internal class AppsFragment : PreferenceFragmentCompat() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.allow_all -> changeAllPreferencesStates(true)
-            R.id.disallow_all -> changeAllPreferencesStates(false)
+            R.id.select_all -> changeAllPreferencesStates(true)
+            R.id.unselect_all -> changeAllPreferencesStates(false)
         }
 
         return true
@@ -110,7 +110,7 @@ internal class AppsFragment : PreferenceFragmentCompat() {
     override fun onDestroy() {
         super.onDestroy()
 
-        memorizeAllowedApps()
+        memorizeSelectedApps()
         prefs.removeTemporaryPreferences()
     }
 }

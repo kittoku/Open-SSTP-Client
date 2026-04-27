@@ -33,8 +33,10 @@ import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.PROFILE_KEY_HEADER
 import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.preference.custom.OscPreference
-import kittoku.osc.preference.exportProfile
 import kittoku.osc.preference.importProfile
+import kittoku.osc.preference.serializeProfile
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,6 +53,34 @@ class MainActivity : AppCompatActivity() {
         }
 
         updatePreferenceView()
+    }
+
+    private val importLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.also {
+            contentResolver.openInputStream(it)?.also { stream ->
+                BufferedInputStream(stream).also {
+                    importProfile(
+                        it.reader(Charsets.UTF_8).readText(),
+                        prefs
+                    )
+                }
+            }
+
+            updatePreferenceView()
+            Toast.makeText(this, "PROFILE IMPORTED", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.also {
+            contentResolver.openOutputStream(it)?.also { stream ->
+                BufferedOutputStream(stream).use {
+                    it.write(serializeProfile(prefs).toByteArray(Charsets.UTF_8))
+                }
+            }
+
+            Toast.makeText(this, "PROFILE EXPORTED", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun updatePreferenceView() {
@@ -132,6 +162,10 @@ class MainActivity : AppCompatActivity() {
 
             R.id.save_profile -> showSaveDialog()
 
+            R.id.import_profile -> importLauncher.launch(arrayOf("application/json"))
+
+            R.id.export_profile -> showExportDialog()
+
             R.id.reload_defaults -> showReloadDialog()
         }
 
@@ -160,12 +194,30 @@ class MainActivity : AppCompatActivity() {
                 prefs.edit().also { editor ->
                     editor.putString(
                         PROFILE_KEY_HEADER + editText.text.ifEmpty { hostname },
-                        exportProfile(prefs)
+                        serializeProfile(prefs)
                     )
                     editor.apply()
                 }
 
                 Toast.makeText(this, "PROFILE SAVED", Toast.LENGTH_SHORT).show()
+            }
+
+            it.setNegativeButton("CANCEL") { _, _ -> }
+
+            it.show()
+        }
+    }
+
+    private fun showExportDialog() {
+        val filename = getStringPrefValue(OscPrefKey.HOME_HOSTNAME, prefs) + ".json"
+
+        AlertDialog.Builder(this).also {
+            it.setMessage(
+                "Password will be also exported as plain text. If you don't want that, blank Password before exporting."
+            )
+
+            it.setPositiveButton("PROCEED") { _, _ ->
+                exportLauncher.launch(filename)
             }
 
             it.setNegativeButton("CANCEL") { _, _ -> }

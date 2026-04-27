@@ -71,6 +71,12 @@ internal class RouteDoEnableAppBasedRulePreference(context: Context, attrs: Attr
     override val preferenceTitle = "Enable App-Based Rule"
 }
 
+internal class RouteDoShowBackgroundAppsPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
+    override val oscPrefKey = OscPrefKey.ROUTE_DO_SHOW_BACKGROUND_APPS
+    override val parentKey: OscPrefKey? = null
+    override val preferenceTitle = "Show Background Apps"
+}
+
 internal class ReconnectionEnabledPreference(context: Context, attrs: AttributeSet) : SwitchPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.RECONNECTION_ENABLED
     override val parentKey: OscPrefKey? = null

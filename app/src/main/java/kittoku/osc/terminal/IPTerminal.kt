@@ -6,6 +6,7 @@ import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
 import kittoku.osc.extension.toHexByteArray
+import kittoku.osc.preference.LIST_TYPE_ALLOWED
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
@@ -21,11 +22,12 @@ internal class IPTerminal(private val bridge: SharedBridge) {
     private var inputStream: FileInputStream? = null
     private var outputStream: FileOutputStream? = null
 
-    private val isAppBasedRuleEnabled = bridge.allowedApps.isNotEmpty()
-    private val isDefaultRouteAdded = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
-    private val isPrivateAddressesRouted = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
-    private val isCustomDNSServerUsed = getBooleanPrefValue(OscPrefKey.DNS_DO_USE_CUSTOM_SERVER, bridge.prefs)
-    private val isCustomRoutesAdded = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
+    private val doEnableAppBasedRule = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE, bridge.prefs)
+    private val isAllowedList = getStringPrefValue(OscPrefKey.ROUTE_APP_LIST_TYPE, bridge.prefs) == LIST_TYPE_ALLOWED
+    private val doAddDefaultRoute = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_DEFAULT_ROUTE, bridge.prefs)
+    private val doRoutePrivateAddresses = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ROUTE_PRIVATE_ADDRESSES, bridge.prefs)
+    private val doUseCustomDNSServer = getBooleanPrefValue(OscPrefKey.DNS_DO_USE_CUSTOM_SERVER, bridge.prefs)
+    private val doAddCustomRoutes = getBooleanPrefValue(OscPrefKey.ROUTE_DO_ADD_CUSTOM_ROUTES, bridge.prefs)
 
     internal suspend fun initialize() {
         if (bridge.PPP_IPv4_ENABLED) {
@@ -38,7 +40,7 @@ internal class IPTerminal(private val bridge: SharedBridge) {
                 bridge.builder.addAddress(it, 32)
             }
 
-            if (isCustomDNSServerUsed) {
+            if (doUseCustomDNSServer) {
                 bridge.builder.addDnsServer(getStringPrefValue(OscPrefKey.DNS_CUSTOM_ADDRESS, bridge.prefs))
             }
 
@@ -67,11 +69,11 @@ internal class IPTerminal(private val bridge: SharedBridge) {
             setIPv6BasedRouting()
         }
 
-        if (isCustomRoutesAdded) {
+        if (doAddCustomRoutes) {
             addCustomRoutes()
         }
 
-        if (isAppBasedRuleEnabled) {
+        if (doEnableAppBasedRule) {
             addAppBasedRules()
         }
 
@@ -87,11 +89,11 @@ internal class IPTerminal(private val bridge: SharedBridge) {
     }
 
     private fun setIPv4BasedRouting() {
-        if (isDefaultRouteAdded) {
+        if (doAddDefaultRoute) {
             bridge.builder.addRoute("0.0.0.0", 0)
         }
 
-        if (isPrivateAddressesRouted) {
+        if (doRoutePrivateAddresses) {
             bridge.builder.addRoute("10.0.0.0", 8)
             bridge.builder.addRoute("172.16.0.0", 12)
             bridge.builder.addRoute("192.168.0.0", 16)
@@ -99,18 +101,22 @@ internal class IPTerminal(private val bridge: SharedBridge) {
     }
 
     private fun setIPv6BasedRouting() {
-        if (isDefaultRouteAdded) {
+        if (doAddDefaultRoute) {
             bridge.builder.addRoute("::", 0)
         }
 
-        if (isPrivateAddressesRouted) {
+        if (doRoutePrivateAddresses) {
             bridge.builder.addRoute("fc00::", 7)
         }
     }
 
     private fun addAppBasedRules() {
-        bridge.allowedApps.forEach {
-            bridge.builder.addAllowedApplication(it.packageName)
+        bridge.selectedApps.forEach {
+            if (isAllowedList) {
+                bridge.builder.addAllowedApplication(it.packageName)
+            } else {
+                bridge.builder.addDisallowedApplication(it.packageName)
+            }
         }
     }
 

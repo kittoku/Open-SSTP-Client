@@ -14,6 +14,7 @@ import kittoku.osc.activity.EXTRA_KEY_TYPE
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.setURIPrefValue
 import kittoku.osc.preference.custom.DirectoryPreference
+import kittoku.osc.preference.custom.RouteSelectedAppsPreference
 
 
 internal class SettingFragment : PreferenceFragmentCompat() {
@@ -21,6 +22,7 @@ internal class SettingFragment : PreferenceFragmentCompat() {
 
     private lateinit var certDirPref: DirectoryPreference
     private lateinit var logDirPref: DirectoryPreference
+    private lateinit var selectAppsPref: RouteSelectedAppsPreference
 
     private val certDirLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         val uri = if (result.resultCode == Activity.RESULT_OK) result.data?.data?.also {
@@ -46,23 +48,28 @@ internal class SettingFragment : PreferenceFragmentCompat() {
         logDirPref.updateView()
     }
 
+    private val selectAppsLauncher = registerForActivityResult(StartActivityForResult()) {
+        selectAppsPref.updateView()
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
         prefs = preferenceManager.sharedPreferences!!
 
         certDirPref = findPreference(OscPrefKey.SSL_CERT_DIR.name)!!
         logDirPref = findPreference(OscPrefKey.LOG_DIR.name)!!
+        selectAppsPref = findPreference(OscPrefKey.ROUTE_SELECTED_APPS.name)!!
 
         setCertDirListener()
         setLogDirListener()
-        setAllowedAppsListener()
+        setSelectAppsListener()
     }
 
     private fun setCertDirListener() {
         certDirPref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).also { intent ->
-                intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                certDirLauncher.launch(intent)
+            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).also {
+                it.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                certDirLauncher.launch(it)
             }
 
             true
@@ -71,25 +78,23 @@ internal class SettingFragment : PreferenceFragmentCompat() {
 
     private fun setLogDirListener() {
         logDirPref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).also { intent ->
-                intent.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                logDirLauncher.launch(intent)
+            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).also {
+                it.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                logDirLauncher.launch(it)
             }
 
             true
         }
     }
 
-    private fun setAllowedAppsListener() {
-        findPreference<Preference>(OscPrefKey.ROUTE_ALLOWED_APPS.name)!!.also {
-            it.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-                startActivity(Intent(requireContext(), BlankActivity::class.java).putExtra(
-                    EXTRA_KEY_TYPE,
-                    BLANK_ACTIVITY_TYPE_APPS
-                ))
-
-                true
+    private fun setSelectAppsListener() {
+        selectAppsPref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+            Intent(requireContext(), BlankActivity::class.java).also {
+                it.putExtra(EXTRA_KEY_TYPE, BLANK_ACTIVITY_TYPE_APPS)
+                selectAppsLauncher.launch(it)
             }
+
+            true
         }
     }
 }

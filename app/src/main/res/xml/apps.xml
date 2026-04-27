@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <kittoku.osc.preference.custom.RouteAppListTypePreference android:key="ROUTE_APP_LIST_TYPE"/>
+    <kittoku.osc.preference.custom.RouteDoShowBackgroundAppsPreference android:key="ROUTE_DO_SHOW_BACKGROUND_APPS"/>
+</PreferenceScreen>

@@ -9,6 +9,14 @@
         android:title="Save Profile" />
 
     <item
+        android:id="@+id/import_profile"
+        android:title="Import Profile" />
+
+    <item
+        android:id="@+id/export_profile"
+        android:title="Export Profile" />
+
+    <item
         android:id="@+id/reload_defaults"
         android:title="Reload Defaults" />
 </menu>

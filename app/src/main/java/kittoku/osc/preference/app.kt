@@ -9,9 +9,10 @@ import kittoku.osc.preference.accessor.getSetPrefValue
 
 internal data class AppString(val packageName: String, val label: String)
 
-internal fun getInstalledAppInfos(pm: PackageManager): List<ApplicationInfo> {
-    val intent = Intent(Intent.ACTION_MAIN).also {
-        it.addCategory(Intent.CATEGORY_LAUNCHER)
+internal fun getInstalledAppInfos(doShowBackgroundApps: Boolean, pm: PackageManager): List<ApplicationInfo> {
+    val intent = Intent(Intent.ACTION_MAIN)
+    if (!doShowBackgroundApps) {
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
     }
 
     val addedPackageNames = mutableSetOf<String>()
@@ -26,9 +27,9 @@ internal fun getInstalledAppInfos(pm: PackageManager): List<ApplicationInfo> {
     }
 }
 
-internal fun getValidAllowedAppInfos(prefs: SharedPreferences, pm: PackageManager): List<ApplicationInfo> {
-    // return currently-installed allowed apps
-    return getSetPrefValue(OscPrefKey.ROUTE_ALLOWED_APPS, prefs).mapNotNull {
+internal fun getValidSelectedAppInfos(prefs: SharedPreferences, pm: PackageManager): List<ApplicationInfo> {
+    // return currently-installed selected apps
+    return getSetPrefValue(OscPrefKey.ROUTE_SELECTED_APPS, prefs).mapNotNull {
         try {
             pm.getApplicationInfo(it, 0)
         } catch (_: PackageManager.NameNotFoundException) {

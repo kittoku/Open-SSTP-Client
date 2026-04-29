@@ -10,14 +10,18 @@ import kittoku.osc.preference.accessor.getSetPrefValue
 internal data class AppString(val packageName: String, val label: String)
 
 internal fun getInstalledAppInfos(doShowBackgroundApps: Boolean, pm: PackageManager): List<ApplicationInfo> {
-    val intent = Intent(Intent.ACTION_MAIN)
-    if (!doShowBackgroundApps) {
-        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+    val appInfos = if (doShowBackgroundApps) {
+        pm.getInstalledApplications(PackageManager.GET_META_DATA)
+    } else {
+        Intent(Intent.ACTION_MAIN).let { intent ->
+            intent.addCategory(Intent.CATEGORY_LAUNCHER)
+            pm.queryIntentActivities(intent, 0).map { it.activityInfo.applicationInfo }
+        }
     }
 
     val addedPackageNames = mutableSetOf<String>()
 
-    return pm.queryIntentActivities(intent, 0).map { it.activityInfo.applicationInfo }.filter {
+    return appInfos.filter {
         if (addedPackageNames.contains(it.packageName)) { // workaround for duplicated 'Google Quick Search Box'
             false
         } else {

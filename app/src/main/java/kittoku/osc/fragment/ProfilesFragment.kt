@@ -11,6 +11,7 @@ import androidx.preference.PreferenceFragmentCompat
 import kittoku.osc.R
 import kittoku.osc.extension.removeTemporaryPreferences
 import kittoku.osc.preference.PROFILE_KEY_HEADER
+import kittoku.osc.preference.deserializeProfile
 import kittoku.osc.preference.importProfile
 import kittoku.osc.preference.summarizeProfile
 
@@ -45,7 +46,11 @@ internal class ProfilesFragment : PreferenceFragmentCompat() {
     }
 
     private fun showLoadDialog(key: String) {
-        val profile = prefs.getString(key, null)!!
+        val profile = deserializeProfile(prefs.getString(key, null)!!)
+        if (profile == null) {
+            Toast.makeText(requireContext(), "INVALID PROFILE", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         AlertDialog.Builder(requireContext()).also {
             it.setTitle(key.substringAfter(PROFILE_KEY_HEADER))

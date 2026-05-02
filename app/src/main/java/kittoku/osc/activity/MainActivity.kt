@@ -33,6 +33,7 @@ import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.PROFILE_KEY_HEADER
 import kittoku.osc.preference.accessor.getStringPrefValue
 import kittoku.osc.preference.custom.OscPreference
+import kittoku.osc.preference.deserializeProfile
 import kittoku.osc.preference.importProfile
 import kittoku.osc.preference.serializeProfile
 import java.io.BufferedInputStream
@@ -57,17 +58,19 @@ class MainActivity : AppCompatActivity() {
 
     private val importLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.also {
-            contentResolver.openInputStream(it)?.also { stream ->
-                BufferedInputStream(stream).also {
-                    importProfile(
-                        it.reader(Charsets.UTF_8).readText(),
-                        prefs
-                    )
+            val profile = contentResolver.openInputStream(it)?.let { stream ->
+                BufferedInputStream(stream).let {
+                    deserializeProfile(it.reader(Charsets.UTF_8).readText())
                 }
             }
 
-            updatePreferenceView()
-            Toast.makeText(this, "PROFILE IMPORTED", Toast.LENGTH_SHORT).show()
+            if (profile == null) {
+                Toast.makeText(this, "IMPORT FAILED", Toast.LENGTH_SHORT).show()
+            } else {
+                importProfile(profile,prefs)
+                updatePreferenceView()
+                Toast.makeText(this, "PROFILE IMPORTED", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

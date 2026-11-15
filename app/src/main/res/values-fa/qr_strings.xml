@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_menu_send_server">ارسال سرور (QR)</string>
+    <string name="bs_menu_receive_server">دریافت سرور (دوربین)</string>
+    <string name="bs_qr_send_title">ارسال سرور</string>
+    <string name="bs_qr_send_hint">از دوستتان بخواهید برنامه‌ی بنفش را باز کند، از منوی ⋮ گزینه‌ی «دریافت سرور» را بزند و دوربین را روی این QR بگیرد.</string>
+    <string name="bs_qr_send_note">این QR فقط با برنامه‌ی بنفش خوانده می‌شود.</string>
+    <string name="bs_qr_no_server">ابتدا یک سرور انتخاب کنید، سپس آن را ارسال کنید.</string>
+    <string name="bs_qr_scan_title">دریافت سرور</string>
+    <string name="bs_qr_scan_hint">از دوستتان بخواهید در برنامه‌ی بنفش «ارسال سرور» را بزند، سپس QR را مقابل کادر بگیرید.</string>
+    <string name="bs_qr_searching">در حال جستجوی QR…</string>
+    <string name="bs_qr_invalid">این QR متعلق به بنفش نیست</string>
+    <string name="bs_qr_perm_title">چرا دوربین؟</string>
+    <string name="bs_qr_perm_body">برای دریافت سرور از دوستتان، بنفش باید QR روی گوشی او را بخواند. دوربین فقط برای همین کار استفاده می‌شود.</string>
+    <string name="bs_qr_perm_note">هیچ عکس یا ویدیویی ذخیره یا ارسال نمی‌شود.\nدوربین فقط در همین صفحه روشن است.</string>
+    <string name="bs_qr_perm_continue">ادامه و اجازه‌ی دوربین</string>
+    <string name="bs_qr_perm_later">فعلاً نه</string>
+    <string name="bs_qr_perm_denied">دسترسی دوربین خاموش است. برای اسکن، از تنظیمات برنامه اجازه دهید.</string>
+    <string name="bs_qr_open_settings">باز کردن تنظیمات</string>
+    <string name="bs_qr_confirm_title">سرور دریافت شد</string>
+    <string name="bs_qr_confirm_msg">%1$s\n\nاین سرور ثبت شود؟</string>
+    <string name="bs_qr_confirm_save">ثبت</string>
+    <string name="bs_qr_connect_msg">سرور ثبت شد. الان وصل می‌شوید؟</string>
+    <string name="bs_status_no_internet">به اینترنت وصل نیستید</string>
+    <string name="bs_hint_no_internet">به‌محض برقراری اینترنت، خودکار وصل می‌شود</string>
+    <string name="bs_connect_pick_server">ابتدا یک سرور انتخاب کنید</string>
+</resources>

@@ -72,7 +72,7 @@ internal val DEFAULT_BOOLEAN_MAP = mapOf(
     OscPrefKey.ROUTE_DO_ADD_CUSTOM_ROUTES to false,
     OscPrefKey.ROUTE_DO_ENABLE_APP_BASED_RULE to false,
     OscPrefKey.ROUTE_DO_SHOW_BACKGROUND_APPS to false,
-    OscPrefKey.RECONNECTION_ENABLED to false,
+    OscPrefKey.RECONNECTION_ENABLED to true,
     OscPrefKey.LOG_DO_SAVE_LOG to false
 )
 

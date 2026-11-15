@@ -1,6 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="SSL Layer">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="@string/bs_set_connection">
+        <Preference
+            android:key="CONNECTION_LOG"
+            android:persistent="false"
+            android:title="@string/bs_set_log_title"
+            android:summary="@string/bs_set_log_summary"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/bs_set_appearance">
+        <ListPreference
+            android:key="THEME_MODE"
+            app:isPreferenceVisible="false"
+            android:title="@string/bs_set_theme"
+            android:entries="@array/bs_theme_entries"
+            android:entryValues="@array/bs_theme_values"
+            android:defaultValue="system"
+            app:useSimpleSummaryProvider="true"/>
+        <ListPreference
+            android:key="LANGUAGE"
+            android:persistent="false"
+            android:title="@string/bs_set_language"
+            android:entries="@array/bs_lang_entries"
+            android:entryValues="@array/bs_lang_values"
+            app:useSimpleSummaryProvider="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/bs_set_reconnection">
+        <kittoku.osc.preference.custom.ReconnectionEnabledPreference android:key="RECONNECTION_ENABLED"/>
+        <kittoku.osc.preference.custom.ReconnectionCountPreference android:key="RECONNECTION_COUNT"/>
+        <kittoku.osc.preference.custom.ReconnectionIntervalPreference android:key="RECONNECTION_INTERVAL"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/bs_set_proxy">
+        <kittoku.osc.preference.custom.ProxyDoUseProxyPreference android:key="PROXY_DO_USE_PROXY"/>
+        <kittoku.osc.preference.custom.ProxyHostnamePreference android:key="PROXY_HOSTNAME"/>
+        <kittoku.osc.preference.custom.ProxyPortPreference android:key="PROXY_PORT"/>
+        <kittoku.osc.preference.custom.ProxyUsernamePreference android:key="PROXY_USERNAME"/>
+        <kittoku.osc.preference.custom.ProxyPasswordPreference android:key="PROXY_PASSWORD"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/bs_set_routing" app:isPreferenceVisible="false">
+        <kittoku.osc.preference.custom.RouteDoEnableAppBasedRulePreference android:key="ROUTE_DO_ENABLE_APP_BASED_RULE" app:isPreferenceVisible="false"/>
+        <kittoku.osc.preference.custom.RouteSelectedAppsPreference android:key="ROUTE_SELECTED_APPS" app:isPreferenceVisible="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="BANAFSHX">
+        <Preference
+            android:key="ABOUT_BANAFSH"
+            android:persistent="false"
+            android:title="@string/bs_set_about"
+            android:summary="@string/bs_set_about_summary"/>
+        <Preference
+            android:key="TELEGRAM_CHANNEL"
+            android:persistent="false"
+            android:title="@string/bs_set_telegram"
+            android:summary="t.me/Banafsh_sstp"/>
+    </PreferenceCategory>
+
+    <Preference
+        android:key="ADVANCED_TOGGLE"
+        android:persistent="false"
+        android:title="@string/bs_set_advanced"
+        android:summary="SSL, PPP, DNS, Routing, Log"/>
+
+    <PreferenceCategory android:key="ADV_SSL" android:title="SSL Layer">
         <kittoku.osc.preference.custom.SSLPortPreference android:key="SSL_PORT"/>
         <kittoku.osc.preference.custom.SSLVersionPreference android:key="SSL_VERSION"/>
         <kittoku.osc.preference.custom.SSLDoVerifyPreference android:key="SSL_DO_VERIFY"/>
@@ -12,58 +77,38 @@
         <kittoku.osc.preference.custom.SSLCustomSNIHostnamePreference android:key="SSL_CUSTOM_SNI"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="HTTP Proxy">
-        <kittoku.osc.preference.custom.ProxyDoUseProxyPreference android:key="PROXY_DO_USE_PROXY"/>
-        <kittoku.osc.preference.custom.ProxyHostnamePreference android:key="PROXY_HOSTNAME"/>
-        <kittoku.osc.preference.custom.ProxyPortPreference android:key="PROXY_PORT"/>
-        <kittoku.osc.preference.custom.ProxyUsernamePreference android:key="PROXY_USERNAME"/>
-        <kittoku.osc.preference.custom.ProxyPasswordPreference android:key="PROXY_PASSWORD"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="PPP Layer">
+    <PreferenceCategory android:key="ADV_PPP" android:title="PPP Layer">
         <kittoku.osc.preference.custom.PPPMruPreference android:key="PPP_MRU"/>
         <kittoku.osc.preference.custom.PPPMtuPreference android:key="PPP_MTU"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="PPP Authentication Protocol">
+    <PreferenceCategory android:key="ADV_PPP_AUTH" android:title="PPP Authentication Protocol">
         <kittoku.osc.preference.custom.PPPAuthProtocolsPreference android:key="PPP_AUTH_PROTOCOLS"/>
         <kittoku.osc.preference.custom.PPPAuthTimeoutPreference android:key="PPP_AUTH_TIMEOUT"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="PPP Network Protocol">
+    <PreferenceCategory android:key="ADV_PPP_NET" android:title="PPP Network Protocol">
         <kittoku.osc.preference.custom.PPPIPv4EnabledPreference android:key="PPP_IPv4_ENABLED"/>
         <kittoku.osc.preference.custom.PPPDoRequestStaticIPv4AddressPreference android:key="PPP_DO_REQUEST_STATIC_IPv4_ADDRESS"/>
         <kittoku.osc.preference.custom.PPPStaticIPv4AddressPreference android:key="PPP_STATIC_IPv4_ADDRESS"/>
         <kittoku.osc.preference.custom.PPPIPv6EnabledPreference android:key="PPP_IPv6_ENABLED"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="DNS Server">
+    <PreferenceCategory android:key="ADV_DNS" android:title="DNS Server">
         <kittoku.osc.preference.custom.DNSDoRequestAddressPreference android:key="DNS_DO_REQUEST_ADDRESS"/>
         <kittoku.osc.preference.custom.DNSDoUseCustomServerPreference android:key="DNS_DO_USE_CUSTOM_SERVER"/>
         <kittoku.osc.preference.custom.DNSCustomAddressPreference android:key="DNS_CUSTOM_ADDRESS"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Routing">
+    <PreferenceCategory android:key="ADV_ROUTING" android:title="Routing (advanced)">
         <kittoku.osc.preference.custom.RouteDoAddDefaultRoutePreference android:key="ROUTE_DO_ADD_DEFAULT_ROUTE"/>
         <kittoku.osc.preference.custom.RouteDoRoutePrivateAddresses android:key="ROUTE_DO_ROUTE_PRIVATE_ADDRESSES"/>
         <kittoku.osc.preference.custom.RouteDoAddCustomRoutesPreference android:key="ROUTE_DO_ADD_CUSTOM_ROUTES"/>
         <kittoku.osc.preference.custom.RouteCustomRoutesPreference android:key="ROUTE_CUSTOM_ROUTES"/>
-        <kittoku.osc.preference.custom.RouteDoEnableAppBasedRulePreference android:key="ROUTE_DO_ENABLE_APP_BASED_RULE"/>
-        <kittoku.osc.preference.custom.RouteSelectedAppsPreference android:key="ROUTE_SELECTED_APPS"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Reconnection">
-        <kittoku.osc.preference.custom.ReconnectionEnabledPreference android:key="RECONNECTION_ENABLED"/>
-        <kittoku.osc.preference.custom.ReconnectionCountPreference android:key="RECONNECTION_COUNT"/>
-        <kittoku.osc.preference.custom.ReconnectionIntervalPreference android:key="RECONNECTION_INTERVAL"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="Log">
+    <PreferenceCategory android:key="ADV_LOG" android:title="Log">
         <kittoku.osc.preference.custom.LogDoSaveLogPreference android:key="LOG_DO_SAVE_LOG"/>
         <kittoku.osc.preference.custom.LogDirPreference android:key="LOG_DIR"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory>
-        <kittoku.osc.preference.custom.LinkOscPreference/>
     </PreferenceCategory>
 </PreferenceScreen>

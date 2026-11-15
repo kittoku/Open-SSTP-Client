@@ -4,8 +4,14 @@
     <kittoku.osc.preference.custom.HomeUsernamePreference android:key="HOME_USERNAME"/>
     <kittoku.osc.preference.custom.HomePasswordPreference android:key="HOME_PASSWORD"/>
     <kittoku.osc.preference.custom.HomeConnectorPreference android:key="HOME_CONNECTOR" />
-
     <PreferenceCategory>
         <kittoku.osc.preference.custom.HomeStatusPreference android:key="HOME_STATUS"/>
+    </PreferenceCategory>
+    <PreferenceCategory>
+        <Preference
+            android:persistent="false"
+            android:selectable="false"
+            android:title="Banafsh-sstp"
+            android:summary="بر پایه Open SSTP Client ساخته‌ی kittoku (MIT License)"/>
     </PreferenceCategory>
 </PreferenceScreen>

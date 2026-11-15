@@ -1,71 +1,44 @@
-# Open SSTP Client for Android <img src="https://github.com/kittoku/Open-SSTP-Client/raw/main/images/icon.png" height="40">
-This is an open-sourced Secure Socket Tunneling Protocol (MS-SSTP) client for Android, developed for accessing to 
-[VPN Azure Cloud](https://www.vpnazure.net/) (or [SoftEther VPN Server](https://www.softether.org/)). 
-So no test with other servers is done. Its behavior may be still unstable.
+# Banafsh (بنفش)
 
-## Installation
-You can download and install the latest version via [Google Play](https://play.google.com/store/apps/details?id=kittoku.osc).
-Some of previous versions are released as apk file on [the releases page](https://github.com/kittoku/Open-SSTP-Client/releases).
+**[فارسی](README.fa.md)** | English
 
-## Usage
-Enter `Host`, `Username` and `Password` preferences and turn the switch on. If a key icon gets to show on 
-the right side of the status bar, establishing a VPN connection has been succeeded. To disconnect 
-the connection, turn the switch off in the home tab or tap the notification. You can save/load the 
-profile from the upper-right option menu.  
-<br>
-<img src="images/example_home.png" width=20%>
-<img src="images/example_setting_1.png" width=20%>
-<img src="images/example_setting_2.png" width=20%>
-<img src="images/example_tile.png" width=20%>
+A simple, free SSTP VPN app for Android, made for everyday users. Pick a free server from the list, tap **Connect**, done.
 
+Telegram channel: https://t.me/Banafsh_sstp
 
-## Setting tab
-Some settings to be noted are written below:
+## Features
 
-### Specify Trusted Certificates (SSL Layer)
-If you choose a certain directory, the client uses ONLY certificates in the directory, but the default 
-certificate store. I made this option for debugging.  
-  
-This preference is displayed as `Add Trusted Certificates` in v1.7.0 or older.
+- One big Connect button and a free servers list (VPN Gate), with automatic testing, status lights, speed and country flags
+- **Apps without VPN**: Iranian banks and apps connect directly; add your own apps with search
+- **Iranian sites without VPN** (experimental): Iranian sites open directly
+- Share the current server with a friend using a QR code, and receive one with the camera
+- Automatic reconnect, in-app updates and short news notices
+- Dark theme, Persian and English
 
-### PPP Network Protocol
-You can choose what network protocol PPP layer tries enabling. Remember, IPv6 option just gives the device 
-a link local address, never guarantees that you can communicate perfectly with IPv6 protocol.
+## Screenshots
 
-### Custom DNS Server Address
-You can specify DNS server to use in this option. Packets associated with this address is routed to 
-the VPN tunnel. If you specify a IPv4(v6) address and disable IPv4(v6) network,
-domain names possibly cannot be resolved.
+<p align="center">
+  <img src="docs/screenshots/home.png" width="220">
+  <img src="docs/screenshots/servers.png" width="220">
+  <img src="docs/screenshots/menu.png" width="220">
+</p>
+<p align="center">
+  <img src="docs/screenshots/qr-send.png" width="220">
+  <img src="docs/screenshots/qr-receive.png" width="220">
+  <img src="docs/screenshots/settings.png" width="220">
+</p>
 
-### Enable App-Based Rule
-With `Select Allowed/Disallowed Apps` option, you can specify the apps which can/cannot use the VPN tunnel.
-Even allowed apps cannot use the VPN tunnel if their routes are not on the routing table.
-So when you use this option, enabling `Add Default Route` option is recommended.
+## Install
 
+1. Download the latest APK from the [Releases](https://github.com/Banafshex/Banafsh-sstp/releases) page.
+2. Open it and install. Google Play Protect may show a warning because the app is not on Google Play; tap **Install anyway**.
 
-## Notice
-* `Host` preference can also contain IP address, but cannot include a port number. You can configure it in
-the setting tab.
+## Please note
 
-* Your device needs to install a self-signed certificate and
- disable `Verify Hostname` option to access to a server using it
- 
-* A server must enable DHCP
- 
-* Only **PAP** and **MS-CHAPv2** authentication protocols can be enabled. No EAP. 
- 
-## Debugging
-It is almost impossible that I can debug a problem caused in any environments but my own. In a networking
-app, there are many possible reasons to cause the problem and I cannot identify the real one unless the 
-problem can be reproduced in my environment.
+The free servers are run by volunteers (VPN Gate) and they may keep connection logs. Do not log in to sensitive accounts such as banks through this VPN. Iranian banks do not open with a non-Iranian IP anyway, which is why the "Apps without VPN" option exists.
 
-So it is strongly encouraged that you should debug by yourself. With `Select Cipher Suites` option, this client tries 
-to use `TLS_RSA_WITH_AES_128_CBC_SHA` or `TLS_RSA_WITH_AES_256_CBC_SHA` as a cipher suite so that you 
-can decrypt and investigate packets with software like WireShark. I think there can be a similar app for 
-Android. Don't forget the great software, Android Studio and its emulator (v^ー°)
+## Credits and license
 
-I don't have Windows Server OS. So I don't officially support accessing to it, but there is a
- successful case. See [this issue](https://github.com/kittoku/Open-SSTP-Client/issues/8#issuecomment-590241322).
+Banafsh is a fork of [Open SSTP Client](https://github.com/kittoku/Open-SSTP-Client) by kittoku, released under the MIT license. Free servers come from [VPN Gate](https://www.vpngate.net/) (University of Tsukuba).
 
-## License
-Licensed under MIT. Be sure you use this software at your own risk. 
+Made by BANAFSHX.

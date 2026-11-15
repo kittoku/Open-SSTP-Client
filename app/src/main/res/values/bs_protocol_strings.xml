@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_protocol_sstp" translatable="false">SSTP</string>
+
+    <string name="bs_choose_server">Choose server</string>
+    <string name="bs_choose_protocol">Choose service</string>
+    <string name="bs_protocol_title">Connection service</string>
+    <string name="bs_protocol_sstp_desc">Looks like HTTPS traffic. Use it when L2TP does not work on your internet.</string>
+    <string name="bs_protocol_next">The new service is used the next time you connect</string>
+    <string name="bs_server_address_protocol">Server Address · %1$s</string>
+    <string name="bs_choose_again_title">Choose a server again</string>
+    <string name="bs_choose_again_body">The server you had was picked for the other service. Each service has its own server list, so pick a server for %1$s.</string>
+    <string name="bs_choose_again_button">Choose server</string>
+    <string name="bs_later">Later</string>
+</resources>

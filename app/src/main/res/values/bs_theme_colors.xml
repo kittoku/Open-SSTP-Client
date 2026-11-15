@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bs_ink">#2D264B</color>
+    <color name="bs_ink_soft">#5F587F</color>
+    <color name="bs_ink_mute">#8F86AD</color>
+    <color name="bs_accent">#7C3AED</color>
+    <color name="bs_accent_soft">#A78BFA</color>
+    <color name="bs_good">#10B981</color>
+    <color name="bs_aqua">#06B6D4</color>
+    <color name="bs_card_fill">#B8FFFFFF</color>
+    <color name="bs_card_stroke">#99FFFFFF</color>
+</resources>

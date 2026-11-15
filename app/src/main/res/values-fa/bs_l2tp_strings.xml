@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_protocol_l2tp_desc">سریع‌تر است، ولی ممکن است روی همه‌ی اینترنت‌ها جواب ندهد. بیشتر مناسب وب‌گردی، اینستاگرام، یوتیوب و …</string>
+    <string name="bs_l2tp_channel">وضعیت L2TP/IPsec</string>
+    <string name="bs_l2tp_connecting">در حال اتصال…</string>
+    <string name="bs_l2tp_connected">وصل است</string>
+    <string name="bs_l2tp_disconnect">قطع اتصال</string>
+    <string name="bs_l2tp_failed">اتصال L2TP/IPsec برقرار نشد: %1$s</string>
+    <string name="bs_l2tp_no_response">سرور جواب نداد. شاید L2TP ندارد یا اینترنتت آن را می‌بندد. سرور دیگری یا سرویس SSTP را امتحان کن.</string>
+    <string name="bs_no_servers_for_service">فعلاً سروری برای این سرویس در دسترس نیست. کمی بعد دوباره امتحان کن.</string>
+</resources>

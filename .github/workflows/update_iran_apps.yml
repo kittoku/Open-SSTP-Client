@@ -1,0 +1,55 @@
+name: Update Iranian apps list
+
+on:
+  schedule:
+    - cron: '30 3 * * *' # every day
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-apps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build iran_apps.txt
+        run: |
+          set -e
+
+          # Community list of Iranian Android apps (maintained by Chocolate4U)
+          curl -fsSL https://raw.githubusercontent.com/Chocolate4U/Iran-Android-Packages/main/packages.md -o packages.md
+
+          sed -e 's/\*\*Package name:\*\*//g' -e '/#/d' -e '/^[[:space:]]*$/d' packages.md \
+            | tr -d '\r' | awk '{$1=$1};1' \
+            | grep -E '^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$' \
+            | grep -v -i -E '(telegram|gram|vpn|proxy|v2ray|xray|clash|vless|vmess|shadowsocks|wireguard|openvpn|tunnel|psiphon|filter)' \
+            | grep -v -E '^(com\.google\.|com\.android\.|android\.|org\.telegram|com\.whatsapp|com\.instagram|com\.facebook|com\.twitter|com\.snapchat|com\.discord|com\.microsoft|org\.mozilla|com\.brave|us\.zoom|com\.spotify|com\.netflix|com\.amazon)' \
+            | sort -u > fetched.txt
+
+          COUNT=$(wc -l < fetched.txt)
+          echo "Community list: $COUNT packages"
+          if [ "$COUNT" -lt 200 ]; then
+            echo "Too few packages, keeping the current list."
+            exit 1
+          fi
+
+          {
+            echo "# Banafsh-sstp: Iranian apps that connect directly (bypass the VPN)"
+            echo "# One package name per line. Lines starting with # are ignored."
+            echo "# Generated daily from iran_apps_extra.txt and the community list Chocolate4U/Iran-Android-Packages"
+            grep -v '^#' iran_apps_extra.txt | grep -v '^[[:space:]]*$'
+            cat fetched.txt
+          } | awk '!seen[$0]++' > iran_apps.txt
+
+          rm -f packages.md fetched.txt
+          echo "Final list: $(grep -vc '^#' iran_apps.txt) packages"
+
+      - name: Commit and push if the list changed
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add iran_apps.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update Iranian apps list [skip ci]" && git push)

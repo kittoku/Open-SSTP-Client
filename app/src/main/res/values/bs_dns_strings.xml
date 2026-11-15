@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_menu_dns">DNS</string>
+    <string name="bs_dns_title">Choose DNS</string>
+    <string name="bs_dns_default_name">Default (the server\'s own DNS)</string>
+    <string name="bs_dns_default_desc">If you are not sure, keep this.</string>
+    <string name="bs_dns_applied_next">The DNS is used the next time you connect</string>
+    <string name="bs_dns_custom_in_use">A custom DNS address is set in the advanced settings. Choosing here replaces it.</string>
+    <string name="bs_dns_cloudflare">Fast; good for gaming and everyday use</string>
+    <string name="bs_dns_google">Stable; good for browsing and watching videos</string>
+    <string name="bs_dns_quad9">More security; blocks malicious domains</string>
+    <string name="bs_dns_adguard">Blocks ads and trackers</string>
+    <string name="bs_dns_opendns">Public DNS with security features</string>
+    <string name="bs_dns_controld">Public DNS without content filtering</string>
+    <string name="bs_dns_cf_security">Blocks malicious domains</string>
+    <string name="bs_dns_cf_family">Blocks malware and adult content</string>
+</resources>

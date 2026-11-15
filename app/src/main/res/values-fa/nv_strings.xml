@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_title">بنفش</string>
+    <string name="bs_nv_apps_title">برنامه‌های بدون VPN</string>
+    <string name="bs_nv_apps_summary">بانک‌ها و برنامه‌های ایرانی و انتخابی شما مستقیم وصل می‌شوند</string>
+    <string name="bs_nv_apps_manage">مدیریت برنامه‌ها</string>
+    <string name="bs_nv_sites_title">سایت‌های ایرانی بدون VPN</string>
+    <string name="bs_nv_sites_tag">آزمایشی</string>
+    <string name="bs_nv_sites_summary">اگر مشکلی پیش آمد این سوییچ را خاموش کنید</string>
+    <string name="bs_nv_sites_next">از اتصال بعدی اعمال می‌شود</string>
+    <string name="bs_bp_title">برنامه‌های بدون VPN</string>
+    <string name="bs_bp_search">جستجوی برنامه</string>
+    <string name="bs_bp_others">انتخاب برنامه‌های دیگر</string>
+    <string name="bs_bp_none">برنامه‌ای پیدا نشد</string>
+    <string name="bs_bp_iran_title">برنامه‌های ایرانی نصب‌شده</string>
+    <string name="bs_bp_iran_sub">همیشه مستقیم وصل می‌شوند</string>
+    <string name="bs_bp_loading">در حال بارگذاری برنامه‌ها…</string>
+    <string name="bs_news_open">باز کردن</string>
+    <string name="bs_channel_news">خبرها و به‌روزرسانی‌ها</string>
+    <string name="bs_notify_update_title">نسخه‌ی جدید آماده است</string>
+    <string name="bs_notify_update_text">بنفش %1$s آماده‌ی نصب است</string>
+    <string name="bs_features_title_short">ویژگی‌ها</string>
+</resources>

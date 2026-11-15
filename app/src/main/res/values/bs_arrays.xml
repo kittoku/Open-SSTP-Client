@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="bs_theme_entries">
+        <item>System default</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="bs_theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+    <string-array name="bs_lang_entries">
+        <item>English</item>
+        <item>فارسی</item>
+    </string-array>
+    <string-array name="bs_lang_values">
+        <item>en</item>
+        <item>fa</item>
+    </string-array>
+</resources>

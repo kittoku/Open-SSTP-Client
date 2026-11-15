@@ -4,35 +4,58 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.4.10'
 }
 
+// Release builds (GitHub Actions) pass these values through environment variables.
+// Normal debug builds simply use the defaults below.
+def appVersionName = System.getenv("VERSION_NAME") ?: "1.0.0-beta.1-dev"
+def ciRunNumber = System.getenv("GITHUB_RUN_NUMBER")
+// debug builds on GitHub get an always-increasing version code, so each new APK installs over the previous one
+def appVersionCode = (System.getenv("VERSION_CODE") ?: (ciRunNumber ? (ciRunNumber.toInteger() + 1000).toString() : "50")).toInteger()
+
 android {
     namespace 'kittoku.osc'
 
     compileSdk 36
 
     defaultConfig {
-        applicationId "kittoku.osc"
+        applicationId "com.banafsh.sstp"
         minSdk 23
         targetSdk 36
-        versionCode 50
-        versionName "1.10.3"
+        versionCode appVersionCode
+        versionName appVersionName
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("KEYSTORE_FILE")
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEYSTORE_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            if (System.getenv("KEYSTORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     buildFeatures {
@@ -42,6 +65,7 @@ android {
 }
 
 dependencies {
+    implementation project(':l2tp-core')
     implementation 'androidx.core:core-ktx:1.16.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation "androidx.documentfile:documentfile:1.1.0"
@@ -49,6 +73,12 @@ dependencies {
     implementation 'com.google.android.material:material:1.13.0'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    // QR codes (core 3.3.0 keeps minSdk 23 working)
+    implementation('com.journeyapps:zxing-android-embedded:4.3.0') { transitive = false }
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.work:work-runtime:2.9.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'

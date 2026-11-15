@@ -1,0 +1,67 @@
+name: Apply update zip
+
+on:
+  workflow_dispatch:
+    inputs:
+      zip_name:
+        description: "Zip file name in the repo root (empty = every .zip there)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unpack the zip file(s)
+        id: unpack
+        env:
+          ZIP_NAME: ${{ inputs.zip_name }}
+        run: |
+          set -e
+          shopt -s nullglob
+
+          if [ -n "$ZIP_NAME" ]; then
+            files=("$ZIP_NAME")
+          else
+            files=(*.zip)
+          fi
+
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No zip file found in the repo root."
+            exit 1
+          fi
+
+          applied=""
+
+          for z in "${files[@]}"; do
+            [ -f "$z" ] || { echo "Not found: $z"; exit 1; }
+
+            echo "Applying $z:"
+            unzip -l "$z"
+            unzip -o -q "$z" -x ".github/*" "__MACOSX/*"
+
+            git rm -q -f "$z"
+
+            applied="$applied $z"
+          done
+
+          echo "applied=$applied" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        env:
+          APPLIED: ${{ steps.unpack.outputs.applied }}
+        run: |
+          git config user.name "GitHub Action Bot"
+          git config user.email "action@github.com"
+
+          git add -A
+
+          git commit -m "Apply update:$APPLIED" || echo "Nothing changed"
+
+          git push

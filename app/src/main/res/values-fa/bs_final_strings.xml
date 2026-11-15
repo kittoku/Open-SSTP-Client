@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_current_server">سرور فعلی</string>
+    <string name="bs_current_here">سرور فعلی تو اینجاست</string>
+    <string name="bs_port_label">پورت %1$d</string>
+    <string name="bs_l2tp_no_address">سرور آدرس نمی‌دهد. سرور دیگری انتخاب کن.</string>
+</resources>

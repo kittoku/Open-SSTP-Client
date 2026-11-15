@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/select_all"
-        android:title="Select All"/>
+        android:title="@string/bs_menu_select_all"/>
 
     <item
         android:id="@+id/unselect_all"
-        android:title="Unselect All" />
+        android:title="@string/bs_menu_unselect_all" />
 </menu>

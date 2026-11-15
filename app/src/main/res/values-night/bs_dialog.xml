@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bs_dialog_bg">#D6221442</color>
+    <color name="bs_dialog_stroke">#80C4A1FF</color>
+    <color name="bs_dialog_text">#F3EEFC</color>
+    <color name="bs_dialog_muted">#CBBDE8</color>
+    <color name="bs_dialog_link">#C4A1FF</color>
+    <color name="bs_dialog_icon_bg">#4D7C3AED</color>
+    <color name="bs_title">#F3EEFC</color>
+    <color name="bs_popup_bg">#F01C1038</color>
+    <color name="bs_bg_scrim">#99070312</color>
+</resources>

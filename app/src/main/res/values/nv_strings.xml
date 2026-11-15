@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_title">BANAFSH</string>
+    <string name="bs_nv_apps_title">Apps without VPN</string>
+    <string name="bs_nv_apps_summary">Iranian banks and apps, and the ones you choose, connect directly</string>
+    <string name="bs_nv_apps_manage">Manage apps</string>
+    <string name="bs_nv_sites_title">Iranian websites without VPN</string>
+    <string name="bs_nv_sites_tag">Experimental</string>
+    <string name="bs_nv_sites_summary">If anything goes wrong, turn this switch off</string>
+    <string name="bs_nv_sites_next">Applies from the next connection</string>
+    <string name="bs_bp_title">Apps without VPN</string>
+    <string name="bs_bp_search">Search apps</string>
+    <string name="bs_bp_others">Choose other apps</string>
+    <string name="bs_bp_none">No app found</string>
+    <string name="bs_bp_iran_title">Installed Iranian apps</string>
+    <string name="bs_bp_iran_sub">They always connect directly</string>
+    <string name="bs_bp_loading">Loading apps…</string>
+    <string name="bs_news_open">Open</string>
+    <string name="bs_channel_news">News and updates</string>
+    <string name="bs_notify_update_title">A new version is ready</string>
+    <string name="bs_notify_update_text">Banafsh %1$s is ready to install</string>
+    <string name="bs_features_title_short">Features</string>
+    <string name="bs_credits" translatable="false">Banafsh-sstp · BANAFSHX\nBased on Open SSTP Client by kittoku (MIT)</string>
+</resources>

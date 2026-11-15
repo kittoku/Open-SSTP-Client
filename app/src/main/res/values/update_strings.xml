@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_menu_check_update">Check for updates</string>
+    <string name="bs_update_card_title">A new version is ready</string>
+    <string name="bs_update_card_version">Version %1$s</string>
+    <string name="bs_update_title">Update to %1$s</string>
+    <string name="bs_update_now">Update</string>
+    <string name="bs_update_later">Later</string>
+    <string name="bs_update_no_notes">A new version is available.</string>
+    <string name="bs_update_downloading">Downloading… %1$d%%</string>
+    <string name="bs_update_installing">Installing…</string>
+    <string name="bs_update_failed">Download failed. Check your internet connection and try again, or download it from the releases page.</string>
+    <string name="bs_update_open_page">Open download page</string>
+    <string name="bs_update_install_failed">Installing the update failed</string>
+    <string name="bs_update_perm_title">Allow installing updates</string>
+    <string name="bs_update_perm_body">To install updates by itself, Banafsh needs Android permission to install apps. On the next screen turn on “Allow from this source”, then come back and tap Update again. Only updates signed by the Banafsh developer can be installed.</string>
+    <string name="bs_update_perm_continue">Continue</string>
+    <string name="bs_update_checking">Checking for updates…</string>
+    <string name="bs_update_uptodate">You are on the latest version</string>
+    <string name="bs_update_check_failed">Could not check for updates. Check your internet connection.</string>
+</resources>

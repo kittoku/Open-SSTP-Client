@@ -1,16 +1,21 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.OpenSSTPClient" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/teal_A700</item>
-        <item name="colorPrimaryVariant">@color/teal_A700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/deep_orange_700</item>
-        <item name="colorSecondaryVariant">@color/deep_orange_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/teal_A700</item>
-        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/banafsh_purple</item>
+        <item name="colorPrimaryVariant">@color/banafsh_purple_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/banafsh_cyan</item>
+        <item name="colorSecondaryVariant">@color/banafsh_cyan</item>
+        <item name="colorOnSecondary">@color/banafsh_ink</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Banafsh.Button</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.Banafsh.Subtitle1</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.Banafsh.Subtitle2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.Banafsh.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.Banafsh.Body2</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.Banafsh.Headline6</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.Banafsh.Caption</item>
     </style>
 </resources>

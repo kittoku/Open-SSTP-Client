@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
 import kittoku.osc.MAX_MRU
+import kittoku.osc.R
 import kittoku.osc.MAX_MTU
 import kittoku.osc.MIN_MRU
 import kittoku.osc.MIN_MTU
@@ -16,7 +17,7 @@ import kittoku.osc.preference.accessor.getURIPrefValue
 
 
 internal fun toastInvalidSetting(message: String, context: Context) {
-    Toast.makeText(context, "INVALID SETTING: $message", Toast.LENGTH_LONG).show()
+    Toast.makeText(context, context.getString(R.string.bs_invalid_setting, message), Toast.LENGTH_LONG).show()
 }
 
 internal fun checkPreferences(prefs: SharedPreferences): String? {

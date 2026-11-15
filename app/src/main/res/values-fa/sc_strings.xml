@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_sc_title">میانبر برنامه‌ها</string>
+    <string name="bs_sc_edit">ویرایش</string>
+    <string name="bs_sc_empty">هنوز برنامه‌ای انتخاب نشده. ویرایش را بزن.</string>
+    <string name="bs_sc_pick">انتخاب برنامه‌ها (حداکثر ۵)</string>
+    <string name="bs_sc_max">حداکثر ۵ برنامه</string>
+    <string name="bs_sc_reset">پیش‌فرض</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_countries_note">%1$d سرور در %2$d کشور</string>
+    <string name="bs_country_servers">%1$d سرور</string>
+    <string name="bs_country_servers_one">۱ سرور</string>
+    <string name="bs_quality_hint">کیفیت بالا و پینگ پایین، انتخاب بهتری است. کیفیت یعنی سهم هر کاربر از سرعت سرور: هرچه خلوت‌تر، بهتر. خاکستری یعنی اطلاعات کافی نیست.</string>
+    <string name="bs_quality_good">کیفیت: خوب</string>
+    <string name="bs_quality_medium">کیفیت: متوسط</string>
+    <string name="bs_quality_bad">کیفیت: بد</string>
+    <string name="bs_quality_unknown">کیفیت: نامشخص</string>
+</resources>

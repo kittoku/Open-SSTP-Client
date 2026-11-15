@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_current_server">Current server</string>
+    <string name="bs_current_here">Your current server is here</string>
+    <string name="bs_port_label">Port %1$d</string>
+    <string name="bs_l2tp_no_address">The server does not give out an address. Choose another server.</string>
+</resources>

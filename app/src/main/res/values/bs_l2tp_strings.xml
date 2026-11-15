@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_protocol_l2tp" translatable="false">L2TP/IPsec</string>
+    <string name="bs_protocol_l2tp_desc">Faster, but it may not work on every internet connection. Best for browsing, Instagram, YouTube and so on.</string>
+    <string name="bs_l2tp_channel">L2TP/IPsec status</string>
+    <string name="bs_l2tp_connecting">Connecting…</string>
+    <string name="bs_l2tp_connected">Connected</string>
+    <string name="bs_l2tp_disconnect">Disconnect</string>
+    <string name="bs_l2tp_failed">L2TP/IPsec could not connect: %1$s</string>
+    <string name="bs_l2tp_no_response">The server did not answer. It may not offer L2TP, or your internet blocks it. Try another server or the SSTP service.</string>
+    <string name="bs_no_servers_for_service">No servers are available for this service right now. Try again later.</string>
+</resources>

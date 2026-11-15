@@ -9,6 +9,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <queries>
         <intent>
@@ -18,17 +23,46 @@
     </queries>
 
     <application
+        android:name=".BanafshApp"
         android:icon="@mipmap/ic_launcher"
+        android:localeConfig="@xml/locales_config"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.OpenSSTPClient"
         tools:targetApi="n">
+        
+<activity
+    android:exported="false"
+    android:theme="@style/Theme.OpenSSTPClient.NoActionBar"
+    android:name=".activity.ServerListActivity">
+</activity>
+
+        <receiver
+            android:name=".UpdateResultReceiver"
+            android:exported="false" />
+
+        <activity
+            android:exported="false"
+            android:theme="@style/Theme.OpenSSTPClient.NoActionBar"
+            android:name=".activity.BypassAppsActivity" />
+
+        <activity
+            android:exported="false"
+            android:theme="@style/Theme.OpenSSTPClient.NoActionBar"
+            android:name=".activity.QrSendActivity" />
+
+        <activity
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.OpenSSTPClient.NoActionBar"
+            android:name=".activity.QrScanActivity" />
 
         <activity
             android:exported="true"
-            android:name=".activity.MainActivity">
+            android:name=".activity.MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -44,9 +78,33 @@
         </activity>
 
         <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+        <service
             android:exported="true"
             android:foregroundServiceType="specialUse"
             android:name=".service.SstpVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".activity.OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OpenSSTPClient.NoActionBar" />
+
+        <service
+            android:exported="true"
+            android:foregroundServiceType="specialUse"
+            android:name=".l2tp.L2tpVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService" />

@@ -8,6 +8,7 @@ import androidx.preference.Preference
 import kittoku.osc.preference.DEFAULT_INT_MAP
 import kittoku.osc.preference.DEFAULT_STRING_MAP
 import kittoku.osc.preference.OscPrefKey
+import kittoku.osc.preference.localizedTitle
 import kittoku.osc.preference.accessor.getIntPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 
@@ -20,7 +21,7 @@ internal interface OscPreference {
 }
 
 internal fun <T> T.initialize() where T : Preference, T : OscPreference {
-    title = preferenceTitle
+    title = localizedTitle(context, oscPrefKey) ?: preferenceTitle
     isSingleLineTitle = false
 
     parentKey?.also { dependency = it.name }

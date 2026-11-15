@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_dns_title">انتخاب DNS</string>
+    <string name="bs_dns_default_name">پیش‌فرض (DNS خود سرور)</string>
+    <string name="bs_dns_default_desc">اگر مطمئن نیستی، همین را نگه دار.</string>
+    <string name="bs_dns_applied_next">DNS از اتصال بعدی اعمال می‌شود</string>
+    <string name="bs_dns_custom_in_use">یک آدرس DNS سفارشی در تنظیمات پیشرفته وارد شده است. انتخاب اینجا جایگزینش می‌کند.</string>
+    <string name="bs_dns_cloudflare">سریع و مناسب گیمینگ و استفاده روزمره</string>
+    <string name="bs_dns_google">پایدار و مناسب وب‌گردی و تماشای ویدیو</string>
+    <string name="bs_dns_quad9">امنیت بیشتر و مسدودسازی دامنه‌های مخرب</string>
+    <string name="bs_dns_adguard">مسدودسازی تبلیغات و ردیاب‌ها</string>
+    <string name="bs_dns_opendns">DNS عمومی با قابلیت‌های امنیتی</string>
+    <string name="bs_dns_controld">DNS عمومی بدون فیلترینگ محتوایی</string>
+    <string name="bs_dns_cf_security">مسدودسازی دامنه‌های مخرب</string>
+    <string name="bs_dns_cf_family">مسدودسازی بدافزارها و محتوای بزرگسالان</string>
+</resources>

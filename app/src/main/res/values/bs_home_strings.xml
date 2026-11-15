@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_brand_vpn" translatable="false">VPN</string>
+    <string name="bs_speed_down">Download</string>
+    <string name="bs_speed_up">Upload</string>
+    <string name="bs_service_label">Service</string>
+    <string name="bs_nav_home">Home</string>
+    <string name="bs_nav_settings">Settings</string>
+    <string name="bs_menu_manual_server">Enter a server manually</string>
+    <string name="bs_speed_none" translatable="false">—</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light glass: translucent white cards with a faint violet edge. -->
+    <color name="bs_glass">#B3FFFFFF</color>
+    <color name="bs_glass_stroke">#40A78BFA</color>
+</resources>

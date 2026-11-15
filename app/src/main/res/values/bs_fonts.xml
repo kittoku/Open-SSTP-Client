@@ -1,0 +1,39 @@
+<resources>
+
+    <!-- Vazirmatn everywhere, including the Material text styles that set their own font. -->
+    <style name="TextAppearance.Banafsh.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+    <style name="TextAppearance.Banafsh.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+    <style name="TextAppearance.Banafsh.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+    <style name="TextAppearance.Banafsh.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+    <style name="TextAppearance.Banafsh.Body2" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+    <style name="TextAppearance.Banafsh.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+    <style name="TextAppearance.Banafsh.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+    </style>
+
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_speed_down">دانلود</string>
+    <string name="bs_speed_up">آپلود</string>
+    <string name="bs_service_label">سرویس</string>
+    <string name="bs_nav_home">خانه</string>
+    <string name="bs_nav_settings">تنظیمات</string>
+    <string name="bs_menu_manual_server">ورود سرور دستی</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_countries_note">%1$d servers in %2$d countries</string>
+    <string name="bs_country_servers">%1$d servers</string>
+    <string name="bs_country_servers_one">1 server</string>
+    <string name="bs_quality_hint">Higher quality and lower ping make a better choice. Quality is each user\'s share of the server speed: the less crowded, the better. Grey means not enough information.</string>
+    <string name="bs_quality_good">Quality: good</string>
+    <string name="bs_quality_medium">Quality: medium</string>
+    <string name="bs_quality_bad">Quality: bad</string>
+    <string name="bs_quality_unknown">Quality: unknown</string>
+</resources>

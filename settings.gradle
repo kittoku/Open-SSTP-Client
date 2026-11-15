@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':l2tp-core'

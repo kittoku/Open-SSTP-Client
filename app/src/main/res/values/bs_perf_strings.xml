@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_show_all">Show all (%1$d servers)</string>
+</resources>

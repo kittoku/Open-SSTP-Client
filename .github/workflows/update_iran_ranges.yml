@@ -1,0 +1,62 @@
+name: Update Iran ranges
+
+on:
+  schedule:
+    - cron: '0 4 1 1,7 *' # every six months (1 January and 1 July)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-ranges:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build iran_ranges.txt from the RIPE NCC registry
+        run: |
+          curl -fsSL --retry 3 -o delegated.txt https://ftp.ripe.net/pub/stats/ripencc/delegated-ripencc-latest
+          python3 - <<'PY'
+          import math
+
+          cidrs = []
+          for line in open("delegated.txt", encoding="utf-8", errors="ignore"):
+              p = line.strip().split("|")
+              if len(p) < 7 or p[1] != "IR" or p[2] != "ipv4":
+                  continue
+              if p[6] not in ("allocated", "assigned"):
+                  continue
+              a = [int(x) for x in p[3].split(".")]
+              start = (a[0] << 24) | (a[1] << 16) | (a[2] << 8) | a[3]
+              end = start + int(p[4]) - 1
+              while start <= end:
+                  size = start & -start if start else 1 << 32
+                  while size > end - start + 1:
+                      size >>= 1
+                  cidrs.append((start, 32 - int(math.log2(size))))
+                  start += size
+
+          lines = [
+              "# Banafsh-sstp: Iranian IPv4 ranges (generated from the RIPE NCC registry)",
+              "# One CIDR block per line. Lines starting with # are ignored.",
+          ]
+          for start, length in cidrs:
+              lines.append(f"{start >> 24 & 255}.{start >> 16 & 255}.{start >> 8 & 255}.{start & 255}/{length}")
+
+          open("iran_ranges.txt", "w", encoding="utf-8").write("\n".join(lines) + "\n")
+          print("Ranges:", len(cidrs))
+          if len(cidrs) < 100:
+              raise SystemExit("Too few ranges, something is wrong")
+          PY
+          mkdir -p app/src/main/res/raw
+          cp iran_ranges.txt app/src/main/res/raw/iran_ranges.txt
+          rm -f delegated.txt
+
+      - name: Commit and push if the list changed
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add iran_ranges.txt app/src/main/res/raw/iran_ranges.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update Iran ranges [skip ci]" && git push)

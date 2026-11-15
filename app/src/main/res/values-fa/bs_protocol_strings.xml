@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_choose_server">انتخاب سرور</string>
+    <string name="bs_choose_protocol">انتخاب سرویس</string>
+    <string name="bs_protocol_title">سرویس اتصال</string>
+    <string name="bs_protocol_sstp_desc">شبیه ترافیک HTTPS است. وقتی L2TP روی اینترنتت جواب نمی‌دهد از آن استفاده کن.</string>
+    <string name="bs_protocol_next">سرویس جدید در اتصال بعدی اعمال می‌شود</string>
+    <string name="bs_server_address_protocol">آدرس سرور · %1$s</string>
+    <string name="bs_choose_again_title">دوباره سرور انتخاب کن</string>
+    <string name="bs_choose_again_body">سروری که داشتی برای سرویس دیگر انتخاب شده بود. هر سرویس لیست سرور مخصوص خودش را دارد، پس برای %1$s یک سرور انتخاب کن.</string>
+    <string name="bs_choose_again_button">انتخاب سرور</string>
+    <string name="bs_later">بعداً</string>
+</resources>

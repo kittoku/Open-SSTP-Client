@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_menu_send_server">Send server (QR)</string>
+    <string name="bs_menu_receive_server">Receive server (camera)</string>
+    <string name="bs_qr_send_title">Send server</string>
+    <string name="bs_qr_send_hint">Ask your friend to open Banafsh, tap the ⋮ menu, choose “Receive server” and point the camera at this QR.</string>
+    <string name="bs_qr_send_note">Only the Banafsh app can read this QR.</string>
+    <string name="bs_qr_no_server">Pick a server first, then send it.</string>
+    <string name="bs_qr_scan_title">Receive server</string>
+    <string name="bs_qr_scan_hint">Ask your friend to tap “Send server” in Banafsh, then hold their QR in front of the frame.</string>
+    <string name="bs_qr_searching">Looking for a QR…</string>
+    <string name="bs_qr_invalid">This QR does not belong to Banafsh</string>
+    <string name="bs_qr_perm_title">Why the camera?</string>
+    <string name="bs_qr_perm_body">To receive a server from your friend, Banafsh needs to read the QR on their phone. The camera is used only for this.</string>
+    <string name="bs_qr_perm_note">No photo or video is saved or sent.\nThe camera is on only on this screen.</string>
+    <string name="bs_qr_perm_continue">Continue and allow camera</string>
+    <string name="bs_qr_perm_later">Not now</string>
+    <string name="bs_qr_perm_denied">Camera access is off. To scan, allow it in the app settings.</string>
+    <string name="bs_qr_open_settings">Open settings</string>
+    <string name="bs_qr_confirm_title">Server received</string>
+    <string name="bs_qr_confirm_msg">%1$s\n\nSave this server?</string>
+    <string name="bs_qr_confirm_save">Save</string>
+    <string name="bs_qr_connect_msg">Server saved. Connect now?</string>
+    <string name="bs_status_no_internet">No internet</string>
+    <string name="bs_hint_no_internet">It will connect automatically as soon as the internet is back</string>
+    <string name="bs_connect_pick_server">Pick a server first</string>
+</resources>

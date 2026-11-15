@@ -17,7 +17,7 @@ internal abstract class StringPreference(context: Context, attrs: AttributeSet) 
 internal class HomeHostnamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.HOME_HOSTNAME
     override val parentKey: OscPrefKey? = null
-    override val preferenceTitle = "Hostname"
+    override val preferenceTitle = "Server Address"
 }
 
 internal class HomeUsernamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
@@ -41,13 +41,13 @@ internal class PPPStaticIPv4AddressPreference(context: Context, attrs: Attribute
 
 internal class ProxyHostnamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.PROXY_HOSTNAME
-    override val parentKey =  OscPrefKey.PROXY_DO_USE_PROXY
+    override val parentKey = OscPrefKey.PROXY_DO_USE_PROXY
     override val preferenceTitle = "Proxy Server Hostname"
 }
 
 internal class ProxyUsernamePreference(context: Context, attrs: AttributeSet) : StringPreference(context, attrs) {
     override val oscPrefKey = OscPrefKey.PROXY_USERNAME
-    override val parentKey =  OscPrefKey.PROXY_DO_USE_PROXY
+    override val parentKey = OscPrefKey.PROXY_DO_USE_PROXY
     override val preferenceTitle = "Proxy Username (optional)"
 }
 

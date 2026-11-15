@@ -9,6 +9,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import kittoku.osc.ProtocolSwitch
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
 import kittoku.osc.preference.checkPreferences
@@ -81,13 +82,12 @@ internal class SstpTileService : TileService() {
         prefs.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
+    // The chosen protocol (SSTP or L2TP) decides which tunnel the tile starts and stops.
     private fun startVpnService(action: String) {
-        val intent = Intent(this, SstpVpnService::class.java).setAction(action)
-
-        if (action == ACTION_VPN_CONNECT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
+        if (action == ACTION_VPN_CONNECT) {
+            ProtocolSwitch.connect(this)
         } else {
-            startService(intent)
+            ProtocolSwitch.disconnect(this)
         }
     }
 

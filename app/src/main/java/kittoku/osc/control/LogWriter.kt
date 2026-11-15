@@ -24,6 +24,10 @@ internal class LogWriter(logOutput: OutputStream) {
         mutex.withLock { write(message) }
     }
 
+    internal fun flush() {
+        outputStream.flush()
+    }
+
     internal fun close() {
         outputStream.flush()
         outputStream.close()

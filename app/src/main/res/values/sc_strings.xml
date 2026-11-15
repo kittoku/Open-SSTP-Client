@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_sc_title">App shortcuts</string>
+    <string name="bs_sc_edit">Edit</string>
+    <string name="bs_sc_empty">No app chosen yet. Tap Edit.</string>
+    <string name="bs_sc_pick">Choose apps (up to 5)</string>
+    <string name="bs_sc_max">Up to 5 apps</string>
+    <string name="bs_sc_reset">Default</string>
+</resources>

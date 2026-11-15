@@ -1,7 +1,12 @@
 package kittoku.osc.terminal
 
+import android.net.IpPrefix
+import android.os.Build
 import android.os.ParcelFileDescriptor
+import kittoku.osc.DnsPresets
 import kittoku.osc.ControlMessage
+import kittoku.osc.IranApps
+import kittoku.osc.IranRanges
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
@@ -9,6 +14,7 @@ import kittoku.osc.extension.toHexByteArray
 import kittoku.osc.preference.LIST_TYPE_ALLOWED
 import kittoku.osc.preference.OscPrefKey
 import kittoku.osc.preference.accessor.getBooleanPrefValue
+import kittoku.osc.preference.accessor.getSetPrefValue
 import kittoku.osc.preference.accessor.getStringPrefValue
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -18,7 +24,6 @@ import java.nio.ByteBuffer
 
 internal class IPTerminal(private val bridge: SharedBridge) {
     private var fd: ParcelFileDescriptor? = null
-
     private var inputStream: FileInputStream? = null
     private var outputStream: FileOutputStream? = null
 
@@ -42,6 +47,14 @@ internal class IPTerminal(private val bridge: SharedBridge) {
 
             if (doUseCustomDNSServer) {
                 bridge.builder.addDnsServer(getStringPrefValue(OscPrefKey.DNS_CUSTOM_ADDRESS, bridge.prefs))
+
+                // A DNS preset (menu > DNS) has a second address.
+                bridge.prefs.getString(DnsPresets.KEY_SECONDARY, "")?.trim()?.takeIf { it.isNotEmpty() }?.let {
+                    try {
+                        bridge.builder.addDnsServer(it)
+                    } catch (_: IllegalArgumentException) {
+                    }
+                }
             }
 
             if (!bridge.currentProposedDNS.contentEquals(ByteArray(4))) {
@@ -73,9 +86,7 @@ internal class IPTerminal(private val bridge: SharedBridge) {
             addCustomRoutes()
         }
 
-        if (doEnableAppBasedRule) {
-            addAppBasedRules()
-        }
+        addAppBypass()
 
         bridge.builder.setMtu(bridge.PPP_MTU)
         bridge.builder.setBlocking(true)
@@ -90,7 +101,9 @@ internal class IPTerminal(private val bridge: SharedBridge) {
 
     private fun setIPv4BasedRouting() {
         if (doAddDefaultRoute) {
-            bridge.builder.addRoute("0.0.0.0", 0)
+            if (!addRoutesWithoutIranianRanges()) {
+                bridge.builder.addRoute("0.0.0.0", 0)
+            }
         }
 
         if (doRoutePrivateAddresses) {
@@ -120,9 +133,64 @@ internal class IPTerminal(private val bridge: SharedBridge) {
         }
     }
 
+    // Iranian apps and the apps the user picked connect directly. Apps that are not installed are skipped.
+    private fun addAppBypass() {
+        if (!bridge.prefs.getBoolean(IranApps.KEY_ENABLED, true)) {
+            return
+        }
+
+        val packages = HashSet<String>()
+        bridge.prefs.getStringSet(IranApps.KEY_LIST, null)?.let { packages.addAll(it) }
+        packages.addAll(getSetPrefValue(OscPrefKey.ROUTE_SELECTED_APPS, bridge.prefs))
+
+        packages.forEach {
+            try {
+                bridge.builder.addDisallowedApplication(it)
+            } catch (_: Exception) {
+                // not installed on this phone
+            }
+        }
+    }
+
+    // Experimental: Iranian IPv4 ranges connect directly. Returns false if the normal default route should be used.
+    private fun addRoutesWithoutIranianRanges(): Boolean {
+        if (!bridge.prefs.getBoolean(IranRanges.KEY_ENABLED, false)) {
+            return false
+        }
+
+        val ranges = IranRanges.load(bridge.service)
+        if (ranges.isEmpty()) {
+            return false
+        }
+
+        return try {
+            if (Build.VERSION.SDK_INT >= 33) {
+                val excluded = IranRanges.toCidrs(ranges)
+                if (excluded.size > IranRanges.MAX_ROUTES) return false
+
+                bridge.builder.addRoute("0.0.0.0", 0)
+                excluded.forEach { (address, length) ->
+                    bridge.builder.excludeRoute(IpPrefix(InetAddress.getByName(IranRanges.format(address)), length))
+                }
+            } else {
+                val routes = IranRanges.complementCidrs(ranges)
+                if (routes.size > IranRanges.MAX_ROUTES) return false
+
+                routes.forEach { (address, length) ->
+                    bridge.builder.addRoute(IranRanges.format(address), length)
+                }
+            }
+
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     private suspend fun addCustomRoutes(): Boolean {
         getStringPrefValue(OscPrefKey.ROUTE_CUSTOM_ROUTES, bridge.prefs).split("\n").filter { it.isNotEmpty() }.forEach {
             val parsed = it.split("/")
+
             if (parsed.size != 2) {
                 bridge.controlMailbox.send(ControlMessage(Where.ROUTE, Result.ERR_PARSING_FAILED))
                 return false
@@ -130,6 +198,7 @@ internal class IPTerminal(private val bridge: SharedBridge) {
 
             val address = parsed[0]
             val prefix = parsed[1].toIntOrNull()
+
             if (prefix == null){
                 bridge.controlMailbox.send(ControlMessage(Where.ROUTE, Result.ERR_PARSING_FAILED))
                 return false

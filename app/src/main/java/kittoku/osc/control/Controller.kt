@@ -1,6 +1,7 @@
 package kittoku.osc.control
 
 import kittoku.osc.ControlMessage
+import kittoku.osc.R
 import kittoku.osc.Result
 import kittoku.osc.SharedBridge
 import kittoku.osc.Where
@@ -161,6 +162,8 @@ internal class Controller(internal val bridge: SharedBridge) {
 
             sstpClient!!.sendCallConnected()
 
+            bridge.service.updateStatus(bridge.service.getString(R.string.bs_status_getting_ip))
+
 
             if (bridge.PPP_IPv4_ENABLED) {
                 IpcpClient(bridge).also {
@@ -200,6 +203,16 @@ internal class Controller(internal val bridge: SharedBridge) {
                 it.launchJobMain()
                 outgoingManager = it
             }
+
+            val serverIp = bridge.sslTerminal?.remoteAddress
+            bridge.service.updateStatus(
+                if (serverIp != null) {
+                    bridge.service.getString(R.string.bs_status_connected_ip, serverIp)
+                } else {
+                    bridge.service.getString(R.string.bs_status_connected)
+                }
+            )
+            bridge.service.clearErrorNotification()
 
 
             observer = NetworkObserver(bridge)

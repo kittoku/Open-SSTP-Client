@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_menu_check_update">بررسی به‌روزرسانی</string>
+    <string name="bs_update_card_title">نسخه‌ی جدید آماده است</string>
+    <string name="bs_update_card_version">نسخه‌ی %1$s</string>
+    <string name="bs_update_title">به‌روزرسانی به نسخه‌ی %1$s</string>
+    <string name="bs_update_now">به‌روزرسانی</string>
+    <string name="bs_update_later">بعداً</string>
+    <string name="bs_update_no_notes">نسخه‌ی جدیدی در دسترس است.</string>
+    <string name="bs_update_downloading">در حال دانلود… %1$d%%</string>
+    <string name="bs_update_installing">در حال نصب…</string>
+    <string name="bs_update_failed">دانلود انجام نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید، یا از صفحه‌ی ریلیزها دانلود کنید.</string>
+    <string name="bs_update_open_page">باز کردن صفحه‌ی دانلود</string>
+    <string name="bs_update_install_failed">نصب به‌روزرسانی انجام نشد</string>
+    <string name="bs_update_perm_title">اجازه‌ی نصب به‌روزرسانی</string>
+    <string name="bs_update_perm_body">برای نصب خودکار به‌روزرسانی، بنفش باید از اندروید اجازه‌ی نصب برنامه بگیرد. در صفحه‌ی بعد گزینه‌ی «اجازه از این منبع» را روشن کنید، برگردید و دوباره «به‌روزرسانی» را بزنید. فقط به‌روزرسانی امضاشده‌ی خود سازنده‌ی بنفش نصب می‌شود.</string>
+    <string name="bs_update_perm_continue">ادامه</string>
+    <string name="bs_update_checking">در حال بررسی به‌روزرسانی…</string>
+    <string name="bs_update_uptodate">شما آخرین نسخه را دارید</string>
+    <string name="bs_update_check_failed">بررسی به‌روزرسانی انجام نشد. اتصال اینترنت را بررسی کنید.</string>
+</resources>

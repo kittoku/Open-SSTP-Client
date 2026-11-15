@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bs_ob_skip">Skip</string>
+    <string name="bs_ob_next">Next</string>
+    <string name="bs_ob_start">Start</string>
+
+    <string name="bs_ob1_title">Welcome to Banafsh</string>
+    <string name="bs_ob1_body">You have the right to a free internet, without sanctions, at no cost. That is why Banafsh exists.</string>
+
+    <string name="bs_ob2_title">What is Banafsh?</string>
+    <string name="bs_ob2_body">Banafsh is a simple, free app that connects you to public VPN servers.\n\nYou pick a server and tap the connect button. The server list updates itself every few hours.\n\nThese servers are shared by volunteers and can be slow or drop at times. Do not use them for banking or anything sensitive.</string>
+
+    <string name="bs_ob3_title">What is DNS?</string>
+    <string name="bs_ob3_body">DNS is like the internet\'s phone book: it turns the name of a site into its address so you can open it.\n\nYou can change the DNS to be faster, safer or free of ads. Open the menu on the home screen, tap \"DNS\" and pick one of the well-known services.\n\nIf you are not sure, keep the default.</string>
+
+    <string name="bs_ob4_title">Two connection services</string>
+    <string name="bs_ob4_body">Banafsh comes with two services:\n\nL2TP/IPsec: fast and light, good for browsing, Instagram and YouTube. It may not work on every internet connection.\n\nSSTP: its traffic looks like normal websites (HTTPS), so it usually works on strict networks too.\n\nIf one does not connect, try the other with the \"Service\" card.</string>
+
+    <string name="bs_ob5_title">Iranian apps and sites</string>
+    <string name="bs_ob5_body">Apps without VPN: banks and Iranian apps stay connected directly. Use \"Manage apps\" to add more.\n\nIranian sites without VPN (experimental): addresses inside Iran open without the VPN.\n\nShortcuts: put your favourite apps at the bottom of the home screen to open them with one tap.</string>
+</resources>

@@ -1,19 +1,73 @@
 <resources>
+
     <!-- Base application theme. -->
     <style name="Theme.OpenSSTPClient" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/teal_700</item>
-        <item name="colorPrimaryVariant">@color/teal_700</item>
+        <item name="colorPrimary">@color/bs_accent</item>
+        <item name="colorPrimaryVariant">@color/banafsh_purple_dark</item>
         <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/deep_orange_700</item>
-        <item name="colorSecondaryVariant">@color/deep_orange_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/teal_700</item>
-        <!-- Customize your theme here. -->
+        <item name="colorSecondary">@color/bs_aqua</item>
+        <item name="colorSecondaryVariant">@color/bs_aqua</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@drawable/bg_app</item>
+        <item name="android:textColorPrimary">@color/bs_ink</item>
+        <item name="android:textColorSecondary">@color/bs_ink_soft</item>
+        <item name="actionBarStyle">@style/BsActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.BanafshHome</item>
+        <item name="android:fontFamily">@font/vazirmatn</item>
+        <item name="fontFamily">@font/vazirmatn</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Banafsh.Button</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.Banafsh.Subtitle1</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.Banafsh.Subtitle2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.Banafsh.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.Banafsh.Body2</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.Banafsh.Headline6</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.Banafsh.Caption</item>
+    </style>
+
+    <!-- The settings screens keep the system action bar: transparent, with dark title and icons. -->
+    <style name="BsActionBar" parent="Widget.MaterialComponents.ActionBar.Solid">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="background">@android:color/transparent</item>
+        <item name="android:elevation">0dp</item>
+        <item name="titleTextStyle">@style/BsActionBarTitle</item>
+    </style>
+
+    <style name="BsActionBarTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/bs_ink</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Used by MainActivity: it draws its own toolbar. -->
+    <style name="Theme.OpenSSTPClient.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="Theme.OpenSSTPClient.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-    <style name="Theme.OpenSSTPClient.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Theme.OpenSSTPClient.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight">
+        <item name="popupMenuStyle">@style/BsPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/BsOverflowMenu</item>
+        <item name="textAppearanceLargePopupMenu">@style/BsPopupMenuText</item>
+        <item name="textAppearanceSmallPopupMenu">@style/BsPopupMenuText</item>
+    </style>
+
+    <!-- The three-dot (overflow) menu reads this one, not popupMenuStyle. -->
+    <style name="BsOverflowMenu" parent="Widget.AppCompat.Light.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="overlapAnchor">false</item>
+    </style>
+
+    <style name="BsPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:popupElevation">8dp</item>
+    </style>
+
+    <style name="BsPopupMenuText" parent="TextAppearance.AppCompat.Widget.PopupMenu.Large">
+        <item name="android:textColor">@color/bs_dialog_text</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
 </resources>

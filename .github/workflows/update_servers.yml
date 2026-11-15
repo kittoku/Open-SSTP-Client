@@ -1,0 +1,34 @@
+name: Update VPN Gate Servers
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # هر ۶ ساعت یک‌بار به‌روزرسانی میشه
+  workflow_dispatch: # اجازه اجرای دستی از تب Actions در گیت‌هاب
+
+permissions:
+  contents: write # این خط دسترسی لازم برای پوش کردن فایل رو میده
+
+jobs:
+  update-servers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run script to fetch servers
+        run: python update_servers.py
+
+      - name: Commit and push if servers.json changed
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add servers.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update VPN Gate servers list [skip ci]" && git push)

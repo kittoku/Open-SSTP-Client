@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qr_bg">#F4EEFF</color>
+    <color name="qr_surface">#E6FFFFFF</color>
+    <color name="qr_surface2">#EDE4FF</color>
+    <color name="qr_accent">#7C3AED</color>
+    <color name="qr_accent_soft">#7C3AED</color>
+    <color name="qr_button">#7C3AED</color>
+    <color name="qr_text">#2D264B</color>
+    <color name="qr_muted">#5F587F</color>
+    <color name="qr_error">#DC2626</color>
+</resources>

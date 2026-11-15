@@ -1,0 +1,18 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+// The L2TP/IPsec protocol stack (MIT, from "L2TP-IPSec-VPN-for-Android"). Plain JVM, no Android SDK.
+// Bytecode is Java 17 so that D8 can dex it, the same as the other modules.
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
